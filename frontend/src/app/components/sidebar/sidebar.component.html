@@ -1,0 +1,35 @@
+<nav class="sidebar-nav">
+  <div class="nav-links">
+    <a routerLink="/features" routerLinkActive="active" class="nav-item">
+      <span class="material-symbols-rounded">stars</span>
+      <span class="label" *ngIf="!collapsed"> Features</span>
+    </a>
+    <a routerLink="/environments" routerLinkActive="active" class="nav-item">
+      <span class="material-symbols-rounded">public</span>
+      <span class="label" *ngIf="!collapsed"> Environments</span>
+    </a>
+    <a routerLink="/teams" routerLinkActive="active" class="nav-item">
+      <span class="material-symbols-rounded">group</span>
+      <span class="label" *ngIf="!collapsed"> Teams</span>
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="theme-selector" *ngIf="!collapsed">
+      <div class="select-wrapper">
+        <span class="material-symbols-rounded select-icon">
+          {{ current === 'dark' ? 'dark_mode' : 'light_mode' }}
+        </span>
+        <select [ngModel]="current" (ngModelChange)="setTheme($event)">
+          <option *ngFor="let t of themes" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <button class="icon-only-theme" *ngIf="collapsed" (click)="toggleTheme()" title="Change Theme">
+      <span class="material-symbols-rounded">
+        {{ current === 'dark' ? 'dark_mode' : 'light_mode' }}
+      </span>
+    </button>
+  </div>
+</nav>

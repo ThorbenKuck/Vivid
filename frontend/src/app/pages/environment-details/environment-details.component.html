@@ -1,0 +1,24 @@
+<div class="page-header flex items-center justify-between">
+  <button class="btn-slim" (click)="back()">
+    <span class="material-symbols-rounded">arrow_back</span>
+    <span>{{ 'common.back'  }}</span>
+  </button>
+  <h1 class="page-title text-lg">Environment</h1>
+</div>
+
+<div class="card" *ngIf="env; else loading">
+  <div class="flex-col gap-md">
+    <div>
+      <label class="text-xs text-muted">{{ 'common.name'  }}</label>
+      <div class="text-sm">{{ env.name }}</div>
+    </div>
+    <div>
+      <label class="text-xs text-muted">{{ 'common.description'  }}</label>
+      <div class="text-sm text-secondary">{{ env.description || ('common.no_description' ) }}</div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="card text-secondary">{{ 'common.loading'  }}</div>
+</ng-template>

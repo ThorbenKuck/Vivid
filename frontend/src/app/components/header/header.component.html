@@ -1,0 +1,32 @@
+<div class="header-content">
+  <button class="menu-btn" (click)="onToggleSidebar()" title="Toggle sidebar">
+    <span class="material-symbols-rounded">
+      {{ collapsed ? 'menu' : 'menu_open' }}
+    </span>
+  </button>
+  
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <span class="brand-name">Vivid</span>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="env-picker" *ngIf="(environments$ | async) as envs">
+    <ng-container *ngIf="envs.length === 0; else envSelect">
+      <button class="add-env-btn" (click)="addEnvironment()">
+        <span class="material-symbols-rounded">add</span>
+        {{ 'Add Environment' }}
+      </button>
+    </ng-container>
+    <ng-template #envSelect>
+      <div class="select-wrapper">
+        <span class="material-symbols-rounded select-icon">public</span>
+        <select #sel (change)="selectEnvironment(sel.value || null)">
+          <option *ngIf="!(selectedEnvironmentId$ | async)" value="" selected disabled>{{ 'Select Environment' }}</option>
+          <option *ngFor="let e of envs" [value]="e.id" [selected]="(selectedEnvironmentId$ | async) === e.id">{{ e.name }}</option>
+        </select>
+      </div>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<div class="page-header flex justify-between items-center gap-md">
+  <h1 class="page-title text-lg">Teams</h1>
+  <div class="search-bar">
+    <app-form-input 
+      icon="search" 
+      placeholder="Search teams"
+      [(ngModel)]="q" 
+      (keyup.enter)="search()">
+    </app-form-input>
+  </div>
+</div>
+
+<div class="teams-list-wrapper" *ngIf="result">
+  <app-generic-table [items]="result.content">
+    <ng-template #rowTemplate let-t>
+      <div class="team-main flex items-center justify-between" (click)="navigate(t)">
+        <div class="team-info flex items-center gap-md">
+          <span class="material-symbols-rounded" style="color: var(--accent-lavender)">group</span>
+          <div class="name-box">
+            <span class="team-name text-sm">{{ t.name }}</span>
+            <span class="member-count text-xs text-muted">{{ t.memberCount }} members</span>
+          </div>
+        </div>
+        
+        <div class="team-actions flex items-center gap-sm">
+          <span class="material-symbols-rounded expand-icon text-muted">
+            chevron_right
+          </span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #expandTemplate let-t>
+      <p class="team-description text-sm text-secondary">{{ t.description || 'No description' }}</p>
+    </ng-template>
+  </app-generic-table>
+
+  <app-pagination 
+    [page]="page" 
+    [totalPages]="totalPages" 
+    [isLast]="isLast"
+    (prev)="page = page - 1; search()" 
+    (next)="page = page + 1; search()">
+  </app-pagination>
+</div>
+
+<button class="fab shadow-slim" (click)="toggleAdd()" title="Add Team">
+  <span class="material-symbols-rounded">add</span>
+</button>
+
+<!-- Modals -->
+<div class="modal-overlay flex items-center justify-center" *ngIf="showAdd" (click)="toggleAdd()">
+  <div class="modal-card card flex-col gap-md" (click)="$event.stopPropagation()">
+    <h2 class="modal-title text-base">Create New Team</h2>
+    <form [formGroup]="addForm" class="flex-col gap-md">
+      <div class="form-group">
+        <label class="text-xs text-muted">Team Name</label>
+        <app-form-input formControlName="name" placeholder="Name"></app-form-input>
+      </div>
+      <div class="form-group">
+        <label class="text-xs text-muted">Description</label>
+        <textarea formControlName="description" placeholder="Description" rows="3"></textarea>
+      </div>
+    </form>
+    <div class="modal-actions flex justify-end gap-sm">
+      <button class="btn-slim" (click)="toggleAdd()">Cancel</button>
+      <button class="btn-slim primary" (click)="add()" [disabled]="addForm.invalid">Create</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<div class="page-header flex justify-between items-center gap-md">
+  <h1 class="page-title text-lg">{{ 'features.title' }}</h1>
+  <div class="search-bar">
+    <app-form-input 
+      icon="search" 
+      [placeholder]="'common.search' "
+      [(ngModel)]="q" 
+      (keyup.enter)="search()">
+    </app-form-input>
+  </div>
+</div>
+
+<div class="features-list-wrapper" *ngIf="featuresPage$ | async as page; else loading">
+  <app-generic-table [items]="page.content" [expandable]="true">
+    <ng-template #rowTemplate let-f>
+      <div class="feature-row-content flex items-center justify-between">
+        <!-- Column 1: Name -->
+        <div class="col-name flex-1">
+          <span class="feature-name text-sm font-medium">{{ f.name }}</span>
+          <div class="flex items-center gap-sm mt-xs">
+            <div class="feature-tags flex gap-xs" *ngIf="f.tags?.length">
+              <span class="tag-pill text-xs" *ngFor="let t of f.tags">{{ t }}</span>
+            </div>
+            <div class="feature-teams flex gap-xs" *ngIf="f.assignedTeams?.length">
+              <div *ngFor="let team of f.assignedTeams; trackBy: trackByTeamId" 
+                   class="team-dot shadow-slim" 
+                   [title]="team.name">
+                {{ team.name.substring(0, 1).toUpperCase() }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Active Status -->
+        <div class="col-status flex items-center justify-center" style="width: 100px;">
+          <span class="material-symbols-rounded" [style.color]="f.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
+            {{ f.enabled ? 'check_circle' : 'radio_button_unchecked' }}
+          </span>
+        </div>
+        
+        <!-- Column 3: Open Action -->
+        <div class="col-actions flex items-center justify-end" style="width: 120px;">
+          <button class="btn-slim" (click)="$event.stopPropagation(); openDetails(f)">
+            <span>Open</span>
+            <span class="material-symbols-rounded">open_in_new</span>
+          </button>
+          <span class="material-symbols-rounded expand-icon text-muted ml-sm" [style.transform]="f['__expanded'] ? 'rotate(180deg)' : 'none'">
+            expand_more
+          </span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #expandTemplate let-f>
+      <div class="expand-content p-sm">
+        <p class="feature-description text-sm text-secondary">{{ f.description || ('features.no_description' ) }}</p>
+      </div>
+    </ng-template>
+  </app-generic-table>
+
+  <app-pagination 
+    [page]="page.number" 
+    [totalPages]="page.totalPages" 
+    [isLast]="page.last"
+    (prev)="prev()" 
+    (next)="next()">
+  </app-pagination>
+</div>
+
+<button class="fab" (click)="toggleAdd()" [title]="'common.add' ">
+  <span class="material-symbols-rounded">add</span>
+</button>
+
+<div class="modal-overlay" *ngIf="showAdd" (click)="toggleAdd()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">{{ 'features.add'  }}</h2>
+    <form [formGroup]="addForm" class="flex-col gap-md">
+      <div class="form-group">
+        <label class="text-xs text-muted">{{ 'common.name'  }}</label>
+        <app-form-input formControlName="name" [placeholder]="'common.name' "></app-form-input>
+      </div>
+      <div class="form-group">
+        <label class="text-xs text-muted">{{ 'common.description'  }}</label>
+        <textarea formControlName="description" [placeholder]="'common.description' " rows="3"></textarea>
+      </div>
+    </form>
+    <div class="modal-actions flex justify-end gap-sm">
+      <button class="btn-slim" (click)="toggleAdd()">{{ 'common.cancel'  }}</button>
+      <button class="btn-slim primary" (click)="add()" [disabled]="addForm.invalid || !addForm.value.name">
+        {{ 'common.create'  }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
+    <span class="material-symbols-rounded rotate">sync</span>
+    <p class="text-secondary">{{ 'common.loading' }}</p>
+  </div>
+</ng-template>

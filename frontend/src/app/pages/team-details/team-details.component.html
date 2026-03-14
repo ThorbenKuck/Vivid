@@ -1,0 +1,112 @@
+<div class="loading-overlay" [class.hidden]="!waitingForBackend">
+    <app-loading-indicator></app-loading-indicator>
+</div>
+
+<div class="page-header flex items-center gap-md">
+  <button class="icon-btn-slim" (click)='backToTeams()' title="Back">
+    <span class="material-symbols-rounded">arrow_back</span>
+  </button>
+  <h1 class="page-title text-lg">Team Details</h1>
+</div>
+
+<div class="details-container flex-col gap-lg" *ngIf="team$ | async as t; else loading">
+  <!-- General Info -->
+  <section class="card flex-col gap-lg">
+    <div class="section-header flex items-center gap-sm">
+      <span class="material-symbols-rounded" style="color: var(--accent-lavender)">info</span>
+      <h2 class="section-title text-sm">Team Information</h2>
+    </div>
+
+    <div class="flex-col gap-md">
+      <div class="form-group" [class.dirty]="state.isFieldDirty('name') | async">
+        <label class="text-xs text-muted flex items-center gap-xs">
+          Name
+          <span *ngIf="state.isFieldDirty('name') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+        </label>
+        <app-form-input [value]="t.name" (change)="updateField('name', $event)" placeholder="Name"></app-form-input>
+      </div>
+      
+      <div class="form-group" [class.dirty]="state.isFieldDirty('description') | async">
+        <label class="text-xs text-muted flex items-center gap-xs">
+          Description
+          <span *ngIf="state.isFieldDirty('description') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+        </label>
+        <textarea rows="3" [value]="t.description" (change)="updateField('description', $event)" placeholder="Description"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- Member Management -->
+  <section class="card flex-col gap-lg">
+    <div class="section-header flex items-center gap-sm">
+      <span class="material-symbols-rounded" style="color: var(--accent-mint)">group</span>
+      <h2 class="section-title text-sm">Members</h2>
+    </div>
+
+    <div class="flex-col gap-md">
+      <div class="search-container relative">
+        <div class="flex items-center gap-sm relative">
+          <input 
+            type="text" 
+            class="form-input text-xs flex-1" 
+            placeholder="Search users to add..." 
+            [(ngModel)]="userSearchQuery"
+            (input)="onUserSearch()"
+          />
+          <span *ngIf="isSearchingUsers" class="material-symbols-rounded rotate text-sm absolute right-sm">sync</span>
+        </div>
+        
+        <ul *ngIf="showUserSuggestions" class="suggestions-dropdown card shadow-slim">
+          <li *ngFor="let opt of userOptions" 
+              (click)="addMember(opt)"
+              class="suggestion-item text-xs p-xs">
+            <div class="flex items-center gap-sm">
+                <div class="avatar-slim">{{ getInitials(opt.username) }}</div>
+                <span>{{ opt.username }} ({{ opt.email }})</span>
+            </div>
+          </li>
+          <li *ngIf="userOptions.length === 0 && !isSearchingUsers" class="suggestion-item text-xs p-xs text-muted">
+            No users found
+          </li>
+        </ul>
+      </div>
+
+      <div class="members-list flex-col gap-sm mt-md">
+        <div *ngFor="let member of t.members; trackBy: trackByUserId" class="member-item flex items-center justify-between p-xs">
+          <div class="flex items-center gap-md">
+            <div class="avatar-circle shadow-slim">{{ getInitials(member.username) }}</div>
+            <div class="flex-col">
+              <span class="text-xs font-semibold">{{ member.username }}</span>
+              <span class="text-xs text-muted">{{ member.displayRole || 'Member' }}</span>
+            </div>
+          </div>
+          <button class="icon-btn-slim danger" (click)="removeMember(member.id)">
+            <span class="material-symbols-rounded">person_remove</span>
+          </button>
+        </div>
+        <div *ngIf="!t.members?.length" class="text-center p-lg text-muted text-xs">
+          No members assigned to this team.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Action Bar -->
+  <div class="action-bar flex items-center justify-center" *ngIf="isDirty$ | async" #actionBar>
+    <div class="action-bar-content flex items-center gap-md card shadow-slim p-sm draggable-handle" (mousedown)="startDragging($event, actionBar)">
+      <span class="material-symbols-rounded drag-icon text-muted">drag_indicator</span>
+      <span class="text-sm font-semibold">Unsaved Changes</span>
+      <div class="flex gap-sm">
+        <button class="btn-slim" (click)="revert()">Revert</button>
+        <button class="btn-slim primary" (click)="save()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
+    <span class="material-symbols-rounded rotate">sync</span>
+    <p class="text-secondary">Loading team details...</p>
+  </div>
+</ng-template>

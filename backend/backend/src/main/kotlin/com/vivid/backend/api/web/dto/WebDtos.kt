@@ -1,0 +1,107 @@
+package com.vivid.backend.api.web.dto
+
+import com.vivid.backend.domain.entity.Environment
+import com.vivid.backend.domain.entity.Feature
+import com.vivid.backend.domain.entity.FeatureEnvironment
+import com.vivid.backend.domain.entity.FeatureLink
+import java.util.*
+
+// Feature DTO represents a feature with environment-specific state (enabled/flags/metadata)
+// for a given environment context.
+
+data class FeatureDto(
+    val id: UUID?,
+    val name: String,
+    val description: String?,
+    val enabled: Boolean,
+    val flags: Map<String, Boolean>,
+    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue>,
+    val tags: List<String>,
+    val outgoingLinks: List<FeatureLinkDto>,
+    val assignedTeams: List<TeamDto>
+)
+
+fun Feature.toDto(fe: FeatureEnvironment? = null): FeatureDto = FeatureDto(
+    id = id,
+    name = name,
+    description = description,
+    enabled = fe?.enabled ?: false,
+    flags = fe?.flags ?: emptyMap(),
+    metadata = fe?.metadata ?: emptyMap(),
+    tags = tags.toList(),
+    outgoingLinks = outgoingLinks.map { it.toDto() },
+    assignedTeams = assignedTeams.map { it.toDto() }
+)
+
+fun Feature.toDto(environment: Environment?): FeatureDto {
+    return toDto(environment?.let { findFeatureEnvironment(it) })
+}
+
+fun Pair<Feature, FeatureEnvironment?>.toDto(): FeatureDto = first.toDto(second)
+
+data class FeatureLinkDto(
+    val id: UUID?,
+    val sourceFeatureId: UUID?,
+    val targetFeatureId: UUID,
+    val targetFeatureName: String? = null,
+    val type: String?
+)
+
+data class FeatureCreateRequest(
+    val name: String,
+    val description: String?,
+    val tags: List<String> = emptyList()
+)
+
+data class FeatureUpdateRequest(
+    val name: String? = null,
+    val description: String? = null,
+    val tags: List<String>? = null,
+    val environmentId: UUID? = null,
+    val enabled: Boolean? = null,
+    val flags: Map<String, Boolean>? = null,
+    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue>? = null,
+    val assignedTeamIds: List<UUID>? = null
+)
+
+data class FeatureEnvironmentUpdateRequest(
+    val enabled: Boolean = false,
+    val flags: Map<String, Boolean> = emptyMap(),
+    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue> = emptyMap()
+)
+
+data class FeatureLinkCreateRequest(
+    val targetFeatureId: UUID,
+    val type: String?
+)
+
+// Mapping Extension Functions
+
+fun FeatureLink.toDto(): FeatureLinkDto = FeatureLinkDto(
+    id = this.id,
+    sourceFeatureId = this.sourceFeature.id,
+    targetFeatureId = this.targetFeature.id,
+    targetFeatureName = this.targetFeature.name,
+    type = this.type
+)
+
+fun FeatureCreateRequest.toEntity(): Feature = Feature(
+    name = this.name,
+    description = this.description,
+    tags = this.tags.toMutableSet()
+)
+
+// Environment DTOs
+
+data class EnvironmentDto(
+    val id: java.util.UUID?,
+    val name: String,
+    val description: String?
+)
+
+fun Environment.toDto() = EnvironmentDto(id = this.id, name = this.name, description = this.description)
+
+data class EnvironmentCreateRequest(
+    val name: String,
+    val description: String?
+)

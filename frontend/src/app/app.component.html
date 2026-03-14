@@ -1,0 +1,19 @@
+<header class="header">
+  <app-header [collapsed]="sidebarCollapsed" (toggleSidebar)="toggleSidebar()"></app-header>
+</header>
+
+<div class="global-loader" *ngIf="loading$ | async">
+  <div class="loader-bar"></div>
+</div>
+
+<div class="layout-container">
+  <aside class="sidebar-aside" [class.show]="!sidebarCollapsed">
+    <app-sidebar [collapsed]="sidebarCollapsed"></app-sidebar>
+  </aside>
+  
+  <main class="main-content" [class.pushed]="!sidebarCollapsed">
+    <div class="page-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

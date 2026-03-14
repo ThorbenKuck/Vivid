@@ -1,0 +1,4 @@
+com.vivid.sdk.spring.VividAutoConfiguration
+com.vivid.sdk.spring.rest.VividRestAutoConfiguration
+com.vivid.sdk.spring.sse.VividSseAutoConfiguration
+com.vivid.sdk.spring.kafka.VividKafkaAutoConfiguration

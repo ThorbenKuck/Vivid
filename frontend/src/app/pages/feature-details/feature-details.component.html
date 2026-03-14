@@ -1,0 +1,226 @@
+<div *ngIf="!environmentId">
+    <section class="card flex-col gap-lg missing-environment">
+        Please select an environment to view environment specific settings.
+    </section>
+</div>
+
+<div class="loading-overlay" [class.hidden]="!waitingForBackend">
+    <app-loading-indicator></app-loading-indicator>
+</div>
+
+<div class="page-header flex items-center gap-md">
+  <button class="icon-btn-slim" (click)="backToFeatures()" [title]="'common.back' ">
+    <span class="material-symbols-rounded">arrow_back</span>
+  </button>
+  <h1 class="page-title text-lg">Details</h1>
+</div>
+
+<div class="details-container flex-col gap-lg" *ngIf="feature$ | async as f; else loading">
+  <!-- Master Switch -->
+  <div class="master-switch-card card flex items-center justify-between p-md" [class.enabled]="f.enabled">
+    <div class="flex items-center gap-md">
+      <span class="material-symbols-rounded text-xl" [style.color]="f.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
+        {{ f.enabled ? 'toggle_on' : 'toggle_off' }}
+      </span>
+      <div class="flex-col">
+        <span class="text-sm font-semibold">Feature Status</span>
+        <span class="text-xs text-muted">{{ f.enabled ? 'This feature is active in the current environment.' : 'This feature is disabled.' }}</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-sm">
+      <span *ngIf="state.isFieldDirty('enabled') | async" class="text-xs text-accent-mint italic">Changed</span>
+      <button class="btn-toggle" [class.active]="f.enabled" (click)="updateField('enabled', !f.enabled)">
+        {{ f.enabled ? 'Enabled' : 'Disabled' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- General Info -->
+  <section class="card flex-col gap-lg">
+    <div class="section-header flex items-center gap-sm">
+      <span class="material-symbols-rounded" style="color: var(--accent-mint)">info</span>
+      <h2 class="section-title text-sm">{{ 'features.details.info'  }}</h2>
+    </div>
+
+    <div class="flex-col gap-md">
+      <div class="form-group" [class.dirty]="state.isFieldDirty('name') | async">
+        <label class="text-xs text-muted flex items-center gap-xs">
+          {{ 'common.name'  }}
+          <span *ngIf="state.isFieldDirty('name') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+        </label>
+        <app-form-input [value]="f.name" (change)="updateField('name', $event)" [placeholder]="'common.name' "></app-form-input>
+      </div>
+      
+      <div class="form-group" [class.dirty]="state.isFieldDirty('description') | async">
+        <label class="text-xs text-muted flex items-center gap-xs">
+          {{ 'common.description'  }}
+          <span *ngIf="state.isFieldDirty('description') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+        </label>
+        <textarea rows="3" [value]="f.description" (change)="updateField('description', $event)" [placeholder]="'common.description' "></textarea>
+      </div>
+
+      <div class="form-group" [class.dirty]="state.isFieldDirty('tags') | async">
+        <label class="text-xs text-muted flex items-center gap-xs">
+          {{ 'features.tags'  }}
+          <span *ngIf="state.isFieldDirty('tags') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+        </label>
+        <app-chiplist [tags]="f.tags" [options]="tagsOptions" (tagsChange)="updateField('tags', $event)"></app-chiplist>
+      </div>
+    </div>
+  </section>
+
+  <!-- Teams -->
+  <section class="card flex-col gap-lg">
+    <div class="section-header flex items-center gap-sm">
+      <span class="material-symbols-rounded" style="color: var(--accent-lavender)">group</span>
+      <h2 class="section-title text-sm">Teams</h2>
+    </div>
+
+    <div class="flex-col gap-md">
+      <div class="search-container relative">
+        <div class="flex items-center gap-sm relative">
+          <input 
+            type="text" 
+            class="form-input text-xs flex-1" 
+            placeholder="Search teams to assign..." 
+            [(ngModel)]="teamSearchQuery"
+            (input)="onTeamSearch()"
+          />
+          <span *ngIf="isSearchingTeams" class="material-symbols-rounded rotate text-sm absolute right-sm">sync</span>
+        </div>
+        
+        <ul *ngIf="showTeamSuggestions" class="suggestions-dropdown card shadow-slim">
+          <li *ngFor="let opt of teamOptions" 
+              (click)="assignTeam(opt)"
+              class="suggestion-item text-xs p-xs">
+            {{ opt.name }}
+          </li>
+          <li *ngIf="teamOptions.length === 0 && !isSearchingTeams" class="suggestion-item text-xs p-xs text-muted">
+            No teams found
+          </li>
+        </ul>
+      </div>
+
+      <div class="teams-list flex flex-wrap gap-xs">
+        <div *ngFor="let team of f.assignedTeams; trackBy: trackByTeamId" class="chip flex items-center gap-xs">
+          <span class="text-xs">{{ team.name }}</span>
+          <button class="remove-btn" (click)="removeTeam(team.id)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Features -->
+  <section class="card flex-col gap-lg">
+    <div class="section-header flex items-center gap-sm">
+      <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span>
+      <h2 class="section-title text-sm">Related Features</h2>
+    </div>
+
+    <div class="flex-col gap-md">
+      <div class="search-container relative">
+        <div class="flex items-center gap-sm relative">
+          <input 
+            type="text" 
+            class="form-input text-xs flex-1" 
+            placeholder="Search features to link..." 
+            [(ngModel)]="featureSearchQuery"
+            (input)="onFeatureSearch()"
+          />
+          <span *ngIf="isSearching" class="material-symbols-rounded rotate text-sm absolute right-sm">sync</span>
+        </div>
+        
+        <ul *ngIf="showFeatureSuggestions" class="suggestions-dropdown card shadow-slim">
+          <li *ngFor="let opt of featureOptions" 
+              (click)="addLink(opt)"
+              class="suggestion-item text-xs p-xs">
+            {{ opt.name }}
+          </li>
+          <li *ngIf="featureOptions.length === 0 && !isSearching" class="suggestion-item text-xs p-xs text-muted">
+            No features found
+          </li>
+        </ul>
+      </div>
+
+      <div class="links-list flex flex-wrap gap-xs">
+        <div *ngFor="let link of f.outgoingLinks; trackBy: trackByLinkId" class="chip flex items-center gap-xs">
+          <span class="text-xs">{{ link.targetFeatureName || link.targetFeatureId }}</span>
+          <button class="remove-btn" (click)="removeLink(link.id!)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+    <ng-container *ngIf="environmentId">
+        <!-- Environment Settings -->
+        <section class="card flex-col gap-lg">
+            <div class="section-header flex items-center gap-sm">
+                <span class="material-symbols-rounded" style="color: var(--accent-sky)">settings</span>
+                <h2 class="section-title text-sm">Environment Specific Flags</h2>
+            </div>
+
+            <div class="flex-col gap-md">
+                <!-- Flags CRUD -->
+                <div class="flags-manager flex-col gap-sm">
+                    <div *ngFor="let flag of f.flags | keyvalue; trackBy: trackByFlagKey" class="flag-row flex items-center gap-md p-xs border-bottom">
+                        <span class="text-xs font-semibold flex-1">{{ flag.key }}</span>
+                        <div class="flex items-center gap-sm">
+                            <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
+                            <button class="icon-btn-slim" (click)="toggleFlag(f.flags, flag.key, !flag.value)">
+              <span class="material-symbols-rounded" [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                {{ flag.value ? 'toggle_on' : 'toggle_off' }}
+              </span>
+                            </button>
+                            <button class="icon-btn-slim danger" (click)="removeFlag(f.flags, flag.key)">
+                                <span class="material-symbols-rounded">delete</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="add-flag-row flex items-center gap-sm mt-sm">
+                        <input type="text" #newFlagKey class="form-input text-xs flex-1" placeholder="New flag key..." />
+                        <button class="btn-slim primary" (click)="addFlag(f.flags, newFlagKey.value); newFlagKey.value = ''">
+                            <span class="material-symbols-rounded">add</span>
+                            Add Flag
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metadata Editor -->
+        <section class="card flex-col gap-lg">
+            <div class="section-header flex items-center gap-sm">
+                <span class="material-symbols-rounded" style="color: var(--accent-lavender)">database</span>
+                <h2 class="section-title text-sm">Metadata</h2>
+            </div>
+
+            <app-metadata-editor [metadata]="f.metadata" (metadataChange)="updateMetadata($event)"></app-metadata-editor>
+        </section>
+
+    </ng-container>
+
+  <!-- Action Bar -->
+  <div class="action-bar flex items-center justify-center" *ngIf="isDirty$ | async" #actionBar>
+    <div class="action-bar-content flex items-center gap-md card shadow-slim p-sm draggable-handle" (mousedown)="startDragging($event, actionBar)">
+      <span class="material-symbols-rounded drag-icon text-muted">drag_indicator</span>
+      <span class="text-sm font-semibold">Unsaved Changes</span>
+      <div class="flex gap-sm">
+        <button class="btn-slim" (click)="revert()">{{ 'common.revert'  }}</button>
+        <button class="btn-slim primary" (click)="save()">{{ 'common.save'  }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
+    <span class="material-symbols-rounded rotate">sync</span>
+    <p class="text-secondary">{{ 'common.loading'  }}</p>
+  </div>
+</ng-template>
