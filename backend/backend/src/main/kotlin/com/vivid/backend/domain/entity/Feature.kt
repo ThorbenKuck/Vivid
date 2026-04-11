@@ -2,8 +2,6 @@ package com.vivid.backend.domain.entity
 
 import jakarta.persistence.*
 import java.util.*
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 
 @Entity
 @Table(name = "features")
@@ -15,6 +13,13 @@ class Feature(
 
     @Column(columnDefinition = "TEXT")
     var description: String? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    var department: Department,
+
+    @Column(name = "running_number", nullable = false, unique = true, updatable = false)
+    var runningNumber: Long = 0,
 
     @OneToMany(mappedBy = "feature", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     var environments: MutableList<FeatureEnvironment> = mutableListOf(),
@@ -38,7 +43,7 @@ class Feature(
     )
     var assignedTeams: MutableSet<Team> = mutableSetOf()
 ): BaseUuidEntity(id) {
-    fun findFeatureEnvironment(environment: Environment): FeatureEnvironment? {
+    fun findFeatureEnvironment(environment: EnvironmentEntity): FeatureEnvironment? {
         return environments.find { it.environment == environment }
     }
 }

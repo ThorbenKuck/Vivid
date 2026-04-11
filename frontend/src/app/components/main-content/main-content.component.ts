@@ -49,12 +49,12 @@ export class MainContentComponent implements OnInit {
 
   ngOnInit(): void {
     this.reload();
-    this.envs.selectedEnvironmentId$.subscribe(() => this.reload());
+    this.envs.selectedEnvironment$.subscribe(() => this.reload());
   }
 
   reload() {
     let envId: string | null = null;
-    this.envs.selectedEnvironmentId$.subscribe(v => envId = v).unsubscribe();
+    this.envs.selectedEnvironment$.subscribe(v => envId = v?.id || null).unsubscribe();
     this.featuresPage$ = this.api.getAllFeatures(this.q, envId, this.page, this.size);
   }
 
@@ -63,7 +63,7 @@ export class MainContentComponent implements OnInit {
   prev() { if (this.page>0) { this.page--; this.reload(); } }
 
   openDetails(f: FeatureDto) {
-    this.router.navigate(['/feature', f.id]);
+    this.router.navigate(['/feature', f.runningNumber]);
   }
 
   trackByTeamId(index: number, team: TeamDto): string {
@@ -88,7 +88,7 @@ export class MainContentComponent implements OnInit {
       // Preload into details via router state for instant draft editing
       this.showAdd = false;
       this.addForm.reset();
-      this.router.navigate(['/feature', feature.id], { state: { feature } });
+      this.router.navigate(['/feature', feature.runningNumber], { state: { feature } });
     });
   }
 }

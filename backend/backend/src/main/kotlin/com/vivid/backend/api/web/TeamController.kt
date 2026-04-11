@@ -19,53 +19,75 @@ class TeamController(
     @GetMapping
     @Operation(summary = "Get all teams (paginated)")
     fun getAllTeams(
+        @RequestParam departmentId: UUID,
         @RequestParam(required = false) q: String?,
         pageable: Pageable
     ): Page<TeamDto> {
         return if (q != null) {
-            teamService.searchTeams(q, pageable).map { it.toDto() }
+            teamService.searchTeams(q, departmentId, pageable).map { it.toDto() }
         } else {
-            teamService.getAllTeams(pageable).map { it.toDto() }
+            teamService.getAllTeams(departmentId, pageable).map { it.toDto() }
         }
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get team by ID")
-    fun getTeamById(@PathVariable id: UUID): TeamDto {
-        return teamService.getTeamById(id).toDto(includeMembers = true)
+    fun getTeamById(
+        @PathVariable id: UUID,
+        @RequestParam departmentId: UUID
+    ): TeamDto {
+        return teamService.getTeamById(id, departmentId).toDto(includeMembers = true)
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new team")
-    fun createTeam(@RequestBody request: TeamCreateRequest): TeamDto {
-        return teamService.createTeam(request.name, request.description).toDto()
+    fun createTeam(
+        @RequestParam departmentId: UUID,
+        @RequestBody request: TeamCreateRequest
+    ): TeamDto {
+        return teamService.createTeam(departmentId, request.name, request.description).toDto()
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing team")
-    fun updateTeam(@PathVariable id: UUID, @RequestBody request: TeamUpdateRequest): TeamDto {
-        return teamService.updateTeam(id, request.name, request.description).toDto(includeMembers = true)
+    fun updateTeam(
+        @PathVariable id: UUID,
+        @RequestParam departmentId: UUID,
+        @RequestBody request: TeamUpdateRequest
+    ): TeamDto {
+        return teamService.updateTeam(id, departmentId, request.name, request.description).toDto(includeMembers = true)
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a team")
-    fun deleteTeam(@PathVariable id: UUID) {
-        teamService.deleteTeam(id)
+    fun deleteTeam(
+        @PathVariable id: UUID,
+        @RequestParam departmentId: UUID
+    ) {
+        teamService.deleteTeam(id, departmentId)
     }
 
     @PostMapping("/{id}/members/{userId}")
     @Operation(summary = "Add a member to a team")
-    fun addMember(@PathVariable id: UUID, @PathVariable userId: UUID): TeamDto {
-        teamService.addMember(id, userId)
-        return teamService.getTeamById(id).toDto(includeMembers = true)
+    fun addMember(
+        @PathVariable id: UUID,
+        @PathVariable userId: UUID,
+        @RequestParam departmentId: UUID
+    ): TeamDto {
+        teamService.addMember(id, userId, departmentId)
+        return teamService.getTeamById(id, departmentId).toDto(includeMembers = true)
     }
 
     @DeleteMapping("/{id}/members/{userId}")
     @Operation(summary = "Remove a member from a team")
-    fun removeMember(@PathVariable id: UUID, @PathVariable userId: UUID): TeamDto {
-        teamService.removeMember(id, userId)
-        return teamService.getTeamById(id).toDto(includeMembers = true)
+    fun removeMember(
+        @PathVariable id: UUID,
+        @PathVariable userId: UUID,
+        @RequestParam departmentId: UUID
+    ): TeamDto {
+        teamService.removeMember(id, userId, departmentId)
+        return teamService.getTeamById(id, departmentId).toDto(includeMembers = true)
     }
 }

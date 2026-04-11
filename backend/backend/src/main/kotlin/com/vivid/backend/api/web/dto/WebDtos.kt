@@ -1,6 +1,6 @@
 package com.vivid.backend.api.web.dto
 
-import com.vivid.backend.domain.entity.Environment
+import com.vivid.backend.domain.entity.EnvironmentEntity
 import com.vivid.backend.domain.entity.Feature
 import com.vivid.backend.domain.entity.FeatureEnvironment
 import com.vivid.backend.domain.entity.FeatureLink
@@ -11,6 +11,7 @@ import java.util.*
 
 data class FeatureDto(
     val id: UUID?,
+    val runningNumber: Long,
     val name: String,
     val description: String?,
     val enabled: Boolean,
@@ -23,6 +24,7 @@ data class FeatureDto(
 
 fun Feature.toDto(fe: FeatureEnvironment? = null): FeatureDto = FeatureDto(
     id = id,
+    runningNumber = runningNumber,
     name = name,
     description = description,
     enabled = fe?.enabled ?: false,
@@ -33,7 +35,7 @@ fun Feature.toDto(fe: FeatureEnvironment? = null): FeatureDto = FeatureDto(
     assignedTeams = assignedTeams.map { it.toDto() }
 )
 
-fun Feature.toDto(environment: Environment?): FeatureDto {
+fun Feature.toDto(environment: EnvironmentEntity?): FeatureDto {
     return toDto(environment?.let { findFeatureEnvironment(it) })
 }
 
@@ -85,10 +87,11 @@ fun FeatureLink.toDto(): FeatureLinkDto = FeatureLinkDto(
     type = this.type
 )
 
-fun FeatureCreateRequest.toEntity(): Feature = Feature(
+fun FeatureCreateRequest.toEntity(department: com.vivid.backend.domain.entity.Department): Feature = Feature(
     name = this.name,
     description = this.description,
-    tags = this.tags.toMutableSet()
+    tags = this.tags.toMutableSet(),
+    department = department
 )
 
 // Environment DTOs
@@ -99,9 +102,30 @@ data class EnvironmentDto(
     val description: String?
 )
 
-fun Environment.toDto() = EnvironmentDto(id = this.id, name = this.name, description = this.description)
+fun EnvironmentEntity.toDto() = EnvironmentDto(id = this.id, name = this.name, description = this.description)
 
 data class EnvironmentCreateRequest(
     val name: String,
     val description: String?
+)
+
+// Department DTOs
+
+data class DepartmentDto(
+    val id: UUID,
+    val name: String,
+    val description: String?,
+    val teams: List<TeamDto>? = null
+)
+
+fun com.vivid.backend.domain.entity.Department.toDto(includeTeams: Boolean = false): DepartmentDto = DepartmentDto(
+    id = id,
+    name = name,
+    description = description,
+    teams = if (includeTeams) teams.map { it.toDto(includeMembers = true) } else null
+)
+
+data class DepartmentCreateRequest(
+    val name: String,
+    val description: String? = null
 )

@@ -1,4 +1,10 @@
 /* HTML: <div class="loader"></div> */
+:host {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .loader {
     width: 85px;
     height: 50px;

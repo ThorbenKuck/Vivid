@@ -3,9 +3,9 @@
         <div class="vivid-logo">Vivid</div>
         <div class="vivid-tagline">Feature Management for Modern Teams</div>
 
-        <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+        <app-loading-indicator *ngIf="loading()"></app-loading-indicator>
 
-        <div *ngIf="!loading && !error">
+        <div *ngIf="!loading() && !error()">
             <div *ngIf="issuer; else noProvider" class="auth-options">
                 <button (click)="onLogin()">
                     <span class="icon">🔒</span>
@@ -17,8 +17,8 @@
             </ng-template>
         </div>
 
-        <div *ngIf="error" class="error-state">
-            <p class="error-message">{{ error }}</p>
+        <div *ngIf="error()" class="error-state">
+            <p class="error-message">{{ error() }}</p>
             <button class="retry-button" (click)="loadConfig()">Retry</button>
         </div>
     </div>

@@ -30,6 +30,12 @@ export class WebFeatureManagementService {
     return this.http.get<FeatureDto>(`${this.baseUrl}/${id}`, params);
   }
 
+  getFeatureByRunningNumber(runningNumber: number, environmentId: string | null = null): Observable<FeatureDto> {
+    const params: any = {};
+    if (environmentId) params.environmentId = environmentId;
+    return this.http.get<FeatureDto>(`${this.baseUrl}/number/${runningNumber}`, params);
+  }
+
   upsertEnvironmentState(id: string, environmentId: string, request: FeatureEnvironmentUpdateRequest): Observable<FeatureDto> {
     return this.http.put<FeatureDto>(`${this.baseUrl}/${id}/environments/${environmentId}`, request);
   }

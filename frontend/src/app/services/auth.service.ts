@@ -144,7 +144,7 @@ export class AuthService {
         if (config.logoutUrl) {
           window.location.href = config.logoutUrl;
         } else {
-          this.router.navigate(['/login']);
+          this.router.navigate(['/']);
         }
       });
     }

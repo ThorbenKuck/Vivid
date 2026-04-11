@@ -6,7 +6,7 @@ import {combineLatest, of, Subject, Subscription, switchMap, tap, debounceTime, 
 import {WebFeatureManagementService} from '../../services/web-feature-management.service';
 import {EnvironmentService} from '../../services/environment.service';
 import {TeamManagementService} from '../../services/team-management.service';
-import {FeatureDto, FeatureEnvironmentUpdateRequest, MetadataValue, TeamDto} from '../../dtos';
+import {EnvironmentDto, FeatureDto, FeatureEnvironmentUpdateRequest, MetadataValue, TeamDto} from '../../dtos';
 import {TranslateModule} from '@ngx-translate/core';
 import {FormInputComponent} from '../../shared/components/form-input/form-input.component';
 import {FeatureStateService} from '../../services/feature-state.service';
@@ -36,7 +36,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     featureSearchQuery = '';
     teamSearchQuery = '';
     waitingForBackend: boolean = false;
-    environmentId: string | null = null;
+    environment: EnvironmentDto | null = null;
 
     feature$ = this.state.feature$;
     isDirty$ = this.state.isDirty$;
@@ -54,8 +54,8 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.api.getAllTags().subscribe(tags => this.tagsOptions = tags);
 
-        this.envs.selectedEnvironmentId$.subscribe(v => {
-            this.environmentId = v;
+        this.envs.selectedEnvironment$.subscribe(v => {
+            this.environment = v;
         });
 
         // Bootstrap state from navigation if provided (instant draft editing after create)
@@ -67,12 +67,16 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
 
         this.sub = combineLatest([
             this.route.paramMap,
-            this.envs.selectedEnvironmentId$
+            this.envs.selectedEnvironment$
         ]).pipe(
             tap(() => this.waitingForBackend = true),
-            switchMap(([params, envId]) => {
+            switchMap(([params, env]) => {
+                const runningNumberStr = params.get('runningNumber');
+                if (runningNumberStr) {
+                    return this.api.getFeatureByRunningNumber(parseInt(runningNumberStr), env?.id);
+                }
                 const id = params.get('id')!;
-                return this.api.getFeatureById(id, envId);
+                return this.api.getFeatureById(id, env?.id);
             })
         ).subscribe({
             next: (f) => {
@@ -90,7 +94,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                     this.showFeatureSuggestions = false;
                     return of({ content: [] });
                 }
-                return this.api.getAllFeatures(query,  this.environmentId || undefined).pipe(
+                return this.api.getAllFeatures(query,  this.environment?.id).pipe(
                     tap(() => this.isSearching = false)
                 );
             })
@@ -256,7 +260,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
             name: draft.name,
             description: draft.description,
             tags: draft.tags,
-            environmentId: this.environmentId || undefined,
+            environmentId: this.environment?.id,
             enabled: draft.enabled,
             flags: draft.flags,
             metadata: draft.metadata,

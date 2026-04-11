@@ -19,7 +19,7 @@ class FeatureEnvironment(
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id", nullable = false)
-    val environment: Environment,
+    val environment: EnvironmentEntity,
 
     @Column(nullable = false)
     var enabled: Boolean = false,

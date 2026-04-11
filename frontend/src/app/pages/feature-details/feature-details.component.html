@@ -1,4 +1,4 @@
-<div *ngIf="!environmentId">
+<div *ngIf="!environment">
     <section class="card flex-col gap-lg missing-environment">
         Please select an environment to view environment specific settings.
     </section>
@@ -156,7 +156,7 @@
   </section>
 
 
-    <ng-container *ngIf="environmentId">
+    <ng-container *ngIf="environment">
         <!-- Environment Settings -->
         <section class="card flex-col gap-lg">
             <div class="section-header flex items-center gap-sm">

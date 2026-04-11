@@ -14,46 +14,55 @@ import java.util.*
 @Transactional
 class TeamService(
     private val teamRepository: TeamRepository,
-    private val userService: UserService
+    private val userService: UserService,
+    private val departmentService: DepartmentService
 ) {
-    fun getAllTeams(pageable: Pageable): Page<Team> {
-        return teamRepository.findAll(pageable)
+    fun getAllTeams(departmentId: UUID, pageable: Pageable): Page<Team> {
+        return teamRepository.findAllByDepartmentId(departmentId, pageable)
     }
 
-    fun getTeamById(id: UUID): Team = teamRepository.findById(id)
-        .orElseThrow { ResourceNotFoundException("Team not found with id: $id") }
+    fun getTeamById(id: UUID, departmentId: UUID): Team {
+        val team = teamRepository.findById(id)
+            .orElseThrow { ResourceNotFoundException("Team not found with id: $id") }
+        if (team.department.id != departmentId) {
+            throw ResourceNotFoundException("Team not found in this department")
+        }
+        return team
+    }
 
-    fun createTeam(name: String, description: String?): Team {
-        val team = Team(name = name, description = description)
+    fun createTeam(departmentId: UUID, name: String, description: String?): Team {
+        val department = departmentService.findById(departmentId)
+        val team = Team(name = name, description = description, department = department)
         return teamRepository.save(team)
     }
 
-    fun updateTeam(id: UUID, name: String?, description: String?): Team {
-        val team = getTeamById(id)
+    fun updateTeam(id: UUID, departmentId: UUID, name: String?, description: String?): Team {
+        val team = getTeamById(id, departmentId)
         name?.let { team.name = it }
         description?.let { team.description = it }
         return teamRepository.save(team)
     }
 
-    fun deleteTeam(id: UUID) {
-        teamRepository.deleteById(id)
+    fun deleteTeam(id: UUID, departmentId: UUID) {
+        val team = getTeamById(id, departmentId)
+        teamRepository.delete(team)
     }
 
-    fun addMember(teamId: UUID, userId: UUID) {
-        val team = getTeamById(teamId)
-        val user = userService.findById(userId)
+    fun addMember(teamId: UUID, userId: UUID, departmentId: UUID) {
+        val team = getTeamById(teamId, departmentId)
+        val user = userService.findById(userId, departmentId)
         team.members.add(user)
         teamRepository.save(team)
     }
 
-    fun removeMember(teamId: UUID, userId: UUID) {
-        val team = getTeamById(teamId)
-        val user = userService.findById(userId)
+    fun removeMember(teamId: UUID, userId: UUID, departmentId: UUID) {
+        val team = getTeamById(teamId, departmentId)
+        val user = userService.findById(userId, departmentId)
         team.members.remove(user)
         teamRepository.save(team)
     }
 
-    fun searchTeams(query: String, pageable: Pageable): Page<Team> {
-        return teamRepository.findByNameContainingIgnoreCase(query, pageable)
+    fun searchTeams(query: String, departmentId: UUID, pageable: Pageable): Page<Team> {
+        return teamRepository.findByNameContainingIgnoreCaseAndDepartmentId(query, departmentId, pageable)
     }
 }

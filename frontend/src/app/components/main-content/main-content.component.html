@@ -16,7 +16,7 @@
       <div class="feature-row-content flex items-center justify-between">
         <!-- Column 1: Name -->
         <div class="col-name flex-1">
-          <span class="feature-name text-sm font-medium">{{ f.name }}</span>
+          <span class="feature-name text-sm font-medium">#{{ f.runningNumber }} {{ f.name }}</span>
           <div class="flex items-center gap-sm mt-xs">
             <div class="feature-tags flex gap-xs" *ngIf="f.tags?.length">
               <span class="tag-pill text-xs" *ngFor="let t of f.tags">{{ t }}</span>

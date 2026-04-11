@@ -7,10 +7,7 @@ import com.vivid.backend.service.FeatureService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/client/features/{environment}")
@@ -23,16 +20,18 @@ class ClientFeatureController(
     @Operation(summary = "Get all enabled features for runtime consumption in the given environment")
     fun getEnabledFeatures(
         @PathVariable environment: String,
+        @RequestParam(required = false) departmentId: java.util.UUID?,
     ): List<ClientFeatureDto> {
-        return featureService.getEnabledFeaturesForClient(environment).map { it.toDto() }
+        return featureService.getEnabledFeaturesForClient(environment, departmentId).map { it.toDto() }
     }
 
     @GetMapping("/{name}")
     fun getFeature(
         @PathVariable environment: String,
         @PathVariable name: String,
+        @RequestParam(required = false) departmentId: java.util.UUID?,
     ): ResponseEntity<ClientFeatureDto> {
-        return featureService.getFeatureByName(name = name, environment = environment)
+        return featureService.getFeatureByName(name = name, departmentId = departmentId, environment = environment)
             ?.toDto()
             ?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.notFound().build()

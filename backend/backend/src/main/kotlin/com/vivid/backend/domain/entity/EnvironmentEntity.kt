@@ -3,14 +3,18 @@ package com.vivid.backend.domain.entity
 import jakarta.persistence.*
 import java.util.*
 
-@Entity
+@Entity(name = "Environment")
 @Table(name = "environments")
-class Environment(
+class EnvironmentEntity(
     id: UUID = UUID.randomUUID(),
 
     @Column(nullable = false, unique = true)
     var name: String,
 
     @Column(columnDefinition = "TEXT")
-    var description: String? = null
+    var description: String? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    var department: Department
 ): BaseUuidEntity(id)

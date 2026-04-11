@@ -56,7 +56,7 @@ export class EnvironmentsComponent implements OnInit {
       this.addForm.reset();
       // Select and navigate to details for immediate follow-up editing
       const id = env.id!;
-      this.envs.select(id);
+      this.envs.select(env);
       this.router.navigate(['/environment', id]);
     });
   }

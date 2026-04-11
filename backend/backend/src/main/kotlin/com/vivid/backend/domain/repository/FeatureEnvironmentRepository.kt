@@ -1,6 +1,6 @@
 package com.vivid.backend.domain.repository
 
-import com.vivid.backend.domain.entity.Environment
+import com.vivid.backend.domain.entity.EnvironmentEntity
 import com.vivid.backend.domain.entity.FeatureEnvironment
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -8,11 +8,11 @@ import java.util.*
 
 interface FeatureEnvironmentRepository : JpaRepository<FeatureEnvironment, UUID> {
 
-    fun findByFeatureIdAndEnvironment(featureId: UUID, environment: Environment): FeatureEnvironment?
+    fun findByFeatureIdAndEnvironment(featureId: UUID, environment: EnvironmentEntity): FeatureEnvironment?
 
-    fun findAllByEnvironmentAndEnabledTrue(environment: Environment): List<FeatureEnvironment>
+    fun findAllByEnvironmentAndEnabledTrue(environment: EnvironmentEntity): List<FeatureEnvironment>
 
-    fun findAllByFeatureIdInAndEnvironment(featureIds: Collection<UUID>, environment: Environment): List<FeatureEnvironment>
+    fun findAllByFeatureIdInAndEnvironment(featureIds: Collection<UUID>, environment: EnvironmentEntity): List<FeatureEnvironment>
 
     @Query(
         """

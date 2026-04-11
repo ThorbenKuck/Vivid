@@ -10,8 +10,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = localStorage.getItem('vivid_token');
-    console.log('AuthInterceptor: Token', token);
-    
+
     if (token) {
       request = request.clone({
         setHeaders: {
@@ -24,7 +23,9 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 || error.status === 403) {
           console.warn(`${error.status} error detected, logging out`);
-          this.authService.logout();
+          setTimeout(() =>  {
+            this.authService.logout();
+          }, 3000);
         }
         return throwError(() => error);
       })

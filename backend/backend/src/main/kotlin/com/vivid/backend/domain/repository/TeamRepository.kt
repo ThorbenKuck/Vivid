@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
 interface TeamRepository : JpaRepository<Team, UUID> {
-    fun findByNameContainingIgnoreCase(name: String, pageable: Pageable): Page<Team>
+    fun findByNameContainingIgnoreCaseAndDepartmentId(name: String, departmentId: UUID, pageable: Pageable): Page<Team>
+    fun findAllByDepartmentId(departmentId: UUID, pageable: Pageable): Page<Team>
 }

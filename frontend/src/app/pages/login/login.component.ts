@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -12,9 +12,9 @@ import {LoadingIndicator} from "../../shared/components/loading-indicator/loadin
   styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit {
-  issuer: string | null = null;
-  loading = true;
-  error: string | null = null;
+  issuer = signal<string | null>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   constructor(
     private authService: AuthService,
@@ -38,25 +38,27 @@ export class LoginComponent implements OnInit {
   loadConfig() {
     this.authService.getAuthConfig().subscribe({
       next: (config) => {
-        this.issuer = config.issuer || null;
-        this.loading = false;
+        this.issuer.set(config.issuer || null);
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Failed to load auth config', err);
-        this.loading = false;
-        this.error = 'Failed to load authentication configuration.';
+        this.loading.set(false);
+        this.error.set('Failed to load authentication configuration.');
       }
     });
   }
 
   onLogin() {
-    if (this.issuer) {
-      this.authService.initiateLogin(this.issuer);
+    const issuer = this.issuer()
+    if (issuer) {
+      this.authService.initiateLogin(issuer);
     }
   }
 
   private handleCallback(code: string, state: string) {
-    this.loading = true;
+    console.log('Handling callback with code', code, 'and state', state);
+    this.loading.set(true);
     this.authService.getAuthConfig().subscribe(config => {
       if (config.issuer) {
         this.authService.handleCallback(code, state, config.issuer).subscribe({
@@ -65,14 +67,14 @@ export class LoginComponent implements OnInit {
           },
           error: (err) => {
             console.error('Login callback failed', err);
-            this.error = 'Login failed. Please try again.';
-            this.loading = false;
+            this.error.set('Login failed. Please try again.');
+            this.loading.set(false);
             this.router.navigate(['/']);
           }
         });
       } else {
-        this.error = 'Auth config missing during callback.';
-        this.loading = false;
+        this.error.set('Auth config missing during callback.');
+        this.loading.set(false);
       }
     });
   }

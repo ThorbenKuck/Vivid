@@ -4,13 +4,15 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
+import { ContextService } from './context.service';
+
 @Injectable({
   providedIn: 'root'
 })
 export class HttpService {
   private readonly baseUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private contextService: ContextService) {}
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders({
@@ -28,31 +30,34 @@ export class HttpService {
   get<T>(url: string, params?: any): Observable<T> {
     return this.http.get<T>(this.formatUrl(url), {
       headers: this.getHeaders(),
-      params: this.formatParams(params)
+      params: this.formatParams(params, url)
     }).pipe(
       catchError(this.handleError)
     );
   }
 
-  post<T>(url: string, body: any): Observable<T> {
+  post<T>(url: string, body: any, params?: any): Observable<T> {
     return this.http.post<T>(this.formatUrl(url), body, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      params: this.formatParams(params, url)
     }).pipe(
       catchError(this.handleError)
     );
   }
 
-  put<T>(url: string, body: any): Observable<T> {
+  put<T>(url: string, body: any, params?: any): Observable<T> {
     return this.http.put<T>(this.formatUrl(url), body, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      params: this.formatParams(params, url)
     }).pipe(
       catchError(this.handleError)
     );
   }
 
-  delete<T>(url: string): Observable<T> {
+  delete<T>(url: string, params?: any): Observable<T> {
     return this.http.delete<T>(this.formatUrl(url), {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      params: this.formatParams(params, url)
     }).pipe(
       catchError(this.handleError)
     );
@@ -66,8 +71,16 @@ export class HttpService {
     return `${this.baseUrl}${cleanUrl}`;
   }
 
-  private formatParams(params?: any): HttpParams {
+  private formatParams(params?: any, url?: string): HttpParams {
     let httpParams = new HttpParams();
+
+    if (url?.includes('/api/web/')) {
+      const deptId = this.contextService.getActiveDepartmentId();
+      if (deptId) {
+        httpParams = httpParams.set('departmentId', deptId);
+      }
+    }
+
     if (params) {
       Object.keys(params).forEach(key => {
         if (params[key] !== null && params[key] !== undefined) {
