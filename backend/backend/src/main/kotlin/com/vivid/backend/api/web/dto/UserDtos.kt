@@ -6,7 +6,7 @@ import java.util.*
 data class UserDto(
     val id: UUID,
     val username: String,
-    val email: String,
+    val email: String?,
     val displayRole: String?
 )
 
@@ -20,6 +20,6 @@ fun User.toDto(): UserDto = UserDto(
 data class UserSyncRequest(
     val keycloakId: String,
     val username: String,
-    val email: String,
+    val email: String?,
     val displayRole: String?
 )

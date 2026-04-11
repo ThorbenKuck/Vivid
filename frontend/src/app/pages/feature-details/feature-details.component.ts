@@ -13,11 +13,12 @@ import {FeatureStateService} from '../../services/feature-state.service';
 import {ChiplistComponent} from '../../shared/components/chiplist/chiplist.component';
 import {MetadataEditorComponent} from '../../shared/components/metadata-editor/metadata-editor.component';
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
+import {NoEnvironmentsWarningComponent} from "../../shared/components/no-environments-warning/no-environments-warning.component";
 
 @Component({
     selector: 'app-feature-details',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, ChiplistComponent, MetadataEditorComponent, LoadingIndicator],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, ChiplistComponent, MetadataEditorComponent, LoadingIndicator, NoEnvironmentsWarningComponent],
     templateUrl: './feature-details.component.html',
     styleUrls: ['./feature-details.component.css'],
     providers: [FeatureStateService]
@@ -36,7 +37,13 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     featureSearchQuery = '';
     teamSearchQuery = '';
     waitingForBackend: boolean = false;
-    environment: EnvironmentDto | null = null;
+    selectedEnvId: string | null = null;
+    environments$ = this.envs.environments$;
+    collapsedCards = {
+        details: true,
+        teams: true,
+        related: true
+    };
 
     feature$ = this.state.feature$;
     isDirty$ = this.state.isDirty$;
@@ -54,34 +61,33 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.api.getAllTags().subscribe(tags => this.tagsOptions = tags);
 
-        this.envs.selectedEnvironment$.subscribe(v => {
-            this.environment = v;
-        });
-
         // Bootstrap state from navigation if provided (instant draft editing after create)
         const navFeature = (history.state && (history.state as any).feature) as FeatureDto | undefined;
         if (navFeature) {
             console.debug('Bootstrap state from navigation', navFeature);
             this.state.load(navFeature);
+            if (navFeature.environments?.length > 0) {
+                this.selectedEnvId = navFeature.environments[0].environmentId;
+            }
         }
 
-        this.sub = combineLatest([
-            this.route.paramMap,
-            this.envs.selectedEnvironment$
-        ]).pipe(
+        this.sub = this.route.paramMap.pipe(
             tap(() => this.waitingForBackend = true),
-            switchMap(([params, env]) => {
+            switchMap(params => {
                 const runningNumberStr = params.get('runningNumber');
                 if (runningNumberStr) {
-                    return this.api.getFeatureByRunningNumber(parseInt(runningNumberStr), env?.id);
+                    return this.api.getFeatureByRunningNumber(parseInt(runningNumberStr));
                 }
                 const id = params.get('id')!;
-                return this.api.getFeatureById(id, env?.id);
+                return this.api.getFeatureById(id);
             })
         ).subscribe({
             next: (f) => {
                 this.waitingForBackend = false;
-                this.state.load(f)
+                this.state.load(f);
+                if (f.environments?.length > 0 && !this.selectedEnvId) {
+                    this.selectedEnvId = f.environments[0].environmentId;
+                }
             }
         });
 
@@ -94,7 +100,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                     this.showFeatureSuggestions = false;
                     return of({ content: [] });
                 }
-                return this.api.getAllFeatures(query,  this.environment?.id).pipe(
+                return this.api.getAllFeatures(query).pipe(
                     tap(() => this.isSearching = false)
                 );
             })
@@ -184,9 +190,8 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                     name: currentDraft.name,
                     description: currentDraft.description,
                     tags: currentDraft.tags,
-                    enabled: currentDraft.enabled,
-                    flags: currentDraft.flags,
-                    metadata: currentDraft.metadata
+                    environments: currentDraft.environments,
+                    assignedTeams: currentDraft.assignedTeams
                 });
             }
             this.featureSearchQuery = '';
@@ -206,9 +211,8 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                     name: currentDraft.name,
                     description: currentDraft.description,
                     tags: currentDraft.tags,
-                    enabled: currentDraft.enabled,
-                    flags: currentDraft.flags,
-                    metadata: currentDraft.metadata
+                    environments: currentDraft.environments,
+                    assignedTeams: currentDraft.assignedTeams
                 });
             }
         });
@@ -221,29 +225,53 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         this.state.updateDraft({[field]: newValue});
     }
 
-    updateMetadata(metadata: { [key: string]: MetadataValue }) {
-        this.state.updateDraft({metadata});
+    updateMetadata(envId: string, metadata: { [key: string]: MetadataValue }) {
+        this.state.updateEnvState(envId, {metadata});
     }
 
-    updateFlags(flags: { [key: string]: boolean }) {
-        this.state.updateDraft({flags});
+    updateFlags(envId: string, flags: { [key: string]: boolean }) {
+        this.state.updateEnvState(envId, {flags});
     }
 
-    toggleFlag(flags: { [key: string]: boolean }, key: string, value: boolean) {
+    toggleFlag(envId: string, flags: { [key: string]: boolean }, key: string, value: boolean) {
         const updatedFlags = { ...flags, [key]: value };
-        this.updateFlags(updatedFlags);
+        this.updateFlags(envId, updatedFlags);
     }
 
-    addFlag(flags: { [key: string]: boolean }, key: string) {
+    addFlag(envId: string, flags: { [key: string]: boolean }, key: string) {
         if (!key || flags[key] !== undefined) return;
         const updatedFlags = { ...flags, [key]: false };
-        this.updateFlags(updatedFlags);
+        this.updateFlags(envId, updatedFlags);
     }
 
-    removeFlag(flags: { [key: string]: boolean }, key: string) {
+    removeFlag(envId: string, flags: { [key: string]: boolean }, key: string) {
         const updatedFlags = { ...flags };
         delete updatedFlags[key];
-        this.updateFlags(updatedFlags);
+        this.updateFlags(envId, updatedFlags);
+    }
+
+    updateEnvField(envId: string, field: 'enabled', value: any) {
+        this.state.updateEnvState(envId, {[field]: value});
+    }
+
+    selectEnv(envId: string) {
+        this.selectedEnvId = envId;
+    }
+
+    toggleCard(card: keyof typeof this.collapsedCards) {
+        this.collapsedCards[card] = !this.collapsedCards[card];
+    }
+
+    copyFrom(targetEnvId: string, sourceEnvId: string) {
+        const draft = this.state.getDraft();
+        if (!draft) return;
+        const sourceEnv = draft.environments.find(e => e.environmentId === sourceEnvId);
+        if (!sourceEnv) return;
+        this.state.updateEnvState(targetEnvId, {
+            enabled: sourceEnv.enabled,
+            flags: JSON.parse(JSON.stringify(sourceEnv.flags)),
+            metadata: JSON.parse(JSON.stringify(sourceEnv.metadata))
+        });
     }
 
     save(): void {
@@ -253,17 +281,20 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         const id = draft.id;
 
         this.waitingForBackend = true;
-        this.state.load(draft);
+
+        const environments: FeatureEnvironmentUpdateRequest[] = draft.environments.map(env => ({
+            environmentId: env.environmentId,
+            enabled: env.enabled,
+            flags: env.flags,
+            metadata: env.metadata
+        }));
 
         // 1. Der API Call
         const update$ = this.api.updateFeature(id, {
             name: draft.name,
             description: draft.description,
             tags: draft.tags,
-            environmentId: this.environment?.id,
-            enabled: draft.enabled,
-            flags: draft.flags,
-            metadata: draft.metadata,
+            environments: environments,
             assignedTeamIds: draft.assignedTeams.map(t => t.id)
         });
 

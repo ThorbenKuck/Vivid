@@ -18,22 +18,17 @@ export class WebFeatureManagementService {
 
   constructor(private http: HttpService) {}
 
-  getAllFeatures(q = '', environmentId: string | null = null, page = 0, size = 20): Observable<Page<FeatureDto>> {
+  getAllFeatures(q = '', page = 0, size = 20): Observable<Page<FeatureDto>> {
     const params: any = { q, page, size };
-    if (environmentId) params.environmentId = environmentId;
     return this.http.get<Page<FeatureDto>>(this.baseUrl, params);
   }
 
-  getFeatureById(id: string, environmentId: string | null = null): Observable<FeatureDto> {
-    const params: any = {};
-    if (environmentId) params.environmentId = environmentId;
-    return this.http.get<FeatureDto>(`${this.baseUrl}/${id}`, params);
+  getFeatureById(id: string): Observable<FeatureDto> {
+    return this.http.get<FeatureDto>(`${this.baseUrl}/${id}`);
   }
 
-  getFeatureByRunningNumber(runningNumber: number, environmentId: string | null = null): Observable<FeatureDto> {
-    const params: any = {};
-    if (environmentId) params.environmentId = environmentId;
-    return this.http.get<FeatureDto>(`${this.baseUrl}/number/${runningNumber}`, params);
+  getFeatureByRunningNumber(runningNumber: number): Observable<FeatureDto> {
+    return this.http.get<FeatureDto>(`${this.baseUrl}/number/${runningNumber}`);
   }
 
   upsertEnvironmentState(id: string, environmentId: string, request: FeatureEnvironmentUpdateRequest): Observable<FeatureDto> {

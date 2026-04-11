@@ -11,6 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormInputComponent } from '../../shared/components/form-input/form-input.component';
 import { GenericTableComponent } from '../../shared/components/generic-table/generic-table.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { NoEnvironmentsWarningComponent } from '../../shared/components/no-environments-warning/no-environments-warning.component';
 
 @Component({
   selector: 'app-main-content',
@@ -22,13 +23,15 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
     TranslateModule, 
     FormInputComponent, 
     GenericTableComponent, 
-    PaginationComponent
+    PaginationComponent,
+    NoEnvironmentsWarningComponent
   ],
   templateUrl: './main-content.component.html',
   styleUrls: ['./main-content.component.css']
 })
 export class MainContentComponent implements OnInit {
   featuresPage$!: Observable<Page<FeatureDto>>;
+  environments$ = this.envs.environments$;
   q = '';
   page = 0;
   size = 10;
@@ -49,18 +52,19 @@ export class MainContentComponent implements OnInit {
 
   ngOnInit(): void {
     this.reload();
-    this.envs.selectedEnvironment$.subscribe(() => this.reload());
   }
 
   reload() {
-    let envId: string | null = null;
-    this.envs.selectedEnvironment$.subscribe(v => envId = v?.id || null).unsubscribe();
-    this.featuresPage$ = this.api.getAllFeatures(this.q, envId, this.page, this.size);
+    this.featuresPage$ = this.api.getAllFeatures(this.q, this.page, this.size);
   }
 
   search() { this.page = 0; this.reload(); }
   next() { this.page++; this.reload(); }
   prev() { if (this.page>0) { this.page--; this.reload(); } }
+
+  getEnv(f: FeatureDto, envId: string) {
+    return f.environments.find(env => env.environmentId === envId);
+  }
 
   openDetails(f: FeatureDto) {
     this.router.navigate(['/feature', f.runningNumber]);

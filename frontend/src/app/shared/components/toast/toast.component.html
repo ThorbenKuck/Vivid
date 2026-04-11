@@ -1,0 +1,15 @@
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class]="toast.type" (click)="remove(toast.id)">
+      <span class="material-symbols-rounded">
+        @if (toast.type === 'error') { error }
+        @else if (toast.type === 'success') { check_circle }
+        @else { info }
+      </span>
+      <span class="message">{{ toast.message }}</span>
+      <button class="close-btn" type="button">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+  }
+</div>

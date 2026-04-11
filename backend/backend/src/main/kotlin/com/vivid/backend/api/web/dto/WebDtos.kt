@@ -14,32 +14,50 @@ data class FeatureDto(
     val runningNumber: Long,
     val name: String,
     val description: String?,
-    val enabled: Boolean,
-    val flags: Map<String, Boolean>,
-    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue>,
+    val environments: List<FeatureEnvironmentDto>,
     val tags: List<String>,
     val outgoingLinks: List<FeatureLinkDto>,
     val assignedTeams: List<TeamDto>
 )
 
-fun Feature.toDto(fe: FeatureEnvironment? = null): FeatureDto = FeatureDto(
-    id = id,
-    runningNumber = runningNumber,
-    name = name,
-    description = description,
-    enabled = fe?.enabled ?: false,
-    flags = fe?.flags ?: emptyMap(),
-    metadata = fe?.metadata ?: emptyMap(),
-    tags = tags.toList(),
-    outgoingLinks = outgoingLinks.map { it.toDto() },
-    assignedTeams = assignedTeams.map { it.toDto() }
+data class FeatureEnvironmentDto(
+    val environmentId: UUID,
+    val environmentName: String,
+    val enabled: Boolean,
+    val flags: Map<String, Boolean>,
+    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue>
 )
 
-fun Feature.toDto(environment: EnvironmentEntity?): FeatureDto {
-    return toDto(environment?.let { findFeatureEnvironment(it) })
-}
+fun FeatureEnvironment.toDto(): FeatureEnvironmentDto = FeatureEnvironmentDto(
+    environmentId = environment.id!!,
+    environmentName = environment.name,
+    enabled = enabled,
+    flags = flags.toMap(),
+    metadata = metadata.toMap()
+)
 
-fun Pair<Feature, FeatureEnvironment?>.toDto(): FeatureDto = first.toDto(second)
+fun Feature.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
+    val envDtos = allEnvironments.map { env ->
+        val fe = findFeatureEnvironment(env)
+        FeatureEnvironmentDto(
+            environmentId = env.id!!,
+            environmentName = env.name,
+            enabled = fe?.enabled ?: false,
+            flags = fe?.flags ?: emptyMap(),
+            metadata = fe?.metadata ?: emptyMap()
+        )
+    }
+    return FeatureDto(
+        id = id,
+        runningNumber = runningNumber,
+        name = name,
+        description = description,
+        environments = envDtos,
+        tags = tags.toList(),
+        outgoingLinks = outgoingLinks.map { it.toDto() },
+        assignedTeams = assignedTeams.map { it.toDto() }
+    )
+}
 
 data class FeatureLinkDto(
     val id: UUID?,
@@ -59,14 +77,12 @@ data class FeatureUpdateRequest(
     val name: String? = null,
     val description: String? = null,
     val tags: List<String>? = null,
-    val environmentId: UUID? = null,
-    val enabled: Boolean? = null,
-    val flags: Map<String, Boolean>? = null,
-    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue>? = null,
+    val environments: List<FeatureEnvironmentUpdateRequest>? = null,
     val assignedTeamIds: List<UUID>? = null
 )
 
 data class FeatureEnvironmentUpdateRequest(
+    val environmentId: UUID,
     val enabled: Boolean = false,
     val flags: Map<String, Boolean> = emptyMap(),
     val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue> = emptyMap()

@@ -20,6 +20,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8989/realms/vivid
+  flyway:
+    baseline-version: 0
+    baseline-description: Setup initial database
+    baseline-on-migrate: true
 
 server:
   port: 8080

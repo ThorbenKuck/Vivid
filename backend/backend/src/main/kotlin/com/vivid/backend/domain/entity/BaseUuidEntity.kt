@@ -7,7 +7,7 @@ import java.util.*
 @MappedSuperclass
 abstract class BaseUuidEntity(
     @Id
-    val id: UUID = UUID.randomUUID()
+    var id: UUID = UUID.randomUUID()
 ) {
 
     override fun equals(other: Any?): Boolean {

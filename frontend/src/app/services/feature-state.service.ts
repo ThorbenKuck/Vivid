@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, combineLatest } from 'rxjs';
-import { FeatureDto } from '../dtos';
+import { FeatureDto, FeatureEnvironmentDto } from '../dtos';
 
 @Injectable({
   providedIn: 'root'
@@ -34,20 +34,13 @@ export class FeatureStateService {
     }
   }
 
-  updateMetadata(key: string, value: any) {
+  updateEnvState(envId: string, update: Partial<FeatureEnvironmentDto>) {
     const current = this.draftState$.value;
     if (current) {
-      const metadata = { ...current.metadata, [key]: value };
-      this.draftState$.next({ ...current, metadata });
-    }
-  }
-
-  removeMetadata(key: string) {
-    const current = this.draftState$.value;
-    if (current) {
-      const metadata = { ...current.metadata };
-      delete metadata[key];
-      this.draftState$.next({ ...current, metadata });
+      const environments = current.environments.map(env => 
+        env.environmentId === envId ? { ...env, ...update } : env
+      );
+      this.draftState$.next({ ...current, environments });
     }
   }
 
@@ -75,13 +68,54 @@ export class FeatureStateService {
     );
   }
 
-  isMetadataKeyDirty(key: string): Observable<boolean> {
+  isEnvFieldDirty(envId: string, fieldName: keyof FeatureEnvironmentDto): Observable<boolean> {
     return combineLatest([this.originalState$, this.draftState$]).pipe(
       map(([original, draft]) => {
         if (!original || !draft) return false;
-        const origVal = original.metadata[key];
-        const draftVal = draft.metadata[key];
+        const origEnv = original.environments.find(e => e.environmentId === envId);
+        const draftEnv = draft.environments.find(e => e.environmentId === envId);
+        if (!origEnv || !draftEnv) return false;
+        return JSON.stringify(origEnv[fieldName]) !== JSON.stringify(draftEnv[fieldName]);
+      })
+    );
+  }
+
+  isEnvMetadataKeyDirty(envId: string, key: string): Observable<boolean> {
+    return combineLatest([this.originalState$, this.draftState$]).pipe(
+      map(([original, draft]) => {
+        if (!original || !draft) return false;
+        const origEnv = original.environments.find(e => e.environmentId === envId);
+        const draftEnv = draft.environments.find(e => e.environmentId === envId);
+        if (!origEnv || !draftEnv) return false;
+        const origVal = origEnv.metadata[key];
+        const draftVal = draftEnv.metadata[key];
         return JSON.stringify(origVal) !== JSON.stringify(draftVal);
+      })
+    );
+  }
+
+  isEnvFlagDirty(envId: string, key: string): Observable<boolean> {
+    return combineLatest([this.originalState$, this.draftState$]).pipe(
+      map(([original, draft]) => {
+        if (!original || !draft) return false;
+        const origEnv = original.environments.find(e => e.environmentId === envId);
+        const draftEnv = draft.environments.find(e => e.environmentId === envId);
+        if (!origEnv || !draftEnv) return false;
+        const origVal = origEnv.flags[key];
+        const draftVal = draftEnv.flags[key];
+        return origVal !== draftVal;
+      })
+    );
+  }
+
+  isEnvDirty(envId: string): Observable<boolean> {
+    return combineLatest([this.originalState$, this.draftState$]).pipe(
+      map(([original, draft]) => {
+        if (!original || !draft) return false;
+        const origEnv = original.environments.find(e => e.environmentId === envId);
+        const draftEnv = draft.environments.find(e => e.environmentId === envId);
+        if (!origEnv || !draftEnv) return false;
+        return JSON.stringify(origEnv) !== JSON.stringify(draftEnv);
       })
     );
   }

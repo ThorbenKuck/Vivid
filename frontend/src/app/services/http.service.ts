@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 import { ContextService } from './context.service';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,11 @@ import { ContextService } from './context.service';
 export class HttpService {
   private readonly baseUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient, private contextService: ContextService) {}
+  constructor(
+    private http: HttpClient, 
+    private contextService: ContextService,
+    private toastService: ToastService
+  ) {}
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders({
@@ -91,9 +96,16 @@ export class HttpService {
     return httpParams;
   }
 
-  private handleError(error: HttpErrorResponse) {
+  private handleError = (error: HttpErrorResponse) => {
     console.error('[HttpService] Error occurred:', error);
-    // You can add more global error handling here (e.g., Toast notifications)
+    
+    if (error.status === 403) {
+      this.toastService.error("You don't have permission to access this feature.");
+    } else {
+      const message = error.error?.message || error.message || 'An unexpected error occurred';
+      this.toastService.error(`Error ${error.status}: ${message}`);
+    }
+    
     return throwError(() => error);
-  }
+  };
 }

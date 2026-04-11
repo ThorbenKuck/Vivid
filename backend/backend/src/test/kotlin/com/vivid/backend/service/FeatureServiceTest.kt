@@ -63,10 +63,10 @@ class FeatureServiceTest {
         
         whenever(featureRepository.findById(id)).thenReturn(Optional.of(feature))
         
-        val result = featureService.getFeatureById(id, departmentId, null)
+        val result = featureService.getFeatureById(id, departmentId)
         
-        assertEquals(id, result.first.id)
-        assertEquals("test-feature", result.first.name)
+        assertEquals(id, result.id)
+        assertEquals("test-feature", result.name)
     }
 
     @Test
@@ -75,7 +75,7 @@ class FeatureServiceTest {
         whenever(featureRepository.findById(id)).thenReturn(Optional.empty())
         
         assertThrows(ResourceNotFoundException::class.java) {
-            featureService.getFeatureById(id, departmentId, null)
+            featureService.getFeatureById(id, departmentId)
         }
     }
 
@@ -90,6 +90,6 @@ class FeatureServiceTest {
         
         val result = featureService.updateFeature(id, departmentId, updateRequest)
         
-        assertEquals("new-name", result.first.name)
+        assertEquals("new-name", result.name)
     }
 }

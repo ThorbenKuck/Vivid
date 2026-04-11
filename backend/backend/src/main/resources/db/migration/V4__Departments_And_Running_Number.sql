@@ -22,6 +22,7 @@ ALTER TABLE environments ALTER COLUMN department_id SET NOT NULL;
 ALTER TABLE vivid_users ALTER COLUMN department_id SET NOT NULL;
 
 -- Running number for features
+DROP SEQUENCE IF EXISTS feature_running_number_seq;
 CREATE SEQUENCE feature_running_number_seq START 1;
 ALTER TABLE features ADD COLUMN running_number BIGINT;
 

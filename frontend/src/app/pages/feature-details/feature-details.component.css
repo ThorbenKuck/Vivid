@@ -271,3 +271,51 @@ textarea {
     padding: 0 var(--spacing-md);
   }
 }
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-btn.active {
+  color: var(--accent-mint);
+  border-bottom-color: var(--accent-mint);
+}
+
+.status-dot-sm {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dirty-indicator-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--accent-mint);
+  margin-left: 2px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition {
+  transition: var(--transition);
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.pb-xs {
+  padding-bottom: var(--spacing-xs);
+}
+
+.env-tabs-wrapper {
+  margin-top: var(--spacing-lg);
+}

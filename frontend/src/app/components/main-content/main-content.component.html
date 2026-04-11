@@ -11,34 +11,46 @@
 </div>
 
 <div class="features-list-wrapper" *ngIf="featuresPage$ | async as page; else loading">
-  <app-generic-table [items]="page.content" [expandable]="true">
+  <div class="table-header flex items-center px-md py-sm mb-xs" *ngIf="(environments$ | async)?.length">
+    <div class="col-number text-xs font-bold text-muted uppercase" style="width: 40px;">#</div>
+    <div class="col-name flex-1 text-xs font-bold text-muted uppercase ml-sm">Name</div>
+    <div class="col-envs flex gap-md px-md" *ngIf="environments$ | async as envs">
+      <div *ngFor="let e of envs" class="col-env text-center text-xs font-bold text-muted uppercase" style="width: 32px;" [title]="e.name">
+        {{ e.name.length > 4 ? e.name.substring(0, 3) + '.' : e.name }}
+      </div>
+    </div>
+    <div class="col-actions text-xs font-bold text-muted uppercase text-right" style="width: 120px;">Actions</div>
+  </div>
+
+  <app-no-environments-warning *ngIf="(environments$ | async) && (environments$ | async)?.length === 0"></app-no-environments-warning>
+
+  <app-generic-table *ngIf="(environments$ | async)?.length" [items]="page.content" [expandable]="true">
     <ng-template #rowTemplate let-f>
-      <div class="feature-row-content flex items-center justify-between">
-        <!-- Column 1: Name -->
-        <div class="col-name flex-1">
-          <span class="feature-name text-sm font-medium">#{{ f.runningNumber }} {{ f.name }}</span>
+      <div class="feature-row-content flex items-center">
+        <!-- Column 1: Number -->
+        <div class="col-number text-sm text-muted" style="width: 40px;">{{ f.runningNumber }}</div>
+
+        <!-- Column 2: Name -->
+        <div class="col-name flex-1 ml-sm">
+          <span class="feature-name text-sm font-medium">{{ f.name }}</span>
           <div class="flex items-center gap-sm mt-xs">
             <div class="feature-tags flex gap-xs" *ngIf="f.tags?.length">
               <span class="tag-pill text-xs" *ngFor="let t of f.tags">{{ t }}</span>
             </div>
-            <div class="feature-teams flex gap-xs" *ngIf="f.assignedTeams?.length">
-              <div *ngFor="let team of f.assignedTeams; trackBy: trackByTeamId" 
-                   class="team-dot shadow-slim" 
-                   [title]="team.name">
-                {{ team.name.substring(0, 1).toUpperCase() }}
-              </div>
-            </div>
           </div>
         </div>
 
-        <!-- Column 2: Active Status -->
-        <div class="col-status flex items-center justify-center" style="width: 100px;">
-          <span class="material-symbols-rounded" [style.color]="f.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
-            {{ f.enabled ? 'check_circle' : 'radio_button_unchecked' }}
-          </span>
+        <!-- Column 3: Environments -->
+        <div class="col-envs flex gap-md px-md" *ngIf="environments$ | async as envs">
+          <div *ngFor="let e of envs" class="col-env flex justify-center" style="width: 32px;">
+            <span class="status-dot shadow-slim" 
+                  [style.background-color]="getEnv(f, e.id)?.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'"
+                  [title]="e.name + ': ' + (getEnv(f, e.id)?.enabled ? 'Enabled' : 'Disabled')">
+            </span>
+          </div>
         </div>
         
-        <!-- Column 3: Open Action -->
+        <!-- Column 4: Open Action -->
         <div class="col-actions flex items-center justify-end" style="width: 120px;">
           <button class="btn-slim" (click)="$event.stopPropagation(); openDetails(f)">
             <span>Open</span>
@@ -67,9 +79,11 @@
   </app-pagination>
 </div>
 
-<button class="fab" (click)="toggleAdd()" [title]="'common.add' ">
-  <span class="material-symbols-rounded">add</span>
-</button>
+@if((environments$ | async)?.length !== 0) {
+    <button class="fab" (click)="toggleAdd()" [title]="'common.add'">
+        <span class="material-symbols-rounded">add</span>
+    </button>
+}
 
 <div class="modal-overlay" *ngIf="showAdd" (click)="toggleAdd()">
   <div class="modal-card" (click)="$event.stopPropagation()">

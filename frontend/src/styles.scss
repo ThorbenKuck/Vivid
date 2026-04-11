@@ -178,7 +178,7 @@ button:hover:not(:disabled) {
   border-color: var(--accent-primary);
 }
 
-button.primary {
+button.primary, .btn.primary {
   background: var(--accent-primary);
   color: #1E293B !important;
   border: none;

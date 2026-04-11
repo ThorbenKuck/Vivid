@@ -8,11 +8,12 @@ import { LoadingService } from './services/loading.service';
 import { delay, filter } from 'rxjs/operators';
 import { LoadingIndicator } from "./shared/components/loading-indicator/loading-indicator";
 import { map, Observable, shareReplay } from "rxjs";
+import { ToastComponent } from './shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent, RouterOutlet, LoadingIndicator],
+  imports: [CommonModule, HeaderComponent, SidebarComponent, RouterOutlet, LoadingIndicator, ToastComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

@@ -1,11 +1,14 @@
 package com.vivid.backend.api
 
 import com.vivid.backend.service.exception.ResourceNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.LocalDateTime
+
+private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -22,6 +25,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handleGeneralException(ex: Exception): ResponseEntity<ErrorResponse> {
+        logger.error("Unexpected error", ex)
         val error = ErrorResponse(
             status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
             message = "An unexpected error occurred",

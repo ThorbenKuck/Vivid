@@ -20,40 +20,34 @@ class WebFeatureController(
 ) {
 
     @GetMapping
-    @Operation(summary = "Get all features with optional search and environment context")
+    @Operation(summary = "Get all features with optional search")
     fun getAllFeatures(
         @RequestParam departmentId: UUID,
         @RequestParam(required = false) q: String?,
-        @RequestParam(required = false) environmentId: String?,
         pageable: Pageable
     ): Page<FeatureDto> {
-        val environment by lazy { environmentId?.let { environmentService.findEnvironment(it, departmentId) } }
-        try {
-            return featureService.getAllFeatures(departmentId, q, pageable).map { it.toDto(environment) }
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            throw t
-        }
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.getAllFeatures(departmentId, q, pageable).map { it.toDto(allEnvironments) }
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get feature by ID with optional environment context")
+    @Operation(summary = "Get feature by ID")
     fun getFeatureById(
         @PathVariable id: UUID,
-        @RequestParam departmentId: UUID,
-        @RequestParam(required = false) environmentId: String?
+        @RequestParam departmentId: UUID
     ): FeatureDto {
-        return featureService.getFeatureById(id, departmentId, environmentId).toDto()
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.getFeatureById(id, departmentId).toDto(allEnvironments)
     }
 
     @GetMapping("/number/{runningNumber}")
-    @Operation(summary = "Get feature by running number with optional environment context")
+    @Operation(summary = "Get feature by running number")
     fun getFeatureByRunningNumber(
         @PathVariable runningNumber: Long,
-        @RequestParam departmentId: UUID,
-        @RequestParam(required = false) environmentId: String?
+        @RequestParam departmentId: UUID
     ): FeatureDto {
-        return featureService.getFeatureByRunningNumber(runningNumber, departmentId, environmentId).toDto()
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.getFeatureByRunningNumber(runningNumber, departmentId).toDto(allEnvironments)
     }
 
     @PostMapping
@@ -63,7 +57,8 @@ class WebFeatureController(
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureCreateRequest
     ): FeatureDto {
-        return featureService.createFeature(departmentId, request).toDto()
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.createFeature(departmentId, request).toDto(allEnvironments)
     }
 
     @PutMapping("/{id}")
@@ -73,7 +68,8 @@ class WebFeatureController(
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureUpdateRequest
     ): FeatureDto {
-        return featureService.updateFeature(id, departmentId, request).toDto()
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.updateFeature(id, departmentId, request).toDto(allEnvironments)
     }
 
     @PutMapping("/{id}/environments/{environment}")
@@ -84,7 +80,8 @@ class WebFeatureController(
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureEnvironmentUpdateRequest
     ): FeatureDto {
-        return featureService.upsertFeatureEnvironment(id, departmentId, environment, request).toDto()
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.upsertFeatureEnvironment(id, departmentId, environment, request).toDto(allEnvironments)
     }
 
     @GetMapping("/tags")
@@ -109,7 +106,8 @@ class WebFeatureController(
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureLinkCreateRequest
     ): FeatureDto {
-        return featureService.addFeatureLink(id, departmentId, request).toDto()
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.addFeatureLink(id, departmentId, request).toDto(allEnvironments)
     }
 
     @DeleteMapping("/{id}/links/{linkId}")
@@ -119,6 +117,7 @@ class WebFeatureController(
         @PathVariable linkId: UUID,
         @RequestParam departmentId: UUID
     ): FeatureDto {
-        return featureService.removeFeatureLink(id, departmentId, linkId).toDto()
+        val allEnvironments = environmentService.getAll(departmentId)
+        return featureService.removeFeatureLink(id, departmentId, linkId).toDto(allEnvironments)
     }
 }

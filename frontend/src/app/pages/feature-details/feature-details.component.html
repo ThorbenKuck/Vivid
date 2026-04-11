@@ -1,9 +1,3 @@
-<div *ngIf="!environment">
-    <section class="card flex-col gap-lg missing-environment">
-        Please select an environment to view environment specific settings.
-    </section>
-</div>
-
 <div class="loading-overlay" [class.hidden]="!waitingForBackend">
     <app-loading-indicator></app-loading-indicator>
 </div>
@@ -16,33 +10,17 @@
 </div>
 
 <div class="details-container flex-col gap-lg" *ngIf="feature$ | async as f; else loading">
-  <!-- Master Switch -->
-  <div class="master-switch-card card flex items-center justify-between p-md" [class.enabled]="f.enabled">
-    <div class="flex items-center gap-md">
-      <span class="material-symbols-rounded text-xl" [style.color]="f.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
-        {{ f.enabled ? 'toggle_on' : 'toggle_off' }}
-      </span>
-      <div class="flex-col">
-        <span class="text-sm font-semibold">Feature Status</span>
-        <span class="text-xs text-muted">{{ f.enabled ? 'This feature is active in the current environment.' : 'This feature is disabled.' }}</span>
-      </div>
-    </div>
-    <div class="flex items-center gap-sm">
-      <span *ngIf="state.isFieldDirty('enabled') | async" class="text-xs text-accent-mint italic">Changed</span>
-      <button class="btn-toggle" [class.active]="f.enabled" (click)="updateField('enabled', !f.enabled)">
-        {{ f.enabled ? 'Enabled' : 'Disabled' }}
-      </button>
-    </div>
-  </div>
-
   <!-- General Info -->
   <section class="card flex-col gap-lg">
-    <div class="section-header flex items-center gap-sm">
-      <span class="material-symbols-rounded" style="color: var(--accent-mint)">info</span>
-      <h2 class="section-title text-sm">{{ 'features.details.info'  }}</h2>
+    <div class="section-header flex items-center justify-between cursor-pointer" (click)="toggleCard('details')">
+      <div class="flex items-center gap-sm">
+        <span class="material-symbols-rounded" style="color: var(--accent-mint)">info</span>
+        <h2 class="section-title text-sm">{{ 'features.details.info'  }}</h2>
+      </div>
+      <span class="material-symbols-rounded transition" [style.transform]="collapsedCards.details ? 'none' : 'rotate(180deg)'">expand_more</span>
     </div>
 
-    <div class="flex-col gap-md">
+    <div class="flex-col gap-md" *ngIf="!collapsedCards.details">
       <div class="form-group" [class.dirty]="state.isFieldDirty('name') | async">
         <label class="text-xs text-muted flex items-center gap-xs">
           {{ 'common.name'  }}
@@ -71,12 +49,15 @@
 
   <!-- Teams -->
   <section class="card flex-col gap-lg">
-    <div class="section-header flex items-center gap-sm">
-      <span class="material-symbols-rounded" style="color: var(--accent-lavender)">group</span>
-      <h2 class="section-title text-sm">Teams</h2>
+    <div class="section-header flex items-center justify-between cursor-pointer" (click)="toggleCard('teams')">
+      <div class="flex items-center gap-sm">
+        <span class="material-symbols-rounded" style="color: var(--accent-lavender)">group</span>
+        <h2 class="section-title text-sm">Teams</h2>
+      </div>
+      <span class="material-symbols-rounded transition" [style.transform]="collapsedCards.teams ? 'none' : 'rotate(180deg)'">expand_more</span>
     </div>
 
-    <div class="flex-col gap-md">
+    <div class="flex-col gap-md" *ngIf="!collapsedCards.teams">
       <div class="search-container relative">
         <div class="flex items-center gap-sm relative">
           <input 
@@ -114,12 +95,15 @@
 
   <!-- Related Features -->
   <section class="card flex-col gap-lg">
-    <div class="section-header flex items-center gap-sm">
-      <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span>
-      <h2 class="section-title text-sm">Related Features</h2>
+    <div class="section-header flex items-center justify-between cursor-pointer" (click)="toggleCard('related')">
+      <div class="flex items-center gap-sm">
+        <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span>
+        <h2 class="section-title text-sm">Related Features</h2>
+      </div>
+      <span class="material-symbols-rounded transition" [style.transform]="collapsedCards.related ? 'none' : 'rotate(180deg)'">expand_more</span>
     </div>
 
-    <div class="flex-col gap-md">
+    <div class="flex-col gap-md" *ngIf="!collapsedCards.related">
       <div class="search-container relative">
         <div class="flex items-center gap-sm relative">
           <input 
@@ -156,54 +140,117 @@
   </section>
 
 
-    <ng-container *ngIf="environment">
-        <!-- Environment Settings -->
-        <section class="card flex-col gap-lg">
+  <!-- Environment Selection Tabs -->
+  <app-no-environments-warning *ngIf="f.environments && f.environments.length === 0"></app-no-environments-warning>
+
+  <div class="env-tabs-wrapper mt-lg" *ngIf="f.environments && f.environments.length > 0">
+    <div class="tabs-header flex gap-sm border-bottom overflow-x-auto pb-xs mb-md">
+      <button *ngFor="let env of f.environments" 
+              class="tab-btn flex items-center gap-xs px-md py-sm transition"
+              [class.active]="selectedEnvId === env.environmentId"
+              (click)="selectEnv(env.environmentId)">
+        <span class="status-dot-sm" [style.background-color]="env.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'"></span>
+        <span class="text-xs font-semibold">{{ env.environmentName }}</span>
+        <span *ngIf="state.isEnvDirty(env.environmentId) | async" class="dirty-indicator-dot"></span>
+      </button>
+    </div>
+
+    <div class="tab-content" *ngIf="selectedEnvId">
+      <ng-container *ngFor="let env of f.environments">
+        <div class="flex-col gap-lg" *ngIf="selectedEnvId === env.environmentId">
+          <!-- Master Switch for Env -->
+          <div class="master-switch-card card flex items-center justify-between p-md" [class.enabled]="env.enabled">
+            <div class="flex items-center gap-md">
+              <span class="material-symbols-rounded text-xl" [style.color]="env.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                {{ env.enabled ? 'toggle_on' : 'toggle_off' }}
+              </span>
+              <div class="flex-col">
+                <span class="text-sm font-semibold">Environment Status ({{ env.environmentName }})</span>
+                <span class="text-xs text-muted">{{ env.enabled ? 'This feature is active in ' + env.environmentName + '.' : 'This feature is disabled.' }}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-sm">
+              <span *ngIf="state.isEnvFieldDirty(env.environmentId, 'enabled') | async" class="text-xs text-accent-mint italic">Changed</span>
+              <button class="btn-toggle" [class.active]="env.enabled" (click)="updateEnvField(env.environmentId, 'enabled', !env.enabled)">
+                {{ env.enabled ? 'Enabled' : 'Disabled' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Environment Specific Flags -->
+          <section class="card flex-col gap-lg">
             <div class="section-header flex items-center gap-sm">
-                <span class="material-symbols-rounded" style="color: var(--accent-sky)">settings</span>
-                <h2 class="section-title text-sm">Environment Specific Flags</h2>
+              <span class="material-symbols-rounded" style="color: var(--accent-sky)">settings</span>
+              <h2 class="section-title text-sm">Feature Flags</h2>
             </div>
 
             <div class="flex-col gap-md">
-                <!-- Flags CRUD -->
-                <div class="flags-manager flex-col gap-sm">
-                    <div *ngFor="let flag of f.flags | keyvalue; trackBy: trackByFlagKey" class="flag-row flex items-center gap-md p-xs border-bottom">
-                        <span class="text-xs font-semibold flex-1">{{ flag.key }}</span>
-                        <div class="flex items-center gap-sm">
-                            <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
-                            <button class="icon-btn-slim" (click)="toggleFlag(f.flags, flag.key, !flag.value)">
-              <span class="material-symbols-rounded" [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
-                {{ flag.value ? 'toggle_on' : 'toggle_off' }}
-              </span>
-                            </button>
-                            <button class="icon-btn-slim danger" (click)="removeFlag(f.flags, flag.key)">
-                                <span class="material-symbols-rounded">delete</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="add-flag-row flex items-center gap-sm mt-sm">
-                        <input type="text" #newFlagKey class="form-input text-xs flex-1" placeholder="New flag key..." />
-                        <button class="btn-slim primary" (click)="addFlag(f.flags, newFlagKey.value); newFlagKey.value = ''">
-                            <span class="material-symbols-rounded">add</span>
-                            Add Flag
-                        </button>
-                    </div>
+              <div class="flags-manager flex-col gap-sm">
+                <div *ngFor="let flag of env.flags | keyvalue; trackBy: trackByFlagKey" class="flag-row flex items-center gap-md p-xs border-bottom">
+                  <span class="text-xs font-semibold flex-1">{{ flag.key }}</span>
+                  <div class="flex items-center gap-sm">
+                    <span *ngIf="state.isEnvFlagDirty(env.environmentId, flag.key) | async" class="text-xs text-accent-mint italic">Changed</span>
+                    <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
+                    <button class="icon-btn-slim" (click)="toggleFlag(env.environmentId, env.flags, flag.key, !flag.value)">
+                      <span class="material-symbols-rounded" [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                        {{ flag.value ? 'toggle_on' : 'toggle_off' }}
+                      </span>
+                    </button>
+                    <button class="icon-btn-slim danger" (click)="removeFlag(env.environmentId, env.flags, flag.key)">
+                      <span class="material-symbols-rounded">delete</span>
+                    </button>
+                  </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Metadata Editor -->
-        <section class="card flex-col gap-lg">
+                <div class="add-flag-row flex items-center gap-sm mt-sm">
+                  <input type="text" #newFlagKey class="form-input text-xs flex-1" placeholder="New flag key..." />
+                  <button class="btn-slim primary" (click)="addFlag(env.environmentId, env.flags, newFlagKey.value); newFlagKey.value = ''">
+                    <span class="material-symbols-rounded">add</span>
+                    Add Flag
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Metadata Editor -->
+          <section class="card flex-col gap-lg">
             <div class="section-header flex items-center gap-sm">
-                <span class="material-symbols-rounded" style="color: var(--accent-lavender)">database</span>
-                <h2 class="section-title text-sm">Metadata</h2>
+              <span class="material-symbols-rounded" style="color: var(--accent-lavender)">database</span>
+              <h2 class="section-title text-sm">Metadata</h2>
             </div>
+            <app-metadata-editor [metadata]="env.metadata" (metadataChange)="updateMetadata(env.environmentId, $event)"></app-metadata-editor>
+          </section>
 
-            <app-metadata-editor [metadata]="f.metadata" (metadataChange)="updateMetadata($event)"></app-metadata-editor>
-        </section>
-
-    </ng-container>
+          <!-- Copy From -->
+          <section class="card flex-col gap-lg">
+            <div class="section-header flex items-center gap-sm">
+              <span class="material-symbols-rounded" style="color: var(--accent-lavender)">content_copy</span>
+              <h2 class="section-title text-sm">Copy From</h2>
+            </div>
+            <div class="flex-col gap-md">
+              <div class="form-group">
+                <label class="text-xs text-muted">Select environment to copy state from:</label>
+                <div class="flex items-center gap-sm mt-xs">
+                  <select #copySource class="form-input text-xs flex-1">
+                    <option value="" disabled selected>Choose environment...</option>
+                    <ng-container *ngFor="let other of f.environments">
+                      <option *ngIf="other.environmentId !== env.environmentId" [value]="other.environmentId">
+                        {{ other.environmentName }}
+                      </option>
+                    </ng-container>
+                  </select>
+                  <button class="btn-slim" (click)="copyFrom(env.environmentId, copySource.value)" [disabled]="!copySource.value">
+                    Copy State
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </ng-container>
+    </div>
+  </div>
 
   <!-- Action Bar -->
   <div class="action-bar flex items-center justify-center" *ngIf="isDirty$ | async" #actionBar>

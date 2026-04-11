@@ -14,8 +14,8 @@ class User(
     @Column(nullable = false, unique = true)
     var username: String,
 
-    @Column(nullable = false)
-    var email: String,
+    @Column(nullable = true)
+    var email: String?,
 
     @Column(name = "display_role")
     var displayRole: String? = null,

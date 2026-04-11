@@ -47,26 +47,14 @@ class FeatureService(
     }
 
     @Transactional(readOnly = true)
-    fun getFeatureById(id: UUID, departmentId: UUID, environmentId: String?): Pair<Feature, FeatureEnvironment?> {
-        val feature = findFeatureById(id, departmentId)
-        val fe = environmentId?.let {
-            val environment = environmentService.findEnvironment(it, departmentId)
-                ?: throw ResourceNotFoundException("Environment with id $it not found")
-            featureEnvironmentRepository.findByFeatureIdAndEnvironment(id, environment)
-        }
-        return feature to fe
+    fun getFeatureById(id: UUID, departmentId: UUID): Feature {
+        return findFeatureById(id, departmentId)
     }
 
     @Transactional(readOnly = true)
-    fun getFeatureByRunningNumber(runningNumber: Long, departmentId: UUID, environmentId: String?): Pair<Feature, FeatureEnvironment?> {
-        val feature = featureRepository.findByRunningNumberAndDepartmentId(runningNumber, departmentId)
+    fun getFeatureByRunningNumber(runningNumber: Long, departmentId: UUID): Feature {
+        return featureRepository.findByRunningNumberAndDepartmentId(runningNumber, departmentId)
             .orElseThrow { ResourceNotFoundException("Feature with number $runningNumber not found in department $departmentId") }
-        val fe = environmentId?.let {
-            val environment = environmentService.findEnvironment(it, departmentId)
-                ?: throw ResourceNotFoundException("Environment with id $it not found")
-            featureEnvironmentRepository.findByFeatureIdAndEnvironment(feature.id, environment)
-        }
-        return feature to fe
     }
 
     @Transactional
@@ -78,7 +66,7 @@ class FeatureService(
     }
 
     @Transactional
-    fun updateFeature(id: UUID, departmentId: UUID, request: FeatureUpdateRequest): Pair<Feature, FeatureEnvironment?> {
+    fun updateFeature(id: UUID, departmentId: UUID, request: FeatureUpdateRequest): Feature {
         val feature = findFeatureById(id, departmentId)
         request.name?.let { feature.name = it }
         request.description?.let { feature.description = it }
@@ -87,27 +75,26 @@ class FeatureService(
             val teams = teamRepository.findAllById(teamIds)
             feature.assignedTeams = teams.toMutableSet()
         }
-        val saved = featureRepository.save(feature)
 
-        var fe: FeatureEnvironment? = null
-        if (request.environmentId != null) {
-            val environment = environmentService.findEnvironment(request.environmentId, departmentId)
-                ?: throw ResourceNotFoundException("Environment with id ${request.environmentId} not found")
-            fe = featureEnvironmentRepository.findByFeatureIdAndEnvironment(id, environment)
+        request.environments?.forEach { envUpdate ->
+            val environment = environmentService.findEnvironment(envUpdate.environmentId, departmentId)
+                ?: throw ResourceNotFoundException("Environment with id ${envUpdate.environmentId} not found")
+            var fe = featureEnvironmentRepository.findByFeatureIdAndEnvironment(id, environment)
             if (fe == null) {
                 fe = FeatureEnvironment(
                     feature = feature,
                     environment = environment,
-                    enabled = request.enabled ?: false
+                    enabled = envUpdate.enabled
                 )
+                feature.environments.add(fe)
             }
-            request.enabled?.let { fe.enabled = it }
-            request.flags?.let { fe.flags = it.toMutableMap() }
-            request.metadata?.let { fe.metadata = it }
-            fe = featureEnvironmentRepository.save(fe)
+            fe.enabled = envUpdate.enabled
+            fe.flags = envUpdate.flags.toMutableMap()
+            fe.metadata = envUpdate.metadata
+            featureEnvironmentRepository.save(fe)
         }
 
-        return saved to fe
+        return featureRepository.save(feature)
     }
 
     @Transactional
@@ -116,7 +103,7 @@ class FeatureService(
         departmentId: UUID,
         environmentId: String,
         request: FeatureEnvironmentUpdateRequest,
-    ): Pair<Feature, FeatureEnvironment> {
+    ): Feature {
         val feature = findFeatureById(featureId, departmentId)
         val environment = environmentService.findEnvironment(environmentId, departmentId)
             ?: throw ResourceNotFoundException("Environment with id $environmentId not found")
@@ -124,12 +111,12 @@ class FeatureService(
                 feature = feature,
                 environment = environment,
                 enabled = false
-            )
+            ).also { feature.environments.add(it) }
         fe.enabled = request.enabled
         fe.flags = request.flags.toMutableMap()
         fe.metadata = request.metadata
-        val savedFe = featureEnvironmentRepository.save(fe)
-        return feature to savedFe
+        featureEnvironmentRepository.save(fe)
+        return featureRepository.save(feature)
     }
 
     @Transactional
