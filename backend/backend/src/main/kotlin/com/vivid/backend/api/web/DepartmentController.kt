@@ -7,6 +7,7 @@ import com.vivid.backend.service.DepartmentService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -18,12 +19,14 @@ class DepartmentController(
 ) {
     @GetMapping
     @Operation(summary = "Get all departments")
+    @PreAuthorize("@permissionService.hasPermission('departments', 'read')")
     fun getAllDepartments(): List<DepartmentDto> {
         return departmentService.getAllDepartments().map { it.toDto() }
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get department by ID")
+    @PreAuthorize("@permissionService.hasPermission('departments', 'read')")
     fun getDepartmentById(@PathVariable id: UUID): DepartmentDto {
         return departmentService.findById(id).toDto(includeTeams = true)
     }
@@ -31,6 +34,7 @@ class DepartmentController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new department")
+    @PreAuthorize("@permissionService.hasPermission('departments', 'write')")
     fun createDepartment(@RequestBody request: DepartmentCreateRequest): DepartmentDto {
         return departmentService.createDepartment(request.name, request.description).toDto()
     }

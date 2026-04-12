@@ -1,7 +1,6 @@
 package com.vivid.backend.service
 
 import com.vivid.backend.api.web.dto.*
-import com.vivid.backend.domain.entity.EnvironmentEntity
 import com.vivid.backend.domain.entity.Feature
 import com.vivid.backend.domain.entity.FeatureEnvironment
 import com.vivid.backend.domain.entity.FeatureLink
@@ -79,19 +78,17 @@ class FeatureService(
         request.environments?.forEach { envUpdate ->
             val environment = environmentService.findEnvironment(envUpdate.environmentId, departmentId)
                 ?: throw ResourceNotFoundException("Environment with id ${envUpdate.environmentId} not found")
-            var fe = featureEnvironmentRepository.findByFeatureIdAndEnvironment(id, environment)
-            if (fe == null) {
-                fe = FeatureEnvironment(
-                    feature = feature,
-                    environment = environment,
-                    enabled = envUpdate.enabled
-                )
-                feature.environments.add(fe)
-            }
+
+            val existing = feature.environments.find { it.environment.id == environment.id }
+            val fe = existing ?: FeatureEnvironment(
+                feature = feature,
+                environment = environment,
+                enabled = envUpdate.enabled
+            ).also { feature.environments.add(it) }
+
             fe.enabled = envUpdate.enabled
             fe.flags = envUpdate.flags.toMutableMap()
             fe.metadata = envUpdate.metadata
-            featureEnvironmentRepository.save(fe)
         }
 
         return featureRepository.save(feature)
@@ -107,15 +104,18 @@ class FeatureService(
         val feature = findFeatureById(featureId, departmentId)
         val environment = environmentService.findEnvironment(environmentId, departmentId)
             ?: throw ResourceNotFoundException("Environment with id $environmentId not found")
-        val fe = featureEnvironmentRepository.findByFeatureIdAndEnvironment(featureId, environment) ?: FeatureEnvironment(
+
+        val fe = feature.environments.find { it.environment.id == environment.id }
+            ?: FeatureEnvironment(
                 feature = feature,
                 environment = environment,
                 enabled = false
             ).also { feature.environments.add(it) }
+
         fe.enabled = request.enabled
         fe.flags = request.flags.toMutableMap()
         fe.metadata = request.metadata
-        featureEnvironmentRepository.save(fe)
+
         return featureRepository.save(feature)
     }
 

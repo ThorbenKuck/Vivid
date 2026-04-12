@@ -4,8 +4,25 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import java.time.Duration
 import java.util.Properties
 
+/**
+ * Configuration properties for the Kafka-based feature streaming.
+ *
+ * @property groupId the Kafka group ID to use
+ * @property bootstrapServers the Kafka bootstrap servers
+ * @property topics the set of topics to listen to
+ * @property enabled whether Kafka streaming is enabled
+ * @property concurrency the number of threads to use for consumption
+ * @property clientIdPrefix the client ID prefix
+ * @property group the Kafka group
+ * @property topicPattern the topic pattern to subscribe to
+ * @property autoStartup whether to start the Kafka listener automatically
+ * @property consumerProperties additional Kafka consumer properties
+ * @property consumerFactory configuration for the Kafka listener container factory
+ * @property batching configuration for batch processing
+ */
 @ConfigurationProperties("spring.vivid.kafka")
 data class VividKafkaProperties(
+    val enabled: Boolean = true,
     /**
      * The kafka group id that vivid should use.
      *
@@ -22,8 +39,6 @@ data class VividKafkaProperties(
      * The topics that vivid should listen to for feature updates.
      */
     val topics: Set<String>,
-
-    val enabled: Boolean = true,
 
     val concurrency: Int? = null,
     val clientIdPrefix: String? = null,

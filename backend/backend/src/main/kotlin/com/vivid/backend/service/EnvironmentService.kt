@@ -5,6 +5,7 @@ import com.vivid.backend.domain.entity.EnvironmentEntity
 import com.vivid.backend.domain.repository.EnvironmentRepository
 import com.vivid.backend.service.exception.ResourceNotFoundException
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -15,12 +16,24 @@ import java.util.UUID.fromString
 @Service
 class EnvironmentService(
     private val environmentRepository: EnvironmentRepository,
-    private val departmentService: DepartmentService
+    private val departmentService: DepartmentService,
+    private val permissionsService: PermissionService,
 ) {
 
     @Transactional(readOnly = true)
     fun search(q: String?, departmentId: UUID, pageable: Pageable): Page<EnvironmentEntity> {
-        return environmentRepository.search(q, departmentId, pageable)
+        val environments = environmentRepository.findAll()
+            .asSequence()
+            .filter { it.department.id == departmentId }
+            .filter { q.isNullOrBlank() || it.name.contains(q, ignoreCase = true) || it.description?.contains(q, ignoreCase = true) == true }
+            .toList()
+
+        val visibleEnvironments = permissionsService.filterVisibleEnvironments(environments)
+        val start = pageable.offset.toInt().coerceAtMost(visibleEnvironments.size)
+        val end = (start + pageable.pageSize).coerceAtMost(visibleEnvironments.size)
+        val pageContent = if (start >= end) emptyList() else visibleEnvironments.subList(start, end)
+
+        return PageImpl(pageContent, pageable, visibleEnvironments.size.toLong())
     }
 
     @Transactional(readOnly = true)

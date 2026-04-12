@@ -11,6 +11,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.web.reactive.function.client.WebClient
 
+/**
+ * AutoConfiguration for the SSE-based feature streaming.
+ *
+ * This configuration provides the [SseFeatureStream] bean if the "sse" stream is enabled.
+ */
 @AutoConfiguration
 @ConditionalOnClass(WebClient::class)
 @EnableConfigurationProperties(VividSseProperties::class)

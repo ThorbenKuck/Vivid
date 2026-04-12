@@ -3,11 +3,13 @@ package com.vivid.backend.api.web
 import com.vivid.backend.api.web.dto.*
 import com.vivid.backend.service.EnvironmentService
 import com.vivid.backend.service.FeatureService
+import com.vivid.backend.service.PermissionService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -17,6 +19,7 @@ import java.util.*
 class WebFeatureController(
     private val featureService: FeatureService,
     private val environmentService: EnvironmentService,
+    private val permissionService: PermissionService,
 ) {
 
     @GetMapping
@@ -26,7 +29,7 @@ class WebFeatureController(
         @RequestParam(required = false) q: String?,
         pageable: Pageable
     ): Page<FeatureDto> {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
         return featureService.getAllFeatures(departmentId, q, pageable).map { it.toDto(allEnvironments) }
     }
 
@@ -36,7 +39,7 @@ class WebFeatureController(
         @PathVariable id: UUID,
         @RequestParam departmentId: UUID
     ): FeatureDto {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
         return featureService.getFeatureById(id, departmentId).toDto(allEnvironments)
     }
 
@@ -46,7 +49,7 @@ class WebFeatureController(
         @PathVariable runningNumber: Long,
         @RequestParam departmentId: UUID
     ): FeatureDto {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
         return featureService.getFeatureByRunningNumber(runningNumber, departmentId).toDto(allEnvironments)
     }
 
@@ -57,7 +60,7 @@ class WebFeatureController(
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureCreateRequest
     ): FeatureDto {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
         return featureService.createFeature(departmentId, request).toDto(allEnvironments)
     }
 
@@ -68,19 +71,28 @@ class WebFeatureController(
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureUpdateRequest
     ): FeatureDto {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
+        // Validate write access for each environment in request
+        request.environments?.forEach { envUpdate ->
+            val env = environmentService.findEnvironment(envUpdate.environmentId, departmentId)
+                ?: throw com.vivid.backend.service.exception.ResourceNotFoundException("Environment not found: ${envUpdate.environmentId}")
+            if (!permissionService.hasEnvPermission(env.name, "write")) {
+                throw org.springframework.security.access.AccessDeniedException("No write access for environment: ${env.name}")
+            }
+        }
         return featureService.updateFeature(id, departmentId, request).toDto(allEnvironments)
     }
 
     @PutMapping("/{id}/environments/{environment}")
     @Operation(summary = "Upsert environment-specific state for a feature")
+    @PreAuthorize("@permissionService.hasEnvPermission(#environment, 'write')")
     fun upsertFeatureEnvironment(
         @PathVariable id: UUID,
         @PathVariable environment: String,
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureEnvironmentUpdateRequest
     ): FeatureDto {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
         return featureService.upsertFeatureEnvironment(id, departmentId, environment, request).toDto(allEnvironments)
     }
 
@@ -106,7 +118,7 @@ class WebFeatureController(
         @RequestParam departmentId: UUID,
         @RequestBody request: FeatureLinkCreateRequest
     ): FeatureDto {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
         return featureService.addFeatureLink(id, departmentId, request).toDto(allEnvironments)
     }
 
@@ -117,7 +129,7 @@ class WebFeatureController(
         @PathVariable linkId: UUID,
         @RequestParam departmentId: UUID
     ): FeatureDto {
-        val allEnvironments = environmentService.getAll(departmentId)
+        val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll(departmentId))
         return featureService.removeFeatureLink(id, departmentId, linkId).toDto(allEnvironments)
     }
 }

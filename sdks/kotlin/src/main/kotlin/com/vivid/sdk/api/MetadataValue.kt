@@ -9,6 +9,11 @@ import com.vivid.sdk.api.metadata.LongMetadataValue
 import com.vivid.sdk.api.metadata.StringListMetadataValue
 import com.vivid.sdk.api.metadata.StringMetadataValue
 
+/**
+ * Base interface for all metadata values in a feature flag.
+ *
+ * Metadata can be used to store additional information about a feature flag, such as configuration parameters.
+ */
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
@@ -24,3 +29,57 @@ import com.vivid.sdk.api.metadata.StringMetadataValue
     JsonSubTypes.Type(value = StringListMetadataValue::class, name = "StringList")
 )
 interface MetadataValue
+
+fun MetadataValue?.isTrue(): Boolean? {
+    return when (this) {
+        is BooleanMetadataValue -> this.content
+        else -> null
+    }
+}
+
+fun MetadataValue?.isFalse(): Boolean? {
+    return when (this) {
+        is BooleanMetadataValue -> this.content
+        else -> null
+    }
+}
+
+fun MetadataValue?.contains(value: String): Boolean {
+    return when (this) {
+        is StringMetadataValue -> this.content == value
+        is StringListMetadataValue -> this.content.contains(value)
+        else -> false
+    }
+}
+
+fun MetadataValue.biggerThan(value: Double): Boolean {
+    return when (this) {
+        is DoubleMetadataValue -> this.content > value
+        is LongMetadataValue -> this.content > value
+        else -> false
+    }
+}
+
+fun MetadataValue.biggerThan(value: Long): Boolean {
+    return when (this) {
+        is DoubleMetadataValue -> this.content > value
+        is LongMetadataValue -> this.content > value
+        else -> false
+    }
+}
+
+fun MetadataValue.smallerThan(value: Double): Boolean {
+    return when (this) {
+        is DoubleMetadataValue -> this.content < value
+        is LongMetadataValue -> this.content < value
+        else -> false
+    }
+}
+
+fun MetadataValue.smallerThan(value: Long): Boolean {
+    return when (this) {
+        is DoubleMetadataValue -> this.content < value
+        is LongMetadataValue -> this.content < value
+        else -> false
+    }
+}

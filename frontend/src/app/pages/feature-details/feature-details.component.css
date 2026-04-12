@@ -292,6 +292,11 @@ textarea {
   border-radius: 50%;
 }
 
+.lock-icon-sm {
+  font-size: 14px !important;
+  color: var(--text-muted);
+}
+
 .dirty-indicator-dot {
   width: 4px;
   height: 4px;

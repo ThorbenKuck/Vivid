@@ -14,11 +14,14 @@ import {ChiplistComponent} from '../../shared/components/chiplist/chiplist.compo
 import {MetadataEditorComponent} from '../../shared/components/metadata-editor/metadata-editor.component';
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
 import {NoEnvironmentsWarningComponent} from "../../shared/components/no-environments-warning/no-environments-warning.component";
+import {PermissionService} from "../../services/permission.service";
+import {HasPermissionDirective} from "../../shared/directives/has-permission.directive";
+import {HasEnvPermissionDirective} from "../../shared/directives/has-env-permission.directive";
 
 @Component({
     selector: 'app-feature-details',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, ChiplistComponent, MetadataEditorComponent, LoadingIndicator, NoEnvironmentsWarningComponent],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, ChiplistComponent, MetadataEditorComponent, LoadingIndicator, NoEnvironmentsWarningComponent, HasPermissionDirective, HasEnvPermissionDirective],
     templateUrl: './feature-details.component.html',
     styleUrls: ['./feature-details.component.css'],
     providers: [FeatureStateService]
@@ -54,7 +57,8 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         private api: WebFeatureManagementService,
         private envs: EnvironmentService,
         private teams: TeamManagementService,
-        public state: FeatureStateService
+        public state: FeatureStateService,
+        public permissions: PermissionService
     ) {
     }
 

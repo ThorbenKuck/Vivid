@@ -9,11 +9,13 @@ import { TeamStateService } from '../../services/team-state.service';
 import { TeamDto, UserDto } from '../../dtos';
 import { FormInputComponent } from '../../shared/components/form-input/form-input.component';
 import { LoadingIndicator } from '../../shared/components/loading-indicator/loading-indicator';
+import { PermissionService } from '../../services/permission.service';
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-team-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, FormInputComponent, LoadingIndicator],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, FormInputComponent, LoadingIndicator, HasPermissionDirective],
   templateUrl: './team-details.component.html',
   styleUrls: ['./team-details.component.css'],
   providers: [TeamStateService]
@@ -35,7 +37,8 @@ export class TeamDetailsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private teams: TeamManagementService,
-    public state: TeamStateService
+    public state: TeamStateService,
+    public permissions: PermissionService
   ) {}
 
   ngOnInit(): void {

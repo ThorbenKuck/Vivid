@@ -6,6 +6,9 @@ import org.springframework.core.env.getProperty
 import org.springframework.core.type.AnnotatedTypeMetadata
 import kotlin.jvm.java
 
+/**
+ * Condition that matches if the Vivid SDK is enabled.
+ */
 class OnEnabledVividFeature: Condition {
     override fun matches(
         context: ConditionContext,
@@ -20,7 +23,7 @@ class OnEnabledVividFeature: Condition {
 
         metadata["value"]?.let { vivids ->
             (vivids as Array<String>).forEach { vivid ->
-                if (!context.environment.getProperty<Boolean>("spring.vivid.$vivid.enabled", false)) {
+                if (!context.environment.getProperty<Boolean>("spring.vivid.$vivid.enabled", true)) {
                     return false
                 }
             }

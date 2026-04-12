@@ -7,11 +7,13 @@ import { TeamDto } from '../../dtos';
 import { FormInputComponent } from '../../shared/components/form-input/form-input.component';
 import { GenericTableComponent } from '../../shared/components/generic-table/generic-table.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import {TranslateModule} from "@ngx-translate/core";
 
 @Component({
   selector: 'app-teams',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, FormInputComponent, GenericTableComponent, PaginationComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, GenericTableComponent, PaginationComponent, HasPermissionDirective],
   templateUrl: './teams.component.html',
   styleUrls: ['./teams.component.css']
 })

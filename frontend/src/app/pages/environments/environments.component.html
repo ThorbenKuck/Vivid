@@ -22,7 +22,7 @@
         </div>
         
         <div class="env-actions flex items-center gap-sm">
-          <button class="icon-btn-slim danger" (click)="$event.stopPropagation(); askDelete(e.id!)" [title]="'common.delete' ">
+          <button *hasPermission="['environments', 'write']" class="icon-btn-slim danger" (click)="$event.stopPropagation(); askDelete(e.id!)" [title]="'common.delete' ">
             <span class="material-symbols-rounded">delete</span>
           </button>
           <span class="material-symbols-rounded expand-icon text-muted" [style.transform]="e['__expanded'] ? 'rotate(180deg)' : 'none'">
@@ -46,7 +46,7 @@
   </app-pagination>
 </div>
 
-<button class="fab shadow-slim" (click)="toggleAdd()" [title]="'common.add' ">
+<button *hasPermission="['environments', 'write']" class="fab shadow-slim" (click)="toggleAdd()" [title]="'common.add' ">
   <span class="material-symbols-rounded">add</span>
 </button>
 

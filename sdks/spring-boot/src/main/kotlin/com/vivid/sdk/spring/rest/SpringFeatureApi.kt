@@ -5,11 +5,15 @@ import com.vivid.sdk.api.Feature
 import com.vivid.sdk.spring.VividProperties
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity
 
 private val logger = LoggerFactory.getLogger(SpringFeatureApi::class.java)
 
+/**
+ * [FeatureApi] implementation that uses Spring's [RestClient] to fetch feature states from the Vivid backend.
+ */
 class SpringFeatureApi(
     private val restClient: RestClient,
     private val restProperties: VividRestProperties,
@@ -31,14 +35,17 @@ class SpringFeatureApi(
                 .retrieve()
                 .toEntity<Feature>()
                 .body
+        } catch (e: HttpClientErrorException.NotFound) {
+            logger.warn("Feature $key not found", e)
         } catch (e: Exception) {
             logger.warn("Error fetching feature $key: ${e.message}")
-            return null
         }
+        return null
     }
 
     override fun fetchAllFeatures(): List<Feature>? {
         try {
+            logger.debug("Fetching all features for environment ${vividProperties.environment}")
             return restClient.get()
                 .uri {
                     it.pathSegment("api", "client", "features", "{environment}")

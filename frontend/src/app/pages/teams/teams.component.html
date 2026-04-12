@@ -44,7 +44,7 @@
   </app-pagination>
 </div>
 
-<button class="fab shadow-slim" (click)="toggleAdd()" title="Add Team">
+<button *hasPermission="['teams', 'write']" class="fab shadow-slim" (click)="toggleAdd()" title="Add Team">
   <span class="material-symbols-rounded">add</span>
 </button>
 

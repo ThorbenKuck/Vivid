@@ -1,17 +1,61 @@
 package com.vivid.sdk.caches
 
+import com.vivid.sdk.FeatureCache
+import com.vivid.sdk.Subscription
 import com.vivid.sdk.api.Feature
+import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
-class SimpleFeatureCache : BaseFeatureCache() {
+/**
+ * Simple implementation of [FeatureCache] that stores feature states in a [ConcurrentHashMap].
+ *
+ * This implementation is thread-safe and supports atomic updates.
+ */
+open class SimpleFeatureCache : FeatureCache {
 
-    private val content = ConcurrentHashMap<String, Feature>()
+    private val subscriptions = ConcurrentHashMap<String, MutableList<FeatureCache.Callback>>()
+    protected val content = ConcurrentHashMap<String, Feature>()
+    protected val writeLock = Any()
+
+    companion object {
+        @JvmStatic
+        protected val EMPTY_FEATURE =
+            Feature(
+                id = "",
+                enabled = false,
+                flags = emptyMap(),
+                metadata = emptyMap(),
+                name = "",
+                timestamp = Instant.ofEpochMilli(0)
+            )
+    }
 
     override fun get(key: String): Feature? {
         return content[key]
     }
 
-    private val writeLock = Any()
+    override fun invalidate(key: String): Feature? {
+        return content.remove(key)?.also { notifySubscribersAboutRemove(it) }
+    }
+
+    protected fun Feature?.nullIfEmpty(): Feature? = this?.takeIf { it !== EMPTY_FEATURE }
+
+    protected fun updateIfNewer(feature: Feature): Pair<Feature?, Feature?> {
+        var previous: Feature? = null
+        var updated: Feature? = null
+
+        content.compute(feature.name) { _, existing ->
+            if (existing == null || feature.timestamp.isAfter(existing.timestamp)) {
+                previous = existing
+                updated = feature
+                feature
+            } else {
+                updated = null
+                existing
+            }
+        }
+        return previous to updated
+    }
 
     override fun set(feature: Feature): Feature? {
         // Diese Methode bleibt für Einzel-Updates erhalten,
@@ -32,7 +76,6 @@ class SimpleFeatureCache : BaseFeatureCache() {
         val updatedForNotification = mutableListOf<Feature>()
 
         synchronized(writeLock) {
-            // 1. Alle Features prüfen und Map aktualisieren
             features.forEach { incoming ->
                 val (_, updated) = updateIfNewer(incoming)
                 if (updated != null) {
@@ -40,39 +83,40 @@ class SimpleFeatureCache : BaseFeatureCache() {
                 }
             }
 
-            // 2. Cleanup veralteter Keys
             content.keys.removeIf { it !in newKeys }
         }
 
-        // 3. Erst JETZT (außerhalb des Locks!) die Subscriber benachrichtigen
-        // Wenn ein Subscriber hier blockiert, sind die Daten in der Map
-        // trotzdem schon für alle anderen Leser verfügbar.
         updatedForNotification.forEach {
             notifySubscribersAboutNext(it)
         }
     }
 
-    /**
-     * Hilfsfunktion für atomares Update pro Key.
-     * Gibt das alte Feature und das neue (falls aktualisiert) zurück.
-     */
-    private fun updateIfNewer(feature: Feature): Pair<Feature?, Feature?> {
-        var previous: Feature? = null
-        var updated: Feature? = null
-
-        content.compute(feature.name) { _, existing ->
-            if (existing == null || feature.timestamp.isAfter(existing.timestamp)) {
-                previous = existing
-                updated = feature
-                feature
-            } else {
-                updated = null
-                existing
-            }
-        }
-        return previous to updated
+    override fun getAll(): List<Feature> {
+        return content.values.toList()
     }
-    override fun invalidate(key: String): Feature? {
-        return content.remove(key)?.also { notifySubscribersAboutRemove(it) }
+
+    protected fun notifySubscribersAboutNext(feature: Feature) {
+        subscriptions[feature.name]?.forEach { it.onNext(feature) }
+    }
+
+    protected fun notifySubscribersAboutRemove(feature: Feature) {
+        subscriptions[feature.name]?.forEach { it.onRemove(feature) }
+    }
+
+    override fun subscribe(
+        key: String,
+        callback: FeatureCache.Callback
+    ): Subscription {
+        subscriptions.computeIfAbsent(key) { mutableListOf() }.add(callback)
+        return SubscriptionImpl(callback, key)
+    }
+
+    inner class SubscriptionImpl(
+        private val callback: FeatureCache.Callback,
+        private val key: String,
+    ) : Subscription {
+        override fun cancel() {
+            subscriptions.computeIfPresent(key) { _, list -> list.remove(callback); list.ifEmpty { null } }
+        }
     }
 }

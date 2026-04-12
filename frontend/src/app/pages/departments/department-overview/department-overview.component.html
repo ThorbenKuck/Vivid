@@ -21,7 +21,7 @@
   </app-generic-table>
 </div>
 
-<button class="fab" (click)="toggleAdd()" title="Create Department">
+<button class="fab" (click)="toggleAdd()" *hasPermission="['departments', 'write']" title="Create Department">
   <span class="material-symbols-rounded">add</span>
 </button>
 

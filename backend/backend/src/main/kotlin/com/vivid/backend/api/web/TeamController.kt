@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -18,6 +19,7 @@ class TeamController(
 ) {
     @GetMapping
     @Operation(summary = "Get all teams (paginated)")
+    @PreAuthorize("@permissionService.hasPermission('teams', 'read')")
     fun getAllTeams(
         @RequestParam departmentId: UUID,
         @RequestParam(required = false) q: String?,
@@ -32,6 +34,7 @@ class TeamController(
 
     @GetMapping("/{id}")
     @Operation(summary = "Get team by ID")
+    @PreAuthorize("@permissionService.hasPermission('teams', 'read')")
     fun getTeamById(
         @PathVariable id: UUID,
         @RequestParam departmentId: UUID
@@ -42,6 +45,7 @@ class TeamController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new team")
+    @PreAuthorize("@permissionService.hasPermission('teams', 'write')")
     fun createTeam(
         @RequestParam departmentId: UUID,
         @RequestBody request: TeamCreateRequest
@@ -51,6 +55,7 @@ class TeamController(
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing team")
+    @PreAuthorize("@permissionService.hasPermission('teams', 'write')")
     fun updateTeam(
         @PathVariable id: UUID,
         @RequestParam departmentId: UUID,
@@ -62,6 +67,7 @@ class TeamController(
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a team")
+    @PreAuthorize("@permissionService.hasPermission('teams', 'write')")
     fun deleteTeam(
         @PathVariable id: UUID,
         @RequestParam departmentId: UUID
@@ -71,6 +77,7 @@ class TeamController(
 
     @PostMapping("/{id}/members/{userId}")
     @Operation(summary = "Add a member to a team")
+    @PreAuthorize("@permissionService.hasPermission('teams', 'write')")
     fun addMember(
         @PathVariable id: UUID,
         @PathVariable userId: UUID,
@@ -82,6 +89,7 @@ class TeamController(
 
     @DeleteMapping("/{id}/members/{userId}")
     @Operation(summary = "Remove a member from a team")
+    @PreAuthorize("@permissionService.hasPermission('teams', 'write')")
     fun removeMember(
         @PathVariable id: UUID,
         @PathVariable userId: UUID,

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -18,11 +19,17 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
+/**
+ * AutoConfiguration for the Kafka-based feature streaming.
+ *
+ * This configuration provides the [KafkaFeatureStream] bean if the "kafka" stream is enabled.
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(VividKafkaProperties::class)
 @ConditionalOnClass(KafkaListenerEndpointRegistry::class)
 @PropertySource("classpath:default.vivid-kafka.properties")
 @ConditionalOnVivid("kafka")
+@ConditionalOnProperty("spring.vivid.kafka.topics")
 class VividKafkaAutoConfiguration {
 
     @Bean

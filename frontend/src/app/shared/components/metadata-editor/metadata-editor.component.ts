@@ -17,30 +17,30 @@ import { MetadataValue } from '../../../dtos/MetadataValue';
         
         <div class="value-input flex-1">
           <ng-container [ngSwitch]="entry.value['@type']">
-            <input *ngSwitchCase="'Boolean'" type="checkbox" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" />
-            <input *ngSwitchCase="'Long'" type="number" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="1" />
-            <input *ngSwitchCase="'Double'" type="number" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="any" />
-            <input *ngSwitchCase="'String'" type="text" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" />
-            <textarea *ngSwitchCase="'Json'" [ngModel]="entry.value.content | json" (ngModelChange)="updateJsonValue(entry.key, $event)"></textarea>
+            <input *ngSwitchCase="'Boolean'" type="checkbox" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" [disabled]="disabled" />
+            <input *ngSwitchCase="'Long'" type="number" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="1" [disabled]="disabled" />
+            <input *ngSwitchCase="'Double'" type="number" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="any" [disabled]="disabled" />
+            <input *ngSwitchCase="'String'" type="text" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" [disabled]="disabled" />
+            <textarea *ngSwitchCase="'Json'" [ngModel]="entry.value.content | json" (ngModelChange)="updateJsonValue(entry.key, $event)" [disabled]="disabled"></textarea>
             <div *ngSwitchCase="'StringList'" class="flex-col gap-xs">
               <div *ngFor="let item of entry.value.content; let i = index; trackBy: trackByIndex" class="flex items-center gap-xs">
-                 <input type="text" [ngModel]="item" (ngModelChange)="updateStringListItem(entry.key, i, $event)" />
-                 <button class="icon-btn danger" (click)="removeStringListItem(entry.key, i)">
+                 <input type="text" [ngModel]="item" (ngModelChange)="updateStringListItem(entry.key, i, $event)" [disabled]="disabled" />
+                 <button class="icon-btn danger" (click)="removeStringListItem(entry.key, i)" [disabled]="disabled">
                     <span class="material-symbols-rounded">remove</span>
                  </button>
               </div>
-              <button class="btn-slim" (click)="addStringListItem(entry.key)">Add Item</button>
+              <button class="btn-slim" (click)="addStringListItem(entry.key)" [disabled]="disabled">Add Item</button>
             </div>
           </ng-container>
         </div>
         
-        <button class="icon-btn-slim danger" (click)="removeEntry(entry.key)">
+        <button class="icon-btn-slim danger" (click)="removeEntry(entry.key)" [disabled]="disabled">
           <span class="material-symbols-rounded">delete</span>
         </button>
       </div>
       
       <!-- New Entry -->
-      <div class="new-entry card p-sm flex items-center gap-sm">
+      <div class="new-entry card p-sm flex items-center gap-sm" *ngIf="!disabled">
         <input type="text" placeholder="Key" [(ngModel)]="newKey" class="flex-1" />
         <select [(ngModel)]="newType" class="flex-1">
           <option value="Boolean">Boolean</option>
@@ -70,6 +70,7 @@ import { MetadataValue } from '../../../dtos/MetadataValue';
 })
 export class MetadataEditorComponent {
   @Input() metadata: { [key: string]: MetadataValue } = {};
+  @Input() disabled = false;
   @Output() metadataChange = new EventEmitter<{ [key: string]: MetadataValue }>();
 
   newKey = '';

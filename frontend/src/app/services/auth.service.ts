@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { UserDto, UserSyncRequest } from '../dtos';
-import { tap } from 'rxjs/operators';
+import { tap, switchMap, map, catchError } from 'rxjs/operators';
 import { HttpService } from './http.service';
 import { Router } from '@angular/router';
+import { PermissionService } from './permission.service';
 
 export interface AuthConfig {
   issuer?: string;
@@ -28,7 +29,8 @@ export class AuthService {
 
   constructor(
     private http: HttpService,
-    private router: Router
+    private router: Router,
+    private permissionService: PermissionService
   ) {
     this.restoreSession();
   }
@@ -124,9 +126,13 @@ export class AuthService {
     };
 
     return this.http.post<UserDto>('/api/web/users/sync', syncRequest).pipe(
-      tap(user => {
+      switchMap(user => {
         this.userSubject.next(user);
         localStorage.setItem('vivid_user', JSON.stringify(user));
+        return this.permissionService.refreshPermissions().pipe(
+          map(() => user),
+          catchError(() => of(user))
+        );
       })
     );
   }
@@ -135,6 +141,7 @@ export class AuthService {
     this.userSubject.next(null);
     localStorage.removeItem('vivid_token');
     localStorage.removeItem('vivid_user');
+    this.permissionService.refreshPermissions();
 
     if (this.config.logoutUrl) {
       window.location.href = this.config.logoutUrl;

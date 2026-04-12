@@ -12,6 +12,9 @@ import { FormInputComponent } from '../../shared/components/form-input/form-inpu
 import { GenericTableComponent } from '../../shared/components/generic-table/generic-table.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { NoEnvironmentsWarningComponent } from '../../shared/components/no-environments-warning/no-environments-warning.component';
+import { PermissionService } from '../../services/permission.service';
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { HasEnvPermissionDirective } from '../../shared/directives/has-env-permission.directive';
 
 @Component({
   selector: 'app-main-content',
@@ -24,7 +27,9 @@ import { NoEnvironmentsWarningComponent } from '../../shared/components/no-envir
     FormInputComponent, 
     GenericTableComponent, 
     PaginationComponent,
-    NoEnvironmentsWarningComponent
+    NoEnvironmentsWarningComponent,
+    HasPermissionDirective,
+    HasEnvPermissionDirective
   ],
   templateUrl: './main-content.component.html',
   styleUrls: ['./main-content.component.css']
@@ -47,7 +52,8 @@ export class MainContentComponent implements OnInit {
     private envs: EnvironmentService,
     private featureState: FeatureStateService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    public permissions: PermissionService
   ) {}
 
   ngOnInit(): void {

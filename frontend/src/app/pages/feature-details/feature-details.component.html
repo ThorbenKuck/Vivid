@@ -26,7 +26,7 @@
           {{ 'common.name'  }}
           <span *ngIf="state.isFieldDirty('name') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
         </label>
-        <app-form-input [value]="f.name" (change)="updateField('name', $event)" [placeholder]="'common.name' "></app-form-input>
+        <app-form-input [value]="f.name" (change)="updateField('name', $event)" [placeholder]="'common.name' " [disabled]="!permissions.hasPermission('environments', 'write')"></app-form-input>
       </div>
       
       <div class="form-group" [class.dirty]="state.isFieldDirty('description') | async">
@@ -34,7 +34,7 @@
           {{ 'common.description'  }}
           <span *ngIf="state.isFieldDirty('description') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
         </label>
-        <textarea rows="3" [value]="f.description" (change)="updateField('description', $event)" [placeholder]="'common.description' "></textarea>
+        <textarea rows="3" [value]="f.description" (change)="updateField('description', $event)" [placeholder]="'common.description' " [disabled]="!permissions.hasPermission('environments', 'write')"></textarea>
       </div>
 
       <div class="form-group" [class.dirty]="state.isFieldDirty('tags') | async">
@@ -42,7 +42,7 @@
           {{ 'features.tags'  }}
           <span *ngIf="state.isFieldDirty('tags') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
         </label>
-        <app-chiplist [tags]="f.tags" [options]="tagsOptions" (tagsChange)="updateField('tags', $event)"></app-chiplist>
+        <app-chiplist [tags]="f.tags" [options]="tagsOptions" (tagsChange)="updateField('tags', $event)" [disabled]="!permissions.hasPermission('environments', 'write')"></app-chiplist>
       </div>
     </div>
   </section>
@@ -58,7 +58,7 @@
     </div>
 
     <div class="flex-col gap-md" *ngIf="!collapsedCards.teams">
-      <div class="search-container relative">
+      <div class="search-container relative" *hasPermission="['environments', 'write']">
         <div class="flex items-center gap-sm relative">
           <input 
             type="text" 
@@ -85,7 +85,7 @@
       <div class="teams-list flex flex-wrap gap-xs">
         <div *ngFor="let team of f.assignedTeams; trackBy: trackByTeamId" class="chip flex items-center gap-xs">
           <span class="text-xs">{{ team.name }}</span>
-          <button class="remove-btn" (click)="removeTeam(team.id)">
+          <button class="remove-btn" (click)="removeTeam(team.id)" *hasPermission="['environments', 'write']">
             <span class="material-symbols-rounded">close</span>
           </button>
         </div>
@@ -104,7 +104,7 @@
     </div>
 
     <div class="flex-col gap-md" *ngIf="!collapsedCards.related">
-      <div class="search-container relative">
+      <div class="search-container relative" *hasPermission="['environments', 'write']">
         <div class="flex items-center gap-sm relative">
           <input 
             type="text" 
@@ -131,7 +131,7 @@
       <div class="links-list flex flex-wrap gap-xs">
         <div *ngFor="let link of f.outgoingLinks; trackBy: trackByLinkId" class="chip flex items-center gap-xs">
           <span class="text-xs">{{ link.targetFeatureName || link.targetFeatureId }}</span>
-          <button class="remove-btn" (click)="removeLink(link.id!)">
+          <button class="remove-btn" (click)="removeLink(link.id!)" *hasPermission="['environments', 'write']">
             <span class="material-symbols-rounded">close</span>
           </button>
         </div>
@@ -151,6 +151,7 @@
               (click)="selectEnv(env.environmentId)">
         <span class="status-dot-sm" [style.background-color]="env.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'"></span>
         <span class="text-xs font-semibold">{{ env.environmentName }}</span>
+        <span class="material-symbols-rounded lock-icon-sm" *ngIf="!permissions.hasEnvPermission(env.environmentName, 'write')" [title]="'No write access to ' + env.environmentName">lock</span>
         <span *ngIf="state.isEnvDirty(env.environmentId) | async" class="dirty-indicator-dot"></span>
       </button>
     </div>
@@ -171,7 +172,10 @@
             </div>
             <div class="flex items-center gap-sm">
               <span *ngIf="state.isEnvFieldDirty(env.environmentId, 'enabled') | async" class="text-xs text-accent-mint italic">Changed</span>
-              <button class="btn-toggle" [class.active]="env.enabled" (click)="updateEnvField(env.environmentId, 'enabled', !env.enabled)">
+              <button class="btn-toggle" 
+                      [class.active]="env.enabled" 
+                      (click)="updateEnvField(env.environmentId, 'enabled', !env.enabled)"
+                      [disabled]="!permissions.hasEnvPermission(env.environmentName, 'write')">
                 {{ env.enabled ? 'Enabled' : 'Disabled' }}
               </button>
             </div>
@@ -191,18 +195,22 @@
                   <div class="flex items-center gap-sm">
                     <span *ngIf="state.isEnvFlagDirty(env.environmentId, flag.key) | async" class="text-xs text-accent-mint italic">Changed</span>
                     <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
-                    <button class="icon-btn-slim" (click)="toggleFlag(env.environmentId, env.flags, flag.key, !flag.value)">
+                    <button class="icon-btn-slim" 
+                            (click)="toggleFlag(env.environmentId, env.flags, flag.key, !flag.value)"
+                            [disabled]="!permissions.hasEnvPermission(env.environmentName, 'write')">
                       <span class="material-symbols-rounded" [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
                         {{ flag.value ? 'toggle_on' : 'toggle_off' }}
                       </span>
                     </button>
-                    <button class="icon-btn-slim danger" (click)="removeFlag(env.environmentId, env.flags, flag.key)">
+                    <button class="icon-btn-slim danger" 
+                            (click)="removeFlag(env.environmentId, env.flags, flag.key)"
+                            *hasEnvPermission="[env.environmentName, 'write']">
                       <span class="material-symbols-rounded">delete</span>
                     </button>
                   </div>
                 </div>
 
-                <div class="add-flag-row flex items-center gap-sm mt-sm">
+                <div class="add-flag-row flex items-center gap-sm mt-sm" *hasEnvPermission="[env.environmentName, 'write']">
                   <input type="text" #newFlagKey class="form-input text-xs flex-1" placeholder="New flag key..." />
                   <button class="btn-slim primary" (click)="addFlag(env.environmentId, env.flags, newFlagKey.value); newFlagKey.value = ''">
                     <span class="material-symbols-rounded">add</span>
@@ -219,11 +227,13 @@
               <span class="material-symbols-rounded" style="color: var(--accent-lavender)">database</span>
               <h2 class="section-title text-sm">Metadata</h2>
             </div>
-            <app-metadata-editor [metadata]="env.metadata" (metadataChange)="updateMetadata(env.environmentId, $event)"></app-metadata-editor>
+            <app-metadata-editor [metadata]="env.metadata" 
+                                 (metadataChange)="updateMetadata(env.environmentId, $event)"
+                                 [disabled]="!permissions.hasEnvPermission(env.environmentName, 'write')">
+            </app-metadata-editor>
           </section>
 
-          <!-- Copy From -->
-          <section class="card flex-col gap-lg">
+          <section class="card flex-col gap-lg" *hasEnvPermission="[env.environmentName, 'write']">
             <div class="section-header flex items-center gap-sm">
               <span class="material-symbols-rounded" style="color: var(--accent-lavender)">content_copy</span>
               <h2 class="section-title text-sm">Copy From</h2>

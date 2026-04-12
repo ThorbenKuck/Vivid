@@ -23,9 +23,7 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
           console.warn(`${error.status} error detected, logging out`);
-          setTimeout(() =>  {
-            this.authService.logout();
-          }, 3000);
+          this.authService.logout();
         }
         return throwError(() => error);
       })

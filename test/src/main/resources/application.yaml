@@ -1,0 +1,14 @@
+spring.vivid:
+  rest:
+    polling:
+      interval: 5s
+    base-url: http://localhost:8080
+  application-id: test
+  environment: Dev
+  streams:
+    - rest
+
+server:
+  port: 8808
+logging.level:
+    com.vivid: INFO

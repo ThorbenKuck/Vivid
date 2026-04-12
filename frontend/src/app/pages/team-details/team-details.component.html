@@ -23,7 +23,7 @@
           Name
           <span *ngIf="state.isFieldDirty('name') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
         </label>
-        <app-form-input [value]="t.name" (change)="updateField('name', $event)" placeholder="Name"></app-form-input>
+        <app-form-input [value]="t.name" (change)="updateField('name', $event)" placeholder="Name" [disabled]="!permissions.hasPermission('teams', 'write')"></app-form-input>
       </div>
       
       <div class="form-group" [class.dirty]="state.isFieldDirty('description') | async">
@@ -31,7 +31,7 @@
           Description
           <span *ngIf="state.isFieldDirty('description') | async" class="material-symbols-rounded text-xs dirty-indicator">circle</span>
         </label>
-        <textarea rows="3" [value]="t.description" (change)="updateField('description', $event)" placeholder="Description"></textarea>
+        <textarea rows="3" [value]="t.description" (change)="updateField('description', $event)" placeholder="Description" [disabled]="!permissions.hasPermission('teams', 'write')"></textarea>
       </div>
     </div>
   </section>
@@ -44,7 +44,7 @@
     </div>
 
     <div class="flex-col gap-md">
-      <div class="search-container relative">
+      <div class="search-container relative" *hasPermission="['teams', 'write']">
         <div class="flex items-center gap-sm relative">
           <input 
             type="text" 
@@ -80,7 +80,7 @@
               <span class="text-xs text-muted">{{ member.displayRole || 'Member' }}</span>
             </div>
           </div>
-          <button class="icon-btn-slim danger" (click)="removeMember(member.id)">
+          <button *hasPermission="['teams', 'write']" class="icon-btn-slim danger" (click)="removeMember(member.id)">
             <span class="material-symbols-rounded">person_remove</span>
           </button>
         </div>

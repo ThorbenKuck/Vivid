@@ -1,5 +1,6 @@
 package com.vivid.sdk.spring.kafka
 
+import com.vivid.sdk.FeatureCache
 import com.vivid.sdk.FeatureStream
 import com.vivid.sdk.Subscription
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
@@ -7,7 +8,7 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 
 /**
- * A FeatureStream that subscribes to a Kafka topic.
+ * [FeatureStream] implementation that uses Kafka to receive feature updates.
  */
 class KafkaFeatureStream(
     private val registry: KafkaListenerEndpointRegistry,

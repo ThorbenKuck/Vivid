@@ -4,15 +4,15 @@
       <span class="material-symbols-rounded">stars</span>
       <span class="label" *ngIf="!collapsed"> Features</span>
     </a>
-    <a routerLink="/environments" routerLinkActive="active" class="nav-item">
+    <a *hasPermission="['environments', 'read']" routerLink="/environments" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">public</span>
       <span class="label" *ngIf="!collapsed"> Environments</span>
     </a>
-    <a routerLink="/teams" routerLinkActive="active" class="nav-item">
+    <a *hasPermission="['teams', 'read']" routerLink="/teams" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">group</span>
       <span class="label" *ngIf="!collapsed"> Teams</span>
     </a>
-    <a routerLink="/departments" routerLinkActive="active" class="nav-item">
+    <a *hasPermission="['departments', 'read']" routerLink="/departments" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">corporate_fare</span>
       <span class="label" *ngIf="!collapsed"> Departments</span>
     </a>

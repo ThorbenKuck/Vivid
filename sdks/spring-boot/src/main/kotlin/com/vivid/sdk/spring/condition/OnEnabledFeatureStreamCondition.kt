@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
 import org.springframework.core.type.AnnotatedTypeMetadata
 
+/**
+ * Condition that matches if the required feature stream is enabled.
+ */
 class OnEnabledFeatureStreamCondition : Condition {
     override fun matches(
         context: ConditionContext,

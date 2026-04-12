@@ -78,6 +78,12 @@
   transition: var(--transition);
 }
 
+.lock-icon {
+  font-size: 10px !important;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 .table-header {
   border-bottom: var(--border-thin);
 }

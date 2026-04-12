@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { TranslateModule } from '@ngx-translate/core';
 import { FormInputComponent } from '../../../shared/components/form-input/form-input.component';
 import { GenericTableComponent } from '../../../shared/components/generic-table/generic-table.component';
+import {HasPermissionDirective} from "../../../shared/directives/has-permission.directive";
 
 @Component({
   selector: 'app-department-overview',
@@ -18,7 +19,8 @@ import { GenericTableComponent } from '../../../shared/components/generic-table/
     ReactiveFormsModule,
     TranslateModule,
     FormInputComponent,
-    GenericTableComponent
+    GenericTableComponent,
+    HasPermissionDirective
   ],
   templateUrl: './department-overview.component.html',
   styleUrls: ['./department-overview.component.css']

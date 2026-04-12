@@ -1,0 +1,20 @@
+{
+  "sidebar": [
+    {
+      "label": "Introduction",
+      "link": "/docs/introduction"
+    },
+    {
+      "label": "Getting Started",
+      "link": "/docs/getting-started"
+    },
+    {
+      "label": "Core Concepts",
+      "link": "/docs/core-concepts"
+    },
+    {
+      "label": "SDKs",
+      "link": "/docs/sdks"
+    }
+  ]
+}

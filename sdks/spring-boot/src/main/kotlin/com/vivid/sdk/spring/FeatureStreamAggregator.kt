@@ -11,6 +11,11 @@ import org.springframework.beans.factory.ObjectProvider
 
 private val logger = LoggerFactory.getLogger(FeatureStreamAggregator::class.java)
 
+/**
+ * Aggregator for multiple [FeatureStream] instances.
+ *
+ * This class is responsible for starting and stopping all enabled [FeatureStream] instances and updating the local [com.vivid.sdk.Features] state.
+ */
 class FeatureStreamAggregator(
     private val features: ModifiableFeatures,
     private val featureStreams: ObjectProvider<FeatureStream>,

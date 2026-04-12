@@ -8,11 +8,12 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormInputComponent } from '../../shared/components/form-input/form-input.component';
 import { GenericTableComponent } from '../../shared/components/generic-table/generic-table.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-environments',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, GenericTableComponent, PaginationComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, GenericTableComponent, PaginationComponent, HasPermissionDirective],
   templateUrl: './environments.component.html',
   styleUrls: ['./environments.component.css']
 })

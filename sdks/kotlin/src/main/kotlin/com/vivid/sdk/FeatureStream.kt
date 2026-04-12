@@ -19,11 +19,34 @@ import com.vivid.sdk.api.Feature
  */
 interface FeatureStream {
 
+    /**
+     * Subscribe to updates from the feature stream.
+     *
+     * Whenever a new update is received, the [Callback] will be notified.
+     *
+     * @param callback the callback to notify when an update is received
+     * @return a [Subscription] instance that can be used to unsubscribe from the stream
+     */
     fun subscribe(callback: Callback): Subscription
 
+    /**
+     * Callback for receiving feature updates from a [FeatureStream].
+     */
     interface Callback {
+        /**
+         * Called whenever a single feature has been updated.
+         *
+         * @param feature the updated feature state
+         */
         fun onNext(feature: Feature)
 
+        /**
+         * Called when all features have been updated at once.
+         *
+         * This can happen during initial synchronization or when a bulk update is received.
+         *
+         * @param featureValues a list of all current feature states
+         */
         fun setAll(featureValues: List<Feature>)
     }
 }

@@ -10,6 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 
+/**
+ * [FeatureStream] implementation that uses Server-Sent Events (SSE) to receive feature updates.
+ */
 class SseFeatureStream(
     private val webClient: WebClient,
     private val sseProperties: VividSseProperties,

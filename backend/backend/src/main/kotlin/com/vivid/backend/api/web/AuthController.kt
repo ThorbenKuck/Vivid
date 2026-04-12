@@ -1,5 +1,8 @@
 package com.vivid.backend.api.web
 
+import com.vivid.backend.api.web.dto.AuthConfigDto
+import com.vivid.backend.api.web.dto.PermissionSetDto
+import com.vivid.backend.service.PermissionService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -8,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
+    private val permissionService: PermissionService,
     @Value("\${vivid.auth.issuer:}") private val issuer: String,
     @Value("\${vivid.auth.client-id:}") private val clientId: String,
     @Value("\${vivid.auth.frontend-base-url:}") private val frontendBaseUrl: String
@@ -23,9 +27,9 @@ class AuthController(
             logoutUrl = logoutUrl
         )
     }
-}
 
-data class AuthConfigDto(
-    val issuer: String?,
-    val logoutUrl: String?
-)
+    @GetMapping("/permissions")
+    fun getPermissions(): PermissionSetDto {
+        return permissionService.getEffectivePermissions()
+    }
+}

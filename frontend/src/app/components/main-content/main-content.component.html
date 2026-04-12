@@ -42,10 +42,15 @@
 
         <!-- Column 3: Environments -->
         <div class="col-envs flex gap-md px-md" *ngIf="environments$ | async as envs">
-          <div *ngFor="let e of envs" class="col-env flex justify-center" style="width: 32px;">
+          <div *ngFor="let e of envs" class="col-env flex flex-col items-center justify-center" style="width: 32px;">
             <span class="status-dot shadow-slim" 
                   [style.background-color]="getEnv(f, e.id)?.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'"
                   [title]="e.name + ': ' + (getEnv(f, e.id)?.enabled ? 'Enabled' : 'Disabled')">
+            </span>
+            <span class="material-symbols-rounded lock-icon" 
+                  *ngIf="!permissions.hasEnvPermission(e.name, 'write')"
+                  [title]="'No write access to ' + e.name">
+              lock
             </span>
           </div>
         </div>
@@ -80,7 +85,7 @@
 </div>
 
 @if((environments$ | async)?.length !== 0) {
-    <button class="fab" (click)="toggleAdd()" [title]="'common.add'">
+    <button class="fab" *hasPermission="['environments', 'write']" (click)="toggleAdd()" [title]="'common.add'">
         <span class="material-symbols-rounded">add</span>
     </button>
 }
