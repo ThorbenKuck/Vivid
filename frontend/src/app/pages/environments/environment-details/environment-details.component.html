@@ -1,0 +1,22 @@
+<div class="page-header flex items-center justify-between">
+  <button class="btn-slim" (click)="back()">
+    <span class="material-symbols-rounded">arrow_back</span>
+    <span>{{ 'common.back'  }}</span>
+  </button>
+  <h1 class="page-title text-lg">Environment</h1>
+</div>
+
+@if(env(); as env) {
+    <card>
+        <h3 vivid-card-title>{{ env.name }}</h3>
+        @if(env.description; as desc) {
+            <div>{{ desc }}</div>
+        } @else {
+            <div class="no-description">No description provided</div>
+        }
+    </card>
+} @else {
+    <ng-template>
+        <div class="card text-secondary">{{ 'common.loading'  }}</div>
+    </ng-template>
+}

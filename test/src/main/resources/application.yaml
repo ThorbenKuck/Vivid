@@ -6,9 +6,9 @@ spring.vivid:
   application-id: test
   environment: Dev
   streams:
-    - rest
+    - sse
 
 server:
   port: 8808
 logging.level:
-    com.vivid: INFO
+    com.vivid: TRACE

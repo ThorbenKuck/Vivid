@@ -12,8 +12,8 @@ data class ClientFeatureDto(
     val timestamp: Instant = Instant.now(),
 )
 
-fun FeatureEnvironment.toDto() = ClientFeatureDto(
-    id = id.toString(),
+fun FeatureEnvironment.toClientDto() = ClientFeatureDto(
+    id = feature.id.toString(),
     name = feature.name,
     enabled = enabled,
     flags = flags,

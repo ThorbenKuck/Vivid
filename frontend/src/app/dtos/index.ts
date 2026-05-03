@@ -7,6 +7,5 @@ export * from './FeatureLinkCreateRequest';
 export * from './FeatureEnvironmentUpdateRequest';
 export * from './EnvironmentDto';
 export * from './EnvironmentCreateRequest';
-export * from './Page';
 export * from './UserDto';
-export * from './TeamDto';
+export * from './NoteDto';

@@ -1,6 +1,6 @@
 import { MetadataValue } from './MetadataValue';
 import { FeatureLinkDto } from './FeatureLinkDto';
-import { TeamDto } from './TeamDto';
+import { NoteDto } from './NoteDto';
 
 export interface FeatureEnvironmentDto {
   environmentId: string;
@@ -14,9 +14,10 @@ export interface FeatureDto {
   id?: string;
   runningNumber: number;
   name: string;
+  key: string;
   description?: string;
   environments: FeatureEnvironmentDto[];
   tags: string[];
   outgoingLinks: FeatureLinkDto[];
-  assignedTeams: TeamDto[];
+  notes: NoteDto[];
 }

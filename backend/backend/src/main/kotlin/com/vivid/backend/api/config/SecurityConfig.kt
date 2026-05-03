@@ -41,6 +41,7 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
+                auth.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
                 auth.anyRequest().authenticated()
             }
             .addFilterBefore(

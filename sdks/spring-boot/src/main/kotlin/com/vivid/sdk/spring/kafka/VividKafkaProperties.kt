@@ -26,7 +26,10 @@ data class VividKafkaProperties(
     /**
      * The kafka group id that vivid should use.
      *
-     * If spring-boot-starter-kafka is in the classpath, this should be the groupId of the application context.
+     * By default, this is a random uuid.
+     *
+     * If you overwrite this property, make sure that different instances have different group ids.
+     * Otherwise, only one instance of your application will receive the messages.
      */
     val groupId: String,
     /**

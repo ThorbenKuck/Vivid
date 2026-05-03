@@ -13,11 +13,26 @@ data class FeatureDto(
     val id: UUID?,
     val runningNumber: Long,
     val name: String,
+    val key: String,
     val description: String?,
     val environments: List<FeatureEnvironmentDto>,
     val tags: List<String>,
     val outgoingLinks: List<FeatureLinkDto>,
-    val assignedTeams: List<TeamDto>
+    val notes: List<NoteDto>
+)
+
+data class NoteDto(
+    val id: UUID,
+    val content: String,
+    val authorName: String,
+    val timestamp: java.time.Instant
+)
+
+fun com.vivid.backend.domain.entity.Note.toDto(): NoteDto = NoteDto(
+    id = id,
+    content = content,
+    authorName = author.username,
+    timestamp = timestamp
 )
 
 data class FeatureEnvironmentDto(
@@ -29,7 +44,7 @@ data class FeatureEnvironmentDto(
 )
 
 fun FeatureEnvironment.toDto(): FeatureEnvironmentDto = FeatureEnvironmentDto(
-    environmentId = environment.id!!,
+    environmentId = environment.id,
     environmentName = environment.name,
     enabled = enabled,
     flags = flags.toMap(),
@@ -40,7 +55,7 @@ fun Feature.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
     val envDtos = allEnvironments.map { env ->
         val fe = findFeatureEnvironment(env)
         FeatureEnvironmentDto(
-            environmentId = env.id!!,
+            environmentId = env.id,
             environmentName = env.name,
             enabled = fe?.enabled ?: false,
             flags = fe?.flags ?: emptyMap(),
@@ -51,11 +66,12 @@ fun Feature.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
         id = id,
         runningNumber = runningNumber,
         name = name,
+        key = key,
         description = description,
         environments = envDtos,
         tags = tags.toList(),
         outgoingLinks = outgoingLinks.map { it.toDto() },
-        assignedTeams = assignedTeams.map { it.toDto() }
+        notes = notes.map { it.toDto() }
     )
 }
 
@@ -77,8 +93,11 @@ data class FeatureUpdateRequest(
     val name: String? = null,
     val description: String? = null,
     val tags: List<String>? = null,
-    val environments: List<FeatureEnvironmentUpdateRequest>? = null,
-    val assignedTeamIds: List<UUID>? = null
+    val environments: List<FeatureEnvironmentUpdateRequest>? = null
+)
+
+data class NoteCreateRequest(
+    val content: String
 )
 
 data class FeatureEnvironmentUpdateRequest(
@@ -103,45 +122,26 @@ fun FeatureLink.toDto(): FeatureLinkDto = FeatureLinkDto(
     type = this.type
 )
 
-fun FeatureCreateRequest.toEntity(department: com.vivid.backend.domain.entity.Department): Feature = Feature(
-    name = this.name,
-    description = this.description,
-    tags = this.tags.toMutableSet(),
-    department = department
-)
-
 // Environment DTOs
 
 data class EnvironmentDto(
-    val id: java.util.UUID?,
+    val id: UUID,
     val name: String,
-    val description: String?
+    val description: String?,
+    val key: String,
+    val weight: Int?
 )
 
-fun EnvironmentEntity.toDto() = EnvironmentDto(id = this.id, name = this.name, description = this.description)
+fun EnvironmentEntity.toDto() = EnvironmentDto(
+    id = this.id,
+    name = this.name,
+    key = this.key,
+    description = this.description,
+    weight = this.weight,
+)
 
 data class EnvironmentCreateRequest(
     val name: String,
     val description: String?
 )
 
-// Department DTOs
-
-data class DepartmentDto(
-    val id: UUID,
-    val name: String,
-    val description: String?,
-    val teams: List<TeamDto>? = null
-)
-
-fun com.vivid.backend.domain.entity.Department.toDto(includeTeams: Boolean = false): DepartmentDto = DepartmentDto(
-    id = id,
-    name = name,
-    description = description,
-    teams = if (includeTeams) teams.map { it.toDto(includeMembers = true) } else null
-)
-
-data class DepartmentCreateRequest(
-    val name: String,
-    val description: String? = null
-)

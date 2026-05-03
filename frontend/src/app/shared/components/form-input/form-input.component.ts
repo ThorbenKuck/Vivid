@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input} from '@angular/core';
+import {Component, forwardRef, input, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 
@@ -15,19 +15,26 @@ import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/for
     ],
     template: `
         <div class="input-container" [class.has-icon]="icon">
-            <span *ngIf="icon" class="material-symbols-rounded input-icon">{{ icon }}</span>
+            @if (icon(); as icon) {
+                <span class="material-symbols-rounded input-icon">{{ icon }}</span>
+            }
             <input
-                    [type]="type"
-                    [placeholder]="placeholder"
+                    [type]="type()"
+                    [placeholder]="placeholder()"
+                    [disabled]="disabled()"
                     [(ngModel)]="value"
                     (ngModelChange)="onModelChange($event)"
                     (blur)="onBlur()"
                     class="slim-input"
-                    [class.icon-padding]="icon"
+                    [class.icon-padding]="icon()"
             />
         </div>
     `,
     styles: [`
+        input:disabled {
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
         .input-container {
             position: relative;
             display: flex;
@@ -55,10 +62,11 @@ import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/for
     `]
 })
 export class FormInputComponent implements ControlValueAccessor {
-    @Input() icon: string = '';
-    @Input() type: string = 'text';
-    @Input() placeholder: string = '';
+    icon = input<string>('');
+    type = input<string>('text');
+    placeholder = input<string>('');
     @Input() value: string = '';
+    disabled = input<boolean>(false);
 
     onChange: any = () => {
     };

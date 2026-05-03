@@ -1,0 +1,20 @@
+<div class="vivid-card" [class.interactive]="interactive()">
+
+    <div class="card-header">
+        <div class="title-wrapper">
+            <ng-content select="[vivid-card-title]"></ng-content>
+            <ng-content select="[vivid-card-subtitle]"></ng-content>
+        </div>
+        <div class="header-actions">
+            <ng-content select="[vivid-card-header-actions]"></ng-content>
+        </div>
+    </div>
+
+    <div class="card-content">
+        <ng-content></ng-content>
+    </div>
+
+    <div class="card-footer">
+        <ng-content select="[vivid-card-actions]"></ng-content>
+    </div>
+</div>

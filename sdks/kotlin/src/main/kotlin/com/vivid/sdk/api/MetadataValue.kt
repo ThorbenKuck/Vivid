@@ -33,6 +33,7 @@ interface MetadataValue
 fun MetadataValue?.isTrue(): Boolean? {
     return when (this) {
         is BooleanMetadataValue -> this.content
+        is StringMetadataValue -> this.content.toBooleanStrictOrNull()
         else -> null
     }
 }
@@ -40,6 +41,7 @@ fun MetadataValue?.isTrue(): Boolean? {
 fun MetadataValue?.isFalse(): Boolean? {
     return when (this) {
         is BooleanMetadataValue -> this.content
+        is StringMetadataValue -> this.content.toBooleanStrictOrNull()
         else -> null
     }
 }

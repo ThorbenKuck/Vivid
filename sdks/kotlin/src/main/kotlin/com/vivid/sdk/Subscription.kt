@@ -14,4 +14,20 @@ interface Subscription {
      */
     fun cancel()
 
+    companion object {
+        operator fun invoke(layers: Collection<Subscription>) = CompositeSubscription(layers)
+    }
+
+    class CompositeSubscription(private val layers: Collection<Subscription>) : Subscription {
+        override fun cancel() {
+            layers.forEach { it.cancel() }
+            if (layers is MutableCollection<*>) {
+                layers.clear()
+            }
+        }
+    }
+
+    object Empty : Subscription {
+        override fun cancel() {}
+    }
 }

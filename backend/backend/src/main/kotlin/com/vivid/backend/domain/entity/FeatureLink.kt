@@ -8,11 +8,11 @@ import java.util.*
 class FeatureLink(
     id: UUID = UUID.randomUUID(),
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "source_feature_id", nullable = false)
     var sourceFeature: Feature,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "target_feature_id", nullable = false)
     var targetFeature: Feature,
 

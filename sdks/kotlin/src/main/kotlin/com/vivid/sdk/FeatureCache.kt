@@ -1,7 +1,7 @@
 package com.vivid.sdk
 
 import com.vivid.sdk.api.Feature
-import com.vivid.sdk.caches.FetchingFeatureCache
+import com.vivid.sdk.caches.ApiEnabledFeatureCache
 import com.vivid.sdk.caches.SimpleFeatureCache
 
 /**
@@ -28,7 +28,7 @@ interface FeatureCache {
          * The cache implementation by this factory method is a wrapper around a [FeatureApi] instance.
          */
         operator fun invoke(api: FeatureApi): FeatureCache {
-            return FetchingFeatureCache(api)
+            return ApiEnabledFeatureCache(api)
         }
     }
 
@@ -56,6 +56,17 @@ interface FeatureCache {
     fun set(feature: Feature): Feature?
 
     /**
+     * Registers an alternative name for the feature
+     *
+     * This is useful if you are referencing a feature not through the unique UUID, but through the key, name, or id.
+     * The provided alias can be used interchangeably with the feature's UUID, key, or name.
+     *
+     * @param alias the alias to register for the feature
+     * @param feature the feature to register the alias for
+     */
+    fun setAlias(alias: String, feature: Feature)
+
+    /**
      * Set the states of multiple features at once.
      *
      * @param features the new feature states
@@ -78,6 +89,22 @@ interface FeatureCache {
      * @return the removed [Feature] state, or null if it was not in cache
      */
     fun invalidate(key: String): Feature?
+
+    /**
+     * Invalidates the whole cache.
+     *
+     * This is the same as calling [invalidate] for all keys in the cache.
+     */
+    fun invalidate()
+
+    /**
+     * Sets the enabled state of this cache.
+     *
+     * If a cache is disabled, all operations will be no-op.
+     *
+     * @param state the new enabled state
+     */
+    fun enable(state: Boolean)
 
     /**
      * Callback for receiving updates from a [FeatureCache].

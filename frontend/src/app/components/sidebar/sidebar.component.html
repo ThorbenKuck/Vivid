@@ -2,19 +2,15 @@
   <div class="nav-links">
     <a routerLink="/features" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">stars</span>
-      <span class="label" *ngIf="!collapsed"> Features</span>
+        @if (!collapsed) {
+            <span class="label"> Features</span>
+        }
     </a>
     <a *hasPermission="['environments', 'read']" routerLink="/environments" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">public</span>
-      <span class="label" *ngIf="!collapsed"> Environments</span>
-    </a>
-    <a *hasPermission="['teams', 'read']" routerLink="/teams" routerLinkActive="active" class="nav-item">
-      <span class="material-symbols-rounded">group</span>
-      <span class="label" *ngIf="!collapsed"> Teams</span>
-    </a>
-    <a *hasPermission="['departments', 'read']" routerLink="/departments" routerLinkActive="active" class="nav-item">
-      <span class="material-symbols-rounded">corporate_fare</span>
-      <span class="label" *ngIf="!collapsed"> Departments</span>
+        @if(!collapsed) {
+            <span class="label"> Environments</span>
+        }
     </a>
   </div>
 

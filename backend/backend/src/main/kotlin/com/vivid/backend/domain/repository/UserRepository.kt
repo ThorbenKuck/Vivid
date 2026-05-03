@@ -8,8 +8,6 @@ import java.util.*
 interface UserRepository : JpaRepository<User, UUID> {
     fun findByKeycloakId(keycloakId: String): User?
 
-    @Query("select u from User u where (lower(u.username) like lower(concat('%', :query, '%')) or lower(u.email) like lower(concat('%', :query, '%'))) and u.department.id = :departmentId")
-    fun search(query: String, departmentId: UUID): List<User>
-
-    fun findAllByDepartmentId(departmentId: UUID): List<User>
+    @Query("select u from User u where (lower(u.username) like lower(concat('%', :query, '%')) or lower(u.email) like lower(concat('%', :query, '%')))")
+    fun search(query: String): List<User>
 }

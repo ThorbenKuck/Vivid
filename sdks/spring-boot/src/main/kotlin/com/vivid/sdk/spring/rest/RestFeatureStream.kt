@@ -36,8 +36,8 @@ class RestFeatureStream(
         } else if(pollingProperties.pollType == VividPollingProperties.PollType.REFRESH) {
             logger.debug("Refreshing feature cache with known features from Vivid")
             cache.getAll().forEach {
-                logger.trace("Refreshing feature: {}", it.name)
-                api.fetchFeature(it.name)?.let {
+                logger.trace("Refreshing feature: {}", it)
+                api.fetchFeature(it.id)?.let {
                     onNext(it)
                 }
             }

@@ -4,7 +4,6 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
-import { ContextService } from './context.service';
 import { ToastService } from './toast.service';
 
 @Injectable({
@@ -15,7 +14,6 @@ export class HttpService {
 
   constructor(
     private http: HttpClient, 
-    private contextService: ContextService,
     private toastService: ToastService
   ) {}
 
@@ -78,13 +76,6 @@ export class HttpService {
 
   private formatParams(params?: any, url?: string): HttpParams {
     let httpParams = new HttpParams();
-
-    if (url?.includes('/api/web/')) {
-      const deptId = this.contextService.getActiveDepartmentId();
-      if (deptId) {
-        httpParams = httpParams.set('departmentId', deptId);
-      }
-    }
 
     if (params) {
       Object.keys(params).forEach(key => {

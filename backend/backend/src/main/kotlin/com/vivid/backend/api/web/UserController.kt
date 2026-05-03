@@ -18,30 +18,27 @@ class UserController(
     @PostMapping("/sync")
     @Operation(summary = "Synchronize user from Keycloak (JIT Provisioning)")
     fun syncUser(
-        @RequestParam(required = false) departmentId: UUID?,
         @RequestBody request: UserSyncRequest
     ): UserDto {
         return userService.syncUser(
             keycloakId = request.keycloakId,
             username = request.username,
             email = request.email,
-            displayRole = request.displayRole,
-            departmentId = departmentId
+            displayRole = request.displayRole
         ).toDto()
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search users by username or email")
     fun searchUsers(
-        @RequestParam q: String,
-        @RequestParam departmentId: UUID
+        @RequestParam q: String
     ): List<UserDto> {
-        return userService.searchUsers(q, departmentId).map { it.toDto() }
+        return userService.searchUsers(q).map { it.toDto() }
     }
 
     @GetMapping
     @Operation(summary = "Get all users")
-    fun getAllUsers(@RequestParam departmentId: UUID): List<UserDto> {
-        return userService.getAllUsers(departmentId).map { it.toDto() }
+    fun getAllUsers(): List<UserDto> {
+        return userService.getAllUsers().map { it.toDto() }
     }
 }

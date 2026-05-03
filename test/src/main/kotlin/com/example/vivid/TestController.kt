@@ -2,7 +2,12 @@ package com.example.vivid
 
 import com.vivid.sdk.FeatureReference
 import com.vivid.sdk.Features
+import com.vivid.sdk.api.MetadataValue
 import com.vivid.sdk.api.contains
+import com.vivid.sdk.api.isFalse
+import com.vivid.sdk.api.isTrue
+import com.vivid.sdk.api.metadata.StringListMetadataValue
+import com.vivid.sdk.api.metadata.StringMetadataValue
 import com.vivid.sdk.spring.qualifier.Vivid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -36,6 +41,10 @@ class TestController(
             return "TRUE"
         }
 
+        val test: MetadataValue? = features.get(feature).getMetadata(name)
+        test.contains("local")
+        test.isTrue()
+        test.isFalse()
 
         return features.get(feature).getMetadata(name)
     }

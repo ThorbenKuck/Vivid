@@ -21,11 +21,16 @@ class SpringFeatureApi(
 ) : FeatureApi {
 
     override fun fetchFeature(key: String): Feature? {
+        if (key.isBlank()) {
+            return null
+        }
+
         try {
+            logger.trace("Attempting to fetch feature \"$key\"")
             return restClient.get()
                 .uri {
-                    it.pathSegment("api", "client", "features", "{environment}", "{id}")
-                        .build(vividProperties.environment, key)
+                    it.path("/api/client/features/{environment}/{id}")
+                        .build(vividProperties.environment.trim().removeSuffix("/"), key)
                 }
                 .headers {
                     it.accept = listOf(MediaType.APPLICATION_JSON)
@@ -35,6 +40,9 @@ class SpringFeatureApi(
                 .retrieve()
                 .toEntity<Feature>()
                 .body
+                .also {
+                    logger.trace("Fetched feature \"$key\" as \"${it?.id}\"")
+                }
         } catch (e: HttpClientErrorException.NotFound) {
             logger.warn("Feature $key not found", e)
         } catch (e: Exception) {
@@ -48,9 +56,8 @@ class SpringFeatureApi(
             logger.debug("Fetching all features for environment ${vividProperties.environment}")
             return restClient.get()
                 .uri {
-                    it.pathSegment("api", "client", "features", "{environment}")
-                        .build(vividProperties.environment)
-                }
+                    it.path("/api/client/features/{environment}") // Nutze .path() statt Segmente für mehr Kontrolle
+                        .build(vividProperties.environment.trim().removeSuffix("/"))                }
                 .headers {
                     it.accept = listOf(MediaType.APPLICATION_JSON)
                     it.add(restProperties.applicationIdHeaderName, vividProperties.applicationId)

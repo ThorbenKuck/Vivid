@@ -6,14 +6,10 @@ This repository is a mono-repo and must follow this structure:
 - frontend/
 - sdks/
 
-All backend-related code must live strictly inside /backend.
-No backend code may be generated outside this directory.
-
-Frontend code must only exist inside /frontend.
-
-SDK implementations must be placed inside /sdks/{language}.
-
-Do not mix layers or cross these boundaries.
+- Backend code must only exist inside /backend.
+- Frontend code must only exist inside /frontend.
+- SDK implementations must be placed inside /sdks/{language}.
+- Do not mix layers or cross these boundaries.
 
 ### Backend (Spring Boot + Kotlin + Maven)
 
@@ -47,18 +43,28 @@ Upwards dependencies must be resolved via constructor injections of interface im
 
 #### Rules:
 
-- Controllers must not access repositories directly.
-- Controllers may only communicate with services.
-- Services contain business logic.
-- Repositories are only used inside services.
-- Repositories are located inside the domain layer.
-- Domain entities must never be exposed directly in API responses.
-- DTOs must be used for all external communication.
-- Mapping must be done via functions in the DTOs.
-  - For converting DTOs to entities, use/create `toEntity()` functions with mandatory parameters.
-  - For converting entities to DTOs, use the `toDto()` extension functions (`fun DomainEntity.toDto(): DTO {}`).
-- Separate classes by files. Do not put multiple classes in a single file.
-- Extension functions are always placed in the same file as the class they extend.
+- API
+  - Controllers must not access repositories directly.
+  - Controllers may only communicate with services.
+  - Controllers only expose and accept DTOs, which are mapped to/from domain entities.
+  - DTOs must be used for all external communication.
+- Business
+  - Services contain business logic.
+  - Services should accept Domain entities or "primitve" parameters.
+  - If required, a Service may expose an internal DTO (for example: `class MyService { data class Input(/**/); data class Output(/**/); fun myFunction(input: Input): Output { /** } }`)
+- Domain
+  - Repositories are only used inside services.
+  - Repositories are located inside the domain layer.
+  - Domain entities must never be exposed directly in API responses.
+  - Entity Namings
+    - All entity classes MUST end with the name suffix "Entitiy".
+    - All entities must have an `@jakarta.persistence.Entity` and `@jakarta.persistence.Table` annotation.
+    - The `@jakarta.persistence.Entity` annotation must contain the name without the "Entity" suffix
+    - The `@jakarta.persistence.Table` annotation must contain the name in lower snake case in plural
+      - For example: An entity for a User must look like this: `@jakarta.persistence.Entity("User"); @jakarta.persistence.Table("users"); class UserEntity {}`
+
+
+- Always separate classes by files! Do not put multiple classes in a single file!
 
 #### Code Quality
 
@@ -88,6 +94,27 @@ Controllers of these APIs must live in separate packages:
 
 They must not share controller classes.
 All apis should be versioned and documented using code-first swagger.
+
+##### Dto Mapping
+
+DTOs are part of the API layer.
+Because of that, mapping should happen "DTO centric" (i.e. controlled from the DTO, not the domain entity).
+
+The DTO mapping should happen using extension functions on the entity.
+For example, if a `FooEntity` entity is mapped to a `FooDto`, the mapping should be done using an extension function like `val fooEntity = FooEntity(); fooEntity.toDto()`.
+If possible, the dto should have a `toEntity` function that maps the dto to an entity. If there are any required parameters that cannot be resolved with "toEntity" functions of other DTOs, they should be passed as parameters to the `toEntity` function.
+These mapping functions must be in the same file as the `FooDto`, to it might look like this:
+```kotlin
+class FooDto(/* Parameter */) {
+  fun toEntity(/* Dependend Parameters */): FooEntity {
+      return FooEntity(/* Parameter and Dependend Parameters */)
+  }
+}
+
+fun FooEntity.toDto() {
+    return FooDto(/* Parameters */)
+}
+```
 
 #### Testing
 

@@ -1,6 +1,5 @@
 package com.vivid.sdk.spring.kafka
 
-import com.vivid.sdk.FeatureCache
 import com.vivid.sdk.FeatureStream
 import com.vivid.sdk.Subscription
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory

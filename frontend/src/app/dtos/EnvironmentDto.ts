@@ -1,5 +1,7 @@
 export interface EnvironmentDto {
-  id?: string;
+  id: string;
   name: string;
+  key: string;
   description?: string;
+  weight?: number;
 }

@@ -13,18 +13,8 @@ private val logger = LoggerFactory.getLogger(UserService::class.java)
 @Service
 @Transactional
 class UserService(
-    private val userRepository: UserRepository,
-    private val departmentRepository: com.vivid.backend.domain.repository.DepartmentRepository
+    private val userRepository: UserRepository
 ) {
-    fun findById(id: UUID, departmentId: UUID): User {
-        val user = userRepository.findById(id)
-            .orElseThrow { ResourceNotFoundException("User not found with id: $id") }
-        if (user.department.id != departmentId) {
-            throw ResourceNotFoundException("User not found in this department")
-        }
-        return user
-    }
-
     fun findById(id: UUID): User = userRepository.findById(id)
         .orElseThrow { ResourceNotFoundException("User not found with id: $id") }
 
@@ -34,8 +24,7 @@ class UserService(
         keycloakId: String,
         username: String,
         email: String?,
-        displayRole: String?,
-        departmentId: UUID? = null
+        displayRole: String?
     ): User {
         val existingUser = userRepository.findByKeycloakId(keycloakId)
         return if (existingUser != null) {
@@ -46,29 +35,21 @@ class UserService(
             userRepository.save(existingUser)
         } else {
             logger.info("Creating new user with keycloakId: $keycloakId")
-            val department = if (departmentId != null) {
-                departmentRepository.findById(departmentId).orElseThrow { ResourceNotFoundException("Department not found") }
-            } else {
-                // Fallback to General department
-                departmentRepository.findById(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-                    .orElseThrow { ResourceNotFoundException("General department not found") }
-            }
             val newUser = User(
                 keycloakId = keycloakId,
                 username = username,
                 email = email,
-                displayRole = displayRole,
-                department = department
+                displayRole = displayRole
             )
             userRepository.save(newUser)
         }
     }
 
-    fun searchUsers(query: String, departmentId: UUID): List<User> {
-        return userRepository.search(query, departmentId)
+    fun searchUsers(query: String): List<User> {
+        return userRepository.search(query)
     }
 
-    fun getAllUsers(departmentId: UUID): List<User> {
-        return userRepository.findAllByDepartmentId(departmentId)
+    fun getAllUsers(): List<User> {
+        return userRepository.findAll()
     }
 }

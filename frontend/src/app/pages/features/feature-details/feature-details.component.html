@@ -1,0 +1,302 @@
+<div class="page-header flex items-center gap-md">
+    <button class="icon-btn-slim" (click)="backToFeatures()" [title]="'common.back' ">
+        <span class="material-symbols-rounded">arrow_back</span>
+    </button>
+    <h1 class="page-title text-lg">Details</h1>
+</div>
+
+@if (feature$ | async; as f) {
+    <accordion>
+        <expansion-panel>
+            <app-header>
+                <span class="material-symbols-rounded" style="color: var(--accent-mint)">info</span>
+                Details
+            </app-header>
+
+            <app-content>
+                <div class="form-group" [class.dirty]="state.isFieldDirty('name') | async">
+                    <label class="text-xs text-muted flex items-center gap-xs">
+                        {{ 'common.name' }}
+                        <span *ngIf="state.isFieldDirty('name') | async"
+                              class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+                    </label>
+                    <app-form-input [value]="f.name" (change)="updateField('name', $event)"
+                                    [placeholder]="'common.name'"></app-form-input>
+                </div>
+
+                <div class="form-group" [class.dirty]="state.isFieldDirty('key') | async">
+                    <label class="text-xs text-muted flex items-center gap-xs">
+                        {{ 'common.key' }}
+                        <span *ngIf="state.isFieldDirty('key') | async"
+                              class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+                    </label>
+                    <app-form-input [value]="f.key" (change)="updateField('name', $event)"
+                                    [placeholder]="'common.name' "
+                                    [disabled]="true"></app-form-input>
+                </div>
+
+                <div class="form-group" [class.dirty]="state.isFieldDirty('description') | async">
+                    <label class="text-xs text-muted flex items-center gap-xs">
+                        {{ 'common.description' }}
+                        <span *ngIf="state.isFieldDirty('description') | async"
+                              class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+                    </label>
+                    <textarea rows="3" [value]="f.description" (change)="updateField('description', $event)"
+                              [placeholder]="'common.description' "
+                              [disabled]="!permissions.hasPermission('environments', 'write')"></textarea>
+                </div>
+
+                <div class="form-group" [class.dirty]="state.isFieldDirty('tags') | async">
+                    <label class="text-xs text-muted flex items-center gap-xs">
+                        {{ 'features.tags' }}
+                        <span *ngIf="state.isFieldDirty('tags') | async"
+                              class="material-symbols-rounded text-xs dirty-indicator">circle</span>
+                    </label>
+                    <app-chiplist [tags]="f.tags" [options]="tagsOptions" (tagsChange)="updateField('tags', $event)"></app-chiplist>
+                </div>
+            </app-content>
+        </expansion-panel>
+
+        <expansion-panel>
+            <app-header>
+                <badge variant="primary" [content]="f.notes?.length || 0">
+                    <span class="material-symbols-rounded" style="color: var(--accent-mint)">chat_bubble</span> Notes & Comments
+                </badge>
+            </app-header>
+            <app-content>
+
+                <div class="notes-list flex-col gap-md" *ngIf="f.notes && f.notes.length > 0; else noNotes">
+                    <div *ngFor="let note of f.notes" class="note-item flex-col gap-xs pb-sm border-bottom">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold author-name">{{ note.authorName }}</span>
+                            <span class="text-xxs text-muted" [vividTooltip]="note.timestamp">{{ note.timestamp | timeAgo }}</span>
+                        </div>
+                        <div class="note-content text-xs text-secondary">{{ note.content }}</div>
+                    </div>
+                </div>
+                <ng-template #noNotes>
+                    <div class="text-xs text-muted italic p-sm">No notes yet. Be the first to add one!</div>
+                </ng-template>
+
+                <div class="add-note-container flex-col gap-sm mt-md">
+        <textarea
+                class="note-textarea text-xs"
+                rows="2"
+                placeholder="Add a note..."
+                [(ngModel)]="newNoteContent"
+                (focus)="expandNoteArea = true"
+                [style.height]="expandNoteArea ? '80px' : '40px'"
+        ></textarea>
+                    <div class="flex justify-end" *ngIf="newNoteContent.trim() || expandNoteArea">
+                        <button
+                                class="btn-post-note text-xs"
+                                [disabled]="!newNoteContent.trim() || isPostingNote"
+                                (click)="addNote()"
+                        >
+                            {{ isPostingNote ? 'Posting...' : 'Post Note' }}
+                        </button>
+                    </div>
+                </div>
+            </app-content>
+        </expansion-panel>
+
+        <expansion-panel>
+            <app-header>
+                <badge variant="primary" [content]="f.outgoingLinks.length">
+                    <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span> Related Features
+                </badge>
+            </app-header>
+            <app-content>
+                <div class="search-container relative" *hasPermission="['environments', 'write']">
+                    <div class="flex items-center gap-sm relative">
+                        <input
+                                type="text"
+                                class="form-input text-xs flex-1"
+                                placeholder="Search features to link..."
+                                [(ngModel)]="featureSearchQuery"
+                                (input)="onFeatureSearch()"
+                                cdkOverlayOrigin
+                                #trigger="cdkOverlayOrigin"
+                        />
+                        <span *ngIf="isSearching"
+                              class="material-symbols-rounded rotate text-sm absolute right-sm">sync</span>
+                    </div>
+
+                    <ng-template
+                            cdkConnectedOverlay
+                            [cdkConnectedOverlayOrigin]="trigger"
+                            [cdkConnectedOverlayOpen]="showFeatureSuggestions"
+                            [cdkConnectedOverlayWidth]="'100%'"
+                            (overlayOutsideClick)="showFeatureSuggestions = false"
+                    >
+                        <ul class="suggestions-dropdown card shadow-slim mt-xs">
+                            <li *ngFor="let opt of featureOptions"
+                                (click)="addLink(opt)"
+                                class="suggestion-item text-xs p-xs">
+                                {{ opt.name }}
+                            </li>
+                            <li *ngIf="featureOptions.length === 0 && !isSearching"
+                                class="suggestion-item text-xs p-xs text-muted">
+                                No features found
+                            </li>
+                        </ul>
+                    </ng-template>
+                </div>
+
+                <div class="links-list flex flex-wrap gap-xs">
+                    <div *ngFor="let link of f.outgoingLinks; trackBy: trackByLinkId"
+                         class="chip flex items-center gap-xs">
+                        <span class="text-xs">{{ link.targetFeatureName || link.targetFeatureId }}</span>
+                        <button class="remove-btn" (click)="removeLink(link.id!)"
+                                *hasPermission="['environments', 'write']">
+                            <span class="material-symbols-rounded">close</span>
+                        </button>
+                    </div>
+                </div>
+            </app-content>
+        </expansion-panel>
+    </accordion>
+
+    @if (f.environments && f.environments.length === 0) {
+        <app-no-environments-warning></app-no-environments-warning>
+    }
+
+    <tabs>
+        @for (environment of f.environments; track environment.environmentId) {
+            @let writePermission = permissions.hasEnvPermission(environment.environmentName, 'write');
+            <tab>
+                <app-tab-header>
+                    <env-status [active]="environment.enabled" [haloType]="environment.enabled ? null : 'error'"></env-status>
+                    <span class="text-xs font-semibold">{{ environment.environmentName }}</span>
+
+                    @if (!writePermission) {
+                        <span class="material-symbols-rounded lock-icon-sm"
+                              [title]="'No write access to ' + environment.environmentName">lock</span>
+                    }
+
+                    @if (state.isEnvDirty(environment.environmentId) | async) {
+                        <span class="dirty-indicator-dot"></span>
+                    }
+                </app-tab-header>
+
+                <div class="environment-switch master-switch-card card flex items-center justify-between p-md"
+                     [class.enabled]="environment.enabled">
+                    <div class="flex items-center gap-md">
+                            <span class="material-symbols-rounded text-xl"
+                                  [style.color]="environment.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                              {{ environment.enabled ? 'toggle_on' : 'toggle_off' }}
+                            </span>
+                        <div class="flex-col">
+                                <span class="text-sm font-semibold">Environment Status ({{ environment.environmentName }}
+                                    )</span>
+                            <span class="text-xs text-muted">{{ environment.enabled ? 'This feature is active in ' + environment.environmentName + '.' : 'This feature is disabled.' }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-sm">
+                            <span *ngIf="state.isEnvFieldDirty(environment.environmentId, 'enabled') | async"
+                                  class="text-xs text-accent-mint italic">Changed</span>
+                        <button class="btn-toggle"
+                                [class.active]="environment.enabled"
+                                (click)="updateEnvField(environment.environmentId, 'enabled', !environment.enabled)"
+                                [disabled]="!writePermission">
+                            {{ environment.enabled ? 'Enabled' : 'Disabled' }}
+                        </button>
+                    </div>
+                </div>
+
+                <accordion [multi]="true">
+                    <expansion-panel>
+                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-sky)">settings</span> Feature Flags</app-header>
+                        <app-content>
+                            <div class="flags-manager flex-col gap-sm">
+                                <div *ngFor="let flag of environment.flags | keyvalue; trackBy: trackByFlagKey"
+                                     class="flag-row flex items-center gap-md p-xs border-bottom">
+                                    <span class="text-xs font-semibold flex-1">{{ flag.key }}</span>
+                                    <div class="flex items-center gap-sm">
+                                        <span *ngIf="state.isEnvFlagDirty(environment.environmentId, flag.key) | async"
+                                              class="text-xs text-accent-mint italic">Changed</span>
+                                        <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
+                                        <button class="icon-btn-slim"
+                                                (click)="toggleFlag(environment.environmentId, environment.flags, flag.key, !flag.value)"
+                                                [disabled]="!writePermission">
+                                            <span class="material-symbols-rounded"
+                                                  [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                                              {{ flag.value ? 'toggle_on' : 'toggle_off' }}
+                                            </span>
+                                        </button>
+                                        <button class="icon-btn-slim danger"
+                                                (click)="removeFlag(environment.environmentId, environment.flags, flag.key)"
+                                                *hasEnvPermission="[environment.environmentName, 'write']">
+                                            <span class="material-symbols-rounded">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="add-flag-row flex items-center gap-sm mt-sm"
+                                     *hasEnvPermission="[environment.environmentName, 'write']">
+                                    <input type="text" #newFlagKey class="form-input text-xs flex-1"
+                                           placeholder="New flag key..."/>
+                                    <button class="btn-slim primary"
+                                            (click)="addFlag(environment.environmentId, environment.flags, newFlagKey.value); newFlagKey.value = ''">
+                                        <span class="material-symbols-rounded">add</span>
+                                        Add Flag
+                                    </button>
+                                </div>
+                            </div>
+                        </app-content>
+                    </expansion-panel>
+
+                    <expansion-panel>
+                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-lavender)">database</span> Metadata</app-header>
+                        <app-content>
+                            <app-metadata-editor [metadata]="environment.metadata"
+                                                 (metadataChange)="updateMetadata(environment.environmentId, $event)"
+                                                 [disabled]="!writePermission">
+                            </app-metadata-editor>
+                        </app-content>
+                    </expansion-panel>
+
+                    <expansion-panel>
+                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-lavender)">content_copy</span> Copy From</app-header>
+                        <app-content>
+                            <div class="form-group">
+                                <label class="text-xs text-muted">Select environment to copy state from:</label>
+                                <div class="flex items-center gap-sm mt-xs">
+                                    <select #copySource class="form-input text-xs flex-1">
+                                        <option value="" disabled selected>Choose environment...</option>
+                                        <ng-container *ngFor="let other of f.environments">
+                                            <option *ngIf="other.environmentId !== environment.environmentId"
+                                                    [value]="other.environmentId">
+                                                {{ other.environmentName }}
+                                            </option>
+                                        </ng-container>
+                                    </select>
+                                    <button class="btn-slim"
+                                            (click)="copyFrom(environment.environmentId, copySource.value)">
+                                        Copy State
+                                    </button>
+                                </div>
+                            </div>
+                        </app-content>
+                    </expansion-panel>
+                </accordion>
+            </tab>
+        }
+    </tabs>
+} @else {
+    <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
+        <app-loading-indicator></app-loading-indicator>
+        <p class="text-secondary">{{ 'common.loading' }}</p>
+    </div>
+}
+
+<div class="action-bar flex items-center justify-center" *ngIf="isDirty$ | async" #actionBar>
+    <div class="action-bar-content flex items-center gap-md card shadow-slim p-sm draggable-handle" (mousedown)="startDragging($event, actionBar)">
+        <span class="material-symbols-rounded drag-icon text-muted">drag_indicator</span>
+        <span class="text-sm font-semibold">Unsaved Changes</span>
+        <div class="flex gap-sm">
+            <button class="btn-slim" (click)="revert()">{{ 'common.revert'  }}</button>
+            <button class="btn-slim primary" (click)="save()">{{ 'common.save'  }}</button>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,7 @@
 package com.vivid.sdk.spring
 
 import com.vivid.sdk.*
-import com.vivid.sdk.caches.FetchingFeatureCache
+import com.vivid.sdk.caches.ApiEnabledFeatureCache
 import com.vivid.sdk.caches.SimpleFeatureCache
 import com.vivid.sdk.spring.condition.ConditionalOnVivid
 import com.vivid.sdk.spring.qualifier.VividAutowireCandidateResolver
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.context.properties.ConfigurationPropertiesSource
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.PropertySource
@@ -43,10 +42,9 @@ class VividAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(Features::class)
     fun features(
-        featureApi: ObjectProvider<FeatureApi>,
         featureCache: FeatureCache,
     ): ModifiableFeatures {
-        logger.info("Consider adding a FeatureApi bean or FeatureCache bean to your application context to improve usability.")
+        logger.debug("Consider adding a FeatureApi bean or FeatureCache bean to your application context to improve consistency.")
         return CacheBasedFeatures(featureCache)
     }
 
@@ -58,7 +56,8 @@ class VividAutoConfiguration {
             logger.warn("No FeatureApi or FeatureCache bean found in application context, using default cache implementation. This may impact feature availability.")
             return SimpleFeatureCache()
         }
-        return FetchingFeatureCache(api)
+
+        return ApiEnabledFeatureCache(api)
     }
 
     @Bean

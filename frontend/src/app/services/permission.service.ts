@@ -1,8 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import { HttpService } from './http.service';
 import { PermissionSetDto } from '../dtos/PermissionSetDto';
 import {Observable, of, tap, throwError} from 'rxjs';
 import {catchError} from 'rxjs/operators';
+import {LoadingService} from "./loading.service";
 
 @Injectable({
   providedIn: 'root'
@@ -10,12 +11,16 @@ import {catchError} from 'rxjs/operators';
 export class PermissionService {
   private permissions = signal<PermissionSetDto | null>(null);
   private loading = false;
+  private http = inject(HttpService);
+  private loadingService = inject(LoadingService);
 
-  constructor(private http: HttpService) {}
-
-  fetchPermissions(force = false): Observable<PermissionSetDto> {
+  fetchPermissions(force = false, informLoadingService: boolean = true): Observable<PermissionSetDto> {
     if (this.loading && !force) {
-      return of(this.permissions() || { admin: false, environments: 'none', teams: 'none', departments: 'none', environment: { admin: false, all: 'none', specific: {} }, resolved: false });
+      return of(this.permissions() || { admin: false, environments: 'none', environment: { admin: false, all: 'none', specific: {} }, resolved: false });
+    }
+
+    if (informLoadingService) {
+      this.loadingService.setApplicationLoading(true);
     }
 
     this.loading = true;
@@ -23,9 +28,15 @@ export class PermissionService {
       tap(perms => {
         this.permissions.set(perms);
         this.loading = false;
+        if (informLoadingService) {
+          this.loadingService.setApplicationLoading(false);
+        }
       }),
       catchError(err => {
         this.loading = false;
+        if (informLoadingService) {
+          this.loadingService.setApplicationLoading(false);
+        }
         return throwError(() => err);
       })
     );
@@ -33,6 +44,10 @@ export class PermissionService {
 
   refreshPermissions(): Observable<PermissionSetDto> {
     return this.fetchPermissions(true);
+  }
+
+  clearPermissions() {
+    this.permissions.set(null);
   }
 
   hasPermission(resource: string, action: 'read' | 'write'): boolean {
@@ -43,8 +58,6 @@ export class PermissionService {
     let level: 'none' | 'read' | 'write' = 'none';
     switch (resource) {
       case 'environments': level = perms.environments; break;
-      case 'teams': level = perms.teams; break;
-      case 'departments': level = perms.departments; break;
     }
 
     return this.checkAccess(level, action);

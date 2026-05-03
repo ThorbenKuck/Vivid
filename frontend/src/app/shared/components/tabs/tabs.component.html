@@ -1,0 +1,23 @@
+<div class="tabs-container">
+    <div class="tabs-nav">
+        @for (tab of tabs; track $index) {
+            <div class="tab-selector" #btn (click)="selectTab(tab, btn, $index)">
+
+                @if (tab.customHeader) {
+                    <ng-container [ngTemplateOutlet]="tab.customHeader.template()"></ng-container>
+                } @else {
+                    {{ tab.title() }}
+                }
+
+            </div>
+        }
+        <span class="ink-bar" [style.width.px]="inkBarWidth()" [style.left.px]="inkBarLeft()"></span>
+    </div>
+
+    <div class="tabs-viewport">
+        <div class="tabs-slider"
+             [style.transform]="'translateX(' + (activeTabIndex() * -100) + '%)'">
+            <ng-content></ng-content>
+        </div>
+    </div>
+</div>

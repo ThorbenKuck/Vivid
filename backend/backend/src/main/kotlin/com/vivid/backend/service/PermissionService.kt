@@ -17,8 +17,6 @@ class PermissionService(
     private val superUserPermissions = PermissionSetDto(
         admin = true,
         environments = "write",
-        teams = "write",
-        departments = "write",
         environment = EnvironmentPermissionsDto(admin = true, all = "write")
     )
 
@@ -76,8 +74,6 @@ class PermissionService(
         return PermissionSetDto(
             admin = false,
             environments = getAccessLevel(roles, "environments"),
-            teams = getAccessLevel(roles, "teams"),
-            departments = getAccessLevel(roles, "departments"),
             environment = EnvironmentPermissionsDto(
                 admin = envAdmin,
                 all = if (envAllWrite) "write" else if (envAllRead) "read" else "none",
@@ -106,8 +102,6 @@ class PermissionService(
 
         val level = when (resource) {
             "environments" -> perms.environments
-            "teams" -> perms.teams
-            "departments" -> perms.departments
             else -> "none"
         }
 

@@ -10,43 +10,7 @@
   </div>
 </div>
 
-<div class="environments-list-wrapper" *ngIf="result">
-  <app-generic-table [items]="result.content">
-    <ng-template #rowTemplate let-e>
-      <div class="env-main flex items-center justify-between">
-        <div class="env-info flex items-center gap-md">
-          <span class="material-symbols-rounded" style="color: var(--accent-sky)">public</span>
-          <div class="name-box">
-            <span class="env-name text-sm">{{ e.name }}</span>
-          </div>
-        </div>
-        
-        <div class="env-actions flex items-center gap-sm">
-          <button *hasPermission="['environments', 'write']" class="icon-btn-slim danger" (click)="$event.stopPropagation(); askDelete(e.id!)" [title]="'common.delete' ">
-            <span class="material-symbols-rounded">delete</span>
-          </button>
-          <span class="material-symbols-rounded expand-icon text-muted" [style.transform]="e['__expanded'] ? 'rotate(180deg)' : 'none'">
-            expand_more
-          </span>
-        </div>
-      </div>
-    </ng-template>
-
-    <ng-template #expandTemplate let-e>
-      <p class="env-description text-sm text-secondary">{{ e.description || ('common.no_description' ) }}</p>
-    </ng-template>
-  </app-generic-table>
-
-  <app-pagination 
-    [page]="page" 
-    [totalPages]="totalPages" 
-    [isLast]="isLast"
-    (prev)="page = page - 1; search()" 
-    (next)="page = page + 1; search()">
-  </app-pagination>
-</div>
-
-<button *hasPermission="['environments', 'write']" class="fab shadow-slim" (click)="toggleAdd()" [title]="'common.add' ">
+<button *hasPermission="['environments', 'write']" class="fab" (click)="toggleAdd()" [title]="'common.add' ">
   <span class="material-symbols-rounded">add</span>
 </button>
 
@@ -81,3 +45,40 @@
     </div>
   </div>
 </div>
+
+@if (result(); as res) {
+    <app-table [page]="res" (pageChange)="loadData($event)" [rowIdKey]="'id'">
+        <table-column key="id" label="name">
+            <ng-template let-f>
+                <span class="material-symbols-rounded" style="color: var(--accent-sky); margin-right: 10px;">public</span> {{ f.name }}
+            </ng-template>
+        </table-column>
+
+        <table-column key="actions" label="Actions" width="120px">
+            <ng-template let-f>
+                <button class="btn-slim" (click)="$event.stopPropagation(); open(f.id)">
+                    <span>Open</span>
+                    <span class="material-symbols-rounded">open_in_new</span>
+                </button>
+
+                <button *hasPermission="['environments', 'write']" class="icon-btn-slim danger" (click)="$event.stopPropagation(); askDelete(f.id)" [title]="'common.delete' ">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+
+            </ng-template>
+        </table-column>
+
+        <ng-template #expandedRowTemplate let-f>
+            @if (f.description; as desc) {
+                <p class="feature-description">{{ desc }}</p>
+            } @else {
+                <p class="missing-feature-description">Keine Beschreibung vorhanden</p>
+            }
+        </ng-template>
+    </app-table>
+} @else {
+    <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
+        <app-loading-indicator></app-loading-indicator>
+        <p class="text-secondary">{{ 'common.loading' }}</p>
+    </div>
+}

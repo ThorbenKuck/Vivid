@@ -5,14 +5,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.vivid.sdk.FeatureApi
-import com.vivid.sdk.Features
 import com.vivid.sdk.api.Feature
 import com.vivid.sdk.api.metadata.StringMetadataValue
-import com.vivid.sdk.caches.FetchingFeatureCache
-import com.vivid.sdk.caches.SimpleFeatureCache
-import kotlinx.coroutines.suspendCancellableCoroutine
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired

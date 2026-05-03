@@ -1,0 +1,46 @@
+/* In der accordion.component.css */
+.accordion-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* 1. Grundzustand: Alle Panels im Accordion eckig machen */
+::ng-deep expansion-panel .collapsible-wrapper {
+    border-radius: 0;
+    margin-top: -1px;
+    border: 1px solid var(--border-color);
+    transition: margin 0.3s, border-radius 0.3s, box-shadow 0.3s;
+}
+
+/* 2. Das erste Panel oben abrunden */
+::ng-deep expansion-panel:first-of-type .collapsible-wrapper {
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+    margin-top: 0;
+}
+
+/* 3. Das letzte Panel unten abrunden (nur wenn nicht offen) */
+::ng-deep expansion-panel:last-of-type .collapsible-wrapper:not(.expanded) {
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+}
+
+/* 4. Wenn ein Panel offen ist: Ausscheren und rund werden */
+::ng-deep expansion-panel .collapsible-wrapper.expanded {
+    margin: 16px 0 !important; /* Margin erzwingen */
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),
+    0 2px 2px 0 rgba(0,0,0,.14),
+    0 1px 5px 0 rgba(0,0,0,.12);
+}
+
+/* Spezialfall: Erstes Element offen -> kein margin-top */
+::ng-deep expansion-panel:first-of-type .collapsible-wrapper.expanded {
+    margin-top: 0 !important;
+}
+
+/* Letztes Element offen -> kein margin-bottom */
+::ng-deep expansion-panel:last-of-type .collapsible-wrapper.expanded {
+    margin-bottom: 0 !important;
+}

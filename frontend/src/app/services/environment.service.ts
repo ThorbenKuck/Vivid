@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {BehaviorSubject, filter, finalize, Observable, tap} from 'rxjs';
 import {EnvironmentCreateRequest, EnvironmentDto} from '../dtos';
 import {HttpService} from './http.service';
-import {DepartmentService} from "./department.service";
+import {Page} from "../shared/components/table/datastructure";
 
 @Injectable({providedIn: 'root'})
 export class EnvironmentService {
@@ -14,19 +14,9 @@ export class EnvironmentService {
     );
 
     private selectedEnvironmentSubject = new BehaviorSubject<EnvironmentDto | null>(null);
-    selectedEnvironment$ = this.selectedEnvironmentSubject.asObservable();
 
     private loadingAll = false;
-
-    constructor(
-        private http: HttpService,
-        private departmentService: DepartmentService
-    ) {
-        departmentService.departments$.subscribe(d => {
-            this.select(null);
-            // this.environments
-        })
-    }
+    private http = inject(HttpService);
 
     loadAll(): Observable<EnvironmentDto[]> {
         if (this.environmentsSubject.value === null && !this.loadingAll) {
@@ -54,7 +44,7 @@ export class EnvironmentService {
     }
 
     search(q: string, page: number, size: number) {
-        return this.http.get<any>(this.baseUrl, {q, page, size});
+        return this.http.get<Page<EnvironmentDto>>(this.baseUrl, {q, page, size});
     }
 
     getById(id: string): Observable<EnvironmentDto> {

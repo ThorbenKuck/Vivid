@@ -14,14 +14,13 @@ interface EnvironmentRepository : JpaRepository<EnvironmentEntity, UUID> {
     @Query(
         """
         select e from Environment e
-        where e.department.id = :departmentId
-        and (:q is null or :q = '' or lower(e.name) like lower(concat('%', :q, '%')))
+        where (:q is null or :q = '' or lower(e.name) like lower(concat('%', :q, '%')))
         """
     )
-    fun search(q: String?, departmentId: UUID, pageable: Pageable): Page<EnvironmentEntity>
+    fun search(q: String?, pageable: Pageable): Page<EnvironmentEntity>
 
-    fun findAllByDepartmentId(departmentId: UUID): List<EnvironmentEntity>
+    @Query("select e from Environment e where e.key = :key")
+    fun findByKey(key: String): EnvironmentEntity?
+
     fun findByName(name: String): EnvironmentEntity?
-    fun findByNameAndDepartmentId(name: String, departmentId: UUID): EnvironmentEntity?
-    fun existsByNameIgnoreCaseAndDepartmentId(name: String, departmentId: UUID): Boolean
 }

@@ -27,7 +27,7 @@ class VividKafkaListenerEndpoint(
     }
 
     override fun getConsumerProperties() = properties.buildConsumerProperties()
-    override fun getBatchListener(): Boolean? {
+    override fun getBatchListener(): Boolean {
         return batch
     }
 }

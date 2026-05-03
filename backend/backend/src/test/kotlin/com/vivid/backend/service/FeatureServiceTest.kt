@@ -26,44 +26,39 @@ class FeatureServiceTest {
     private lateinit var featureEnvironmentRepository: FeatureEnvironmentRepository
 
     @Mock
-    private lateinit var teamRepository: com.vivid.backend.domain.repository.TeamRepository
-
-    @Mock
     private lateinit var environmentService: EnvironmentService
 
     @Mock
-    private lateinit var departmentService: DepartmentService
+    private lateinit var userService: UserService
 
     @InjectMocks
     private lateinit var featureService: FeatureService
 
-    private val departmentId = UUID.randomUUID()
-    private val department = com.vivid.backend.domain.entity.Department(id = departmentId, name = "General")
-
     @Test
     fun `should create feature successfully`() {
         val request = FeatureCreateRequest(name = "test-feature", description = "test desc")
-        val feature = Feature(name = request.name, description = request.description, department = department)
+        val feature = Feature(name = request.name, description = request.description, runningNumber = 0, key = "test-feature")
         
-        whenever(departmentService.findById(departmentId)).thenReturn(department)
         whenever(featureRepository.getNextRunningNumber()).thenReturn(42L)
         whenever(featureRepository.save(any<Feature>())).thenReturn(feature)
         
-        val result = featureService.createFeature(departmentId, request)
+        val result = featureService.createFeature(
+            name = request.name,
+            description = request.description,
+        )
         
         assertNotNull(result)
         assertEquals(request.name, result.name)
-        assertEquals(departmentId, result.department.id)
     }
 
     @Test
     fun `should get feature by id`() {
         val id = UUID.randomUUID()
-        val feature = Feature(id = id, name = "test-feature", department = department)
+        val feature = Feature(id = id, name = "test-feature", key = "test-feature", runningNumber = 0)
         
         whenever(featureRepository.findById(id)).thenReturn(Optional.of(feature))
         
-        val result = featureService.getFeatureById(id, departmentId)
+        val result = featureService.getFeatureById(id)
         
         assertEquals(id, result.id)
         assertEquals("test-feature", result.name)
@@ -75,20 +70,20 @@ class FeatureServiceTest {
         whenever(featureRepository.findById(id)).thenReturn(Optional.empty())
         
         assertThrows(ResourceNotFoundException::class.java) {
-            featureService.getFeatureById(id, departmentId)
+            featureService.getFeatureById(id)
         }
     }
 
     @Test
     fun `should update feature`() {
         val id = UUID.randomUUID()
-        val existingFeature = Feature(id = id, name = "old-name", department = department)
+        val existingFeature = Feature(id = id, name = "old-name", key = "old-name", runningNumber = 0)
         val updateRequest = FeatureUpdateRequest(name = "new-name", description = null, tags = null)
         
         whenever(featureRepository.findById(id)).thenReturn(Optional.of(existingFeature))
         whenever(featureRepository.save(any<Feature>())).thenAnswer { it.arguments[0] }
         
-        val result = featureService.updateFeature(id, departmentId, updateRequest)
+        val result = featureService.updateFeature(id, updateRequest)
         
         assertEquals("new-name", result.name)
     }

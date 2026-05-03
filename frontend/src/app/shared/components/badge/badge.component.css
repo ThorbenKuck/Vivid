@@ -1,0 +1,68 @@
+:host {
+    display: inline-block;
+    position: relative;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px; /* Pillen-Form */
+    padding: 0 6px;
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    min-width: 18px;
+    height: 18px;
+    line-height: 1;
+    color: white;
+}
+
+/* Größen */
+.badge-sm {
+    min-width: 14px;
+    height: 14px;
+    font-size: 0.65rem;
+    padding: 0 4px;
+}
+
+.badge-lg {
+    min-width: 22px;
+    height: 22px;
+    font-size: 0.85rem;
+    padding: 0 8px;
+}
+
+/* Varianten */
+.badge-primary {
+    background-color: var(--color-primary, #3f51b5);
+    color: var(--text-muted);
+}
+
+.badge-success {
+    background-color: var(--color-success, #2ecc71);
+    color: var(--text-muted);
+}
+
+.badge-error {
+    background-color: var(--color-error, #e74c3c);
+    color: var(--text-muted);
+}
+
+.badge-warning {
+    background-color: var(--color-warning, #f1c40f);
+    color: var(--text-muted);
+}
+
+.badge-muted {
+    background-color: var(--text-muted, #95a5a6);
+    color: var(--text-muted);
+}
+
+/* Overlap Modus: Positioniert das Badge oben rechts am Parent */
+.badge.is-overlap {
+    position: absolute;
+    top: -8px;
+    border: 2px solid var(--surface-color, #121212); /* Kontrast-Rahmen */
+    z-index: 10;
+}

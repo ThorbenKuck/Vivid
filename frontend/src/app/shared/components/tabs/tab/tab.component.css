@@ -1,0 +1,10 @@
+:host {
+    display: block;
+    width: 100%;
+    flex: 0 0 100%; /* Doppelt hält besser */
+}
+
+.tab-content {
+    width: 100%;
+    box-sizing: border-box;
+}

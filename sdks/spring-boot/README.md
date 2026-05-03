@@ -204,3 +204,21 @@ The starter automatically configures:
 2. A `FeatureApi` (defaults to `SpringFeatureApi` for REST).
 3. `FeatureStream` implementations based on the enabled streams.
 4. A `FeatureStreamAggregator` that manages the streams.
+
+## DB Cache
+
+To use the `JdbcFeatureCache`, you need to setup the following tables in your DB:
+
+```sql
+CREATE TABLE features (
+    id VARCHAR(255) PRIMARY KEY,
+    payload TEXT NOT NULL,
+    version_timestamp TIMESTAMP NOT NULL
+);
+
+CREATE TABLE feature_aliases (
+    alias_name VARCHAR(255) PRIMARY KEY,
+    feature_id VARCHAR(255) NOT NULL,
+    CONSTRAINT fk_feature FOREIGN KEY (feature_id) REFERENCES features(id) ON DELETE CASCADE
+);
+```

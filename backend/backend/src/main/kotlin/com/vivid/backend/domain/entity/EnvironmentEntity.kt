@@ -11,10 +11,12 @@ class EnvironmentEntity(
     @Column(nullable = false, unique = true)
     var name: String,
 
-    @Column(columnDefinition = "TEXT")
-    var description: String? = null,
+    @Column(nullable = false, unique = true)
+    var key: String,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = false)
-    var department: Department
+    @Column(nullable = false)
+    var weight: Int? = null,
+
+    @Column(columnDefinition = "TEXT")
+    var description: String? = null
 ): BaseUuidEntity(id)

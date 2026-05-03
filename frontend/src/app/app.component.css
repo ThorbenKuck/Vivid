@@ -24,7 +24,7 @@ app-loading-indicator {
   padding: 0 var(--spacing-lg);
 }
 
-app-header {
+page-header {
   flex-grow: 1;
   display: flex;
 }
@@ -77,6 +77,7 @@ app-header {
 
 .main-content {
   flex: 1;
+  display: flex;
   width: 100%;
   transition: var(--transition);
   padding: var(--spacing-lg);
@@ -85,6 +86,9 @@ app-header {
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
 }
 
 @media (min-width: 768px) {

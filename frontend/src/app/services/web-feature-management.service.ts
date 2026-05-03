@@ -7,8 +7,8 @@ import {
   FeatureUpdateRequest,
   FeatureLinkCreateRequest,
   FeatureEnvironmentUpdateRequest,
-  Page
 } from '../dtos';
+import {Page} from "../shared/components/table/datastructure";
 
 @Injectable({
   providedIn: 'root'
@@ -57,5 +57,9 @@ export class WebFeatureManagementService {
 
   removeFeatureLink(id: string, linkId: string): Observable<FeatureDto> {
     return this.http.delete<FeatureDto>(`${this.baseUrl}/${id}/links/${linkId}`);
+  }
+
+  addNote(id: string, content: string): Observable<FeatureDto> {
+    return this.http.post<FeatureDto>(`${this.baseUrl}/${id}/notes`, { content });
   }
 }

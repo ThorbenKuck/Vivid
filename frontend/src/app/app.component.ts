@@ -1,72 +1,83 @@
 import {Component, OnInit, signal} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HeaderComponent } from './components/header/header.component';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { EnvironmentService } from './services/environment.service';
-import { LoadingService } from './services/loading.service';
-import { delay, filter } from 'rxjs/operators';
-import { LoadingIndicator } from "./shared/components/loading-indicator/loading-indicator";
-import { map, Observable, shareReplay } from "rxjs";
-import { ToastComponent } from './shared/components/toast/toast.component';
+import {CommonModule} from '@angular/common';
+import {PageHeaderComponent} from './components/header/page-header.component';
+import {SidebarComponent} from './components/sidebar/sidebar.component';
+import {ActivatedRoute, NavigationEnd, Router, RouterOutlet} from '@angular/router';
+import {EnvironmentService} from './services/environment.service';
+import {LoadingService} from './services/loading.service';
+import {filter} from 'rxjs/operators';
+import {LoadingIndicator} from "./shared/components/loading-indicator/loading-indicator";
+import {catchError, finalize, forkJoin, map, Observable, of, shareReplay, take} from "rxjs";
+import {ToastComponent} from './shared/components/toast/toast.component';
+import {PermissionService} from "./services/permission.service";
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent, RouterOutlet, LoadingIndicator, ToastComponent],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    standalone: true,
+    imports: [CommonModule, PageHeaderComponent, SidebarComponent, RouterOutlet, LoadingIndicator, ToastComponent],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  sidebarCollapsed = false;
-  loading$ = this.loadingService.loading$.pipe(delay(0));
-  showShell$: Observable<boolean | undefined>;
-  initialized$ = signal(false);
+    sidebarCollapsed = false;
+    showShell$: Observable<boolean>;
 
-  constructor(
-      private envs: EnvironmentService,
-      private loadingService: LoadingService,
-      private router: Router,
-      private activatedRoute: ActivatedRoute,
-  ) {
-    this.showShell$ = this.router.events.pipe(
-        filter(event => event instanceof NavigationEnd),
-        map(() => {
-          let route = this.activatedRoute.firstChild;
-          while (route?.firstChild) {
-            route = route.firstChild;
-          }
+    constructor(
+        private envs: EnvironmentService,
+        protected loadingService: LoadingService,
+        private permissionService: PermissionService,
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
+    ) {
+        loadingService.setApplicationLoading(true);
+        this.showShell$ = this.router.events.pipe(
+            filter(event => event instanceof NavigationEnd),
+            map(() => {
+                let route = this.activatedRoute.firstChild;
+                while (route?.firstChild) {
+                    route = route.firstChild;
+                }
 
-          if (!route) {
-            return undefined;
-          }
+                const data = route?.snapshot.data;
+                return data?.['hideShell'] !== true;
+            }),
+            shareReplay(1)
+        );
+    }
 
-          const data = route.snapshot.data;
-
-          if ('showShell' in data) {
-            return data['showShell'] === true;
-          }
-
-          return true;
-        }),
-        shareReplay(1)
-    );
-  }
-
-  ngOnInit(): void {
-    this.showShell$
-        .pipe(filter((show): show is boolean => show !== undefined))
-        .subscribe(show => {
-          if (show) {
-            this.envs.loadAll().subscribe();
-          }
-
-          this.initialized$.set(true);
-          console.log("Initialized app with showShell: " + show);
+    ngOnInit(): void {
+        // 1. Shell-Status ermitteln (NavigationEnd)
+        this.router.events.pipe(
+            filter(event => event instanceof NavigationEnd),
+            // Wir warten, bis wir wissen, ob wir die Shell zeigen
+            take(1)
+        ).subscribe(() => {
+            this.initializeApp();
         });
-  }
 
-  toggleSidebar() {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
-  }
+        this.showShell$
+            .pipe(filter((show): show is boolean => show !== undefined))
+            .subscribe(show => {
+                if (show) {
+                    this.envs.loadAll().subscribe();
+                }
+
+                this.loadingService.setApplicationLoading(false);
+            });
+    }
+
+    private initializeApp() {
+        forkJoin({
+            permissions: this.permissionService.fetchPermissions().pipe(catchError(() => of(null))),
+            envs: this.envs.loadAll().pipe(catchError(() => of([])))
+        }).pipe(
+            finalize(() => {
+                this.loadingService.setApplicationLoading(false);
+            })
+        ).subscribe();
+    }
+
+    toggleSidebar() {
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+    }
 }

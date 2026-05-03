@@ -3,9 +3,8 @@ package com.vivid.backend.api.web.dto
 data class PermissionSetDto(
     val admin: Boolean = false,
     val environments: String = "none", // "none", "read", "write"
-    val teams: String = "none",
-    val departments: String = "none",
     val environment: EnvironmentPermissionsDto = EnvironmentPermissionsDto(),
+    val features: String = "none", // "none", "read", "write"
     val resolved: Boolean = true,
 )
 

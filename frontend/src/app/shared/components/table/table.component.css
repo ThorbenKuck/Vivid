@@ -1,0 +1,127 @@
+/* Container-Grundsetup */
+:host {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.table-wrapper {
+    width: 100%;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.table-body {
+    flex-grow: 1;
+    overflow: auto;
+}
+
+/* Das Herzstück: Das Grid-Layout */
+.table-grid {
+    display: grid;
+    /* Die Variable kommt per [style] von Angular */
+    grid-template-columns: var(--table-grid-cols);
+    gap: 1rem;
+    align-items: center;
+    padding: var(--spacing-sm) !important;
+    padding-left: var(--spacing-lg);
+}
+
+/* Header-Styling */
+.table-header {
+    padding: 0.75rem 1rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+/* Die Card (Reihe) */
+.row-card {
+    background: var(--surface-color, #1e1e1e);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.row-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Wenn aufgeklappt, kriegt die Card einen Fokus */
+.row-card.is-expanded {
+    border-color: var(--accent-mint, #2ecc71);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.row-card.expandable {
+    cursor: pointer;
+}
+
+/* Zelle im Grid */
+.cell {
+    min-width: 0; /* Wichtig für Text-Truncation */
+    display: flex;
+    align-items: center;
+}
+
+/* Der aufklappbare Bereich */
+.expanded-area {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Footer & Pagination */
+.table-footer {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    color: var(--text-secondary);
+}
+
+button {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Animationen */
+.animate-in {
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--radius-sm);
+}
+
+.page-selection {
+    display: flex;
+    gap: 10px;
+}
+
+.header-cell.center {
+    justify-self: center;
+}

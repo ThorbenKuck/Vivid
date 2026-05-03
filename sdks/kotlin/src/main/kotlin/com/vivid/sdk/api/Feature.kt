@@ -21,6 +21,23 @@ data class Feature(
     val metadata: Map<String, MetadataValue>,
     val timestamp: Instant,
 ) {
+    companion object {
+        @JvmStatic
+        private val EMPTY =
+            Feature(
+                id = "",
+                enabled = false,
+                flags = emptyMap(),
+                metadata = emptyMap(),
+                name = "",
+                timestamp = Instant.ofEpochMilli(0)
+            )
+
+        fun empty(): Feature {
+            return EMPTY
+        }
+    }
+
     /**
      * Get a metadata value for the feature, checking its type.
      *
@@ -29,7 +46,7 @@ data class Feature(
      * @return the metadata value if it exists and has the correct type, or null if it does not exist
      * @throws ClassCastException if the metadata value exists but has a different type
      */
-    fun <T: MetadataValue> checkedMetadataValue(name: String, type: KClass<T>): T? {
+    fun <T : MetadataValue> checkedMetadataValue(name: String, type: KClass<T>): T? {
         val unchecked = metadata[name] ?: return null
         if (type.isInstance(unchecked)) {
             return unchecked as T
@@ -37,8 +54,31 @@ data class Feature(
             throw ClassCastException("Expected metadata $name to be of type ${type.qualifiedName}, but was of type ${unchecked::class.qualifiedName}")
         }
     }
+
+    fun nullIfEmpty(): Feature? = takeIf { !it.isEmpty() }
+
+    fun isEmpty(): Boolean = this === EMPTY
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Feature
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        var result = enabled.hashCode()
+        result = 31 * result + id.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "Feature(id='$id', name='$name')"
+    }
 }
 
-inline fun <reified T: MetadataValue> Feature.checkedMetadataValue(name: String): T? {
+inline fun <reified T : MetadataValue> Feature.checkedMetadataValue(name: String): T? {
     return checkedMetadataValue(name, T::class)
 }

@@ -66,6 +66,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- JDBC Cache -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- GRPC Integration -->
         <dependency>
             <groupId>io.grpc</groupId>

@@ -1,10 +1,10 @@
-@if (initialized$()) {
+@if (!loadingService.isApplicationLoading()) {
     @if (showShell$ | async) {
         <header class="header">
-            <app-header [collapsed]="sidebarCollapsed" (toggleSidebar)="toggleSidebar()"></app-header>
+            <page-header [collapsed]="sidebarCollapsed" (toggleSidebar)="toggleSidebar()"></page-header>
         </header>
 
-        @if (loading$ | async) {
+        @if (loadingService.isFetching()) {
             <div class="global-loader">
                 <div class="loader-bar"></div>
             </div>

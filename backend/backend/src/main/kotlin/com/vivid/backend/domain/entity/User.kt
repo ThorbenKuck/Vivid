@@ -18,9 +18,5 @@ class User(
     var email: String?,
 
     @Column(name = "display_role")
-    var displayRole: String? = null,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = false)
-    var department: Department
+    var displayRole: String? = null
 ) : BaseUuidEntity(id)

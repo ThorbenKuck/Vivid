@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import {BehaviorSubject, delay, EMPTY, Observable, of, take, throwError} from 'rxjs';
 import { UserDto, UserSyncRequest } from '../dtos';
-import { tap, switchMap, map, catchError } from 'rxjs/operators';
+import {tap, switchMap, map, catchError, filter} from 'rxjs/operators';
 import { HttpService } from './http.service';
 import { Router } from '@angular/router';
 import { PermissionService } from './permission.service';
+import {HttpEvent, HttpHandlerFn, HttpRequest} from "@angular/common/http";
 
 export interface AuthConfig {
   issuer?: string;
@@ -20,6 +21,8 @@ export interface AuthConfig {
 export class AuthService {
   private userSubject = new BehaviorSubject<UserDto | null>(null);
   user$ = this.userSubject.asObservable();
+  private isRefreshing = false;
+  private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
   private config: AuthConfig = {
     clientId: 'vivid-client',
@@ -103,7 +106,11 @@ export class AuthService {
       .then(res => res.json())
       .then(data => {
         const jwt = data.access_token;
+        const refreshToken = data.refresh_token;
         localStorage.setItem('vivid_token', jwt);
+        if (refreshToken) {
+          localStorage.setItem('vivid_refresh_token', refreshToken);
+        }
         this.login(jwt).subscribe({
           next: user => {
             subscriber.next(user);
@@ -137,23 +144,55 @@ export class AuthService {
     );
   }
 
+  refreshToken(): Observable<string> {
+    const refreshToken = localStorage.getItem('vivid_refresh_token');
+    const issuer = this.config.issuer;
+
+    // SOFORTIGER ABBRUCH statt throwError, wenn nichts da ist
+    if (!refreshToken || !issuer) {
+      this.logout(); // Direkt ausloggen ohne Umwege
+      return EMPTY;  // Import von 'rxjs'
+    }
+
+    const tokenUrl = `${issuer}/protocol/openid-connect/token`;    const body = new URLSearchParams();
+    body.set('grant_type', 'refresh_token');
+    body.set('client_id', this.config.clientId);
+    body.set('refresh_token', refreshToken);
+
+    return new Observable<string>(subscriber => {
+      fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString()
+      })
+          .then(res => {
+            if (!res.ok) throw new Error('Refresh failed');
+            return res.json();
+          })
+          .then(data => {
+            localStorage.setItem('vivid_token', data.access_token);
+            localStorage.setItem('vivid_refresh_token', data.refresh_token);
+            subscriber.next(data.access_token);
+            subscriber.complete();
+          })
+          .catch(err => {
+            this.logout(); // Wenn Refresh fehlschlägt, ist die Session wirklich tot
+            subscriber.error(err);
+          });
+    });
+  }
+
   logout() {
     this.userSubject.next(null);
     localStorage.removeItem('vivid_token');
+    localStorage.removeItem('vivid_refresh_token'); // Wichtig: Auch das Refresh-Token löschen!
     localStorage.removeItem('vivid_user');
-    this.permissionService.refreshPermissions();
+    this.permissionService.clearPermissions();
 
     if (this.config.logoutUrl) {
       window.location.href = this.config.logoutUrl;
     } else {
-      // Fallback if no logout URL is configured
-      this.getAuthConfig().subscribe(config => {
-        if (config.logoutUrl) {
-          window.location.href = config.logoutUrl;
-        } else {
-          this.router.navigate(['/']);
-        }
-      });
+      this.router.navigate(['/login']);
     }
   }
 
@@ -190,5 +229,37 @@ export class AuthService {
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
+  }
+
+  handle401(req: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
+    if (!this.isRefreshing) {
+      this.isRefreshing = true;
+      this.refreshTokenSubject.next(null);
+
+      return this.refreshToken().pipe(
+          delay(1000),
+          switchMap((newToken) => {
+            this.isRefreshing = false;
+            localStorage.setItem('vivid_token', newToken);
+            this.refreshTokenSubject.next(newToken);
+            return next(this.addToken(req, newToken));
+          }),
+          catchError((err) => {
+            this.isRefreshing = false;
+            this.logout();
+            return throwError(() => err);
+          })
+      );
+    }
+
+    return this.refreshTokenSubject.pipe(
+        filter(token => token !== null),
+        take(1),
+        switchMap((token) => next(this.addToken(req, token!)))
+    );
+  }
+
+  private addToken(req: HttpRequest<any>, token: string) {
+    return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
   }
 }

@@ -17,8 +17,6 @@ class PermissionProperties(
      * Default visibilities if a role is not explicitly set.
      */
     val defaultVisibility: Map<String, String> = mapOf(
-        "environments" to "read",
-        "teams" to "read",
-        "departments" to "read",
+        "environments" to "read"
     ),
 )

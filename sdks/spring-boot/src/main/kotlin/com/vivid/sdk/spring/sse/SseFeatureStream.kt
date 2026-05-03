@@ -4,11 +4,17 @@ import com.vivid.sdk.FeatureStream
 import com.vivid.sdk.Subscription
 import com.vivid.sdk.api.Feature
 import com.vivid.sdk.spring.VividProperties
+import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
+import reactor.util.retry.Retry.backoff
+import java.time.Duration.ofMinutes
+import java.time.Duration.ofSeconds
+
+private val logger = LoggerFactory.getLogger(SseFeatureStream::class.java)
 
 /**
  * [FeatureStream] implementation that uses Server-Sent Events (SSE) to receive feature updates.
@@ -24,9 +30,10 @@ class SseFeatureStream(
     }
 
     override fun subscribe(callback: FeatureStream.Callback): Subscription {
+        logger.debug("Subscribing to SSE feature stream")
         val webClientBuild = webClient.get().uri {
-            it.pathSegment("api", "client", "features", "{environment}", "stream")
-                .build(vividProperties.environment)
+            it.path("/api/client/features/{environment}/stream")
+                .build(vividProperties.environment.trim().removeSuffix("/"))
         }
 
         sseProperties.apiKey?.let { webClientBuild.header(sseProperties.apiTokenHeaderName, it) }
@@ -34,10 +41,21 @@ class SseFeatureStream(
 
         val eventStream: Flux<ServerSentEvent<Feature>> = webClientBuild.retrieve()
             .bodyToFlux(SSE_TYPE)
+            .timeout(ofMinutes(5))
+            .retryWhen(
+                backoff(Long.MAX_VALUE, ofSeconds(2))
+                    .doBeforeRetry { logger.warn("SSE connection lost, retrying...") }
+            )
 
-        val disposable = eventStream.subscribe { event ->
-            event.data()?.let { callback.onNext(it) }
-        }
+        val disposable = eventStream.subscribe(
+            { event ->
+                logger.debug("Received SSE event with data: {}", event.data())
+                event.data()?.let { callback.onNext(it) }
+            }, { error ->
+                logger.error("Error in SSE feature stream: {}", error.message, error)
+            }
+        )
+        logger.debug("Subscription to SSE feature stream established.")
 
         return SseSubscription(disposable)
     }
