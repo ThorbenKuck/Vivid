@@ -15,13 +15,13 @@ class EnvironmentOverrideEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feature_id", nullable = false)
-    val feature: Feature,
+    val feature: FeatureEntity,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id", nullable = false)
     val environment: EnvironmentEntity,
 
-    @Column(nullable = true)
+    @Column
     var enabled: Boolean? = null,
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -32,7 +32,7 @@ class EnvironmentOverrideEntity(
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    var metadata: MutableMap<String, MetadataValue> = mutableMapOf(),
+    var metadata: Map<String, MetadataValue> = emptyMap(),
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

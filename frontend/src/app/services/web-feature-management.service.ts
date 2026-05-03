@@ -6,7 +6,7 @@ import {
   FeatureCreateRequest,
   FeatureUpdateRequest,
   FeatureLinkCreateRequest,
-  FeatureEnvironmentUpdateRequest,
+  EnvironmentOverrideUpdateRequest,
 } from '../dtos';
 import {Page} from "../shared/components/table/datastructure";
 
@@ -31,7 +31,7 @@ export class WebFeatureManagementService {
     return this.http.get<FeatureDto>(`${this.baseUrl}/number/${runningNumber}`);
   }
 
-  upsertEnvironmentState(id: string, environmentId: string, request: FeatureEnvironmentUpdateRequest): Observable<FeatureDto> {
+  upsertEnvironmentOverride(id: string, environmentId: string, request: EnvironmentOverrideUpdateRequest): Observable<FeatureDto> {
     return this.http.put<FeatureDto>(`${this.baseUrl}/${id}/environments/${environmentId}`, request);
   }
 

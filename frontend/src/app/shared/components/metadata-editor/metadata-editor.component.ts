@@ -1,7 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, KeyValue} from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MetadataValue } from '../../../dtos/MetadataValue';
+import { MetadataValue } from '../../../dtos';
+import {EnvironmentOverrideDto} from "../../../dtos";
+
+export interface ValueChange {
+  key: string;
+  value: MetadataValue;
+}
 
 @Component({
   selector: 'app-metadata-editor',
@@ -9,39 +15,59 @@ import { MetadataValue } from '../../../dtos/MetadataValue';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="metadata-editor flex-col gap-sm">
-      <div *ngFor="let entry of metadata | keyvalue; trackBy: trackByKey" class="metadata-row flex items-center gap-sm card p-sm">
-        <div class="key-display flex-1">
+      <div *ngFor="let entry of metadata | keyvalue; trackBy: trackByKey"
+           class="metadata-row flex items-center gap-sm card p-sm">
+        <div class="key-display flex-1 flex items-center">
+          @if (hasOverride(entry)) {
+            <span class="material-symbols-rounded text-xs" style="color: var(--accent-mint)">adjust</span>
+          }
           <span class="text-sm font-semibold">{{ entry.key }}</span>
-          <span class="text-xs text-muted ml-sm">({{ entry.value['@type'] }})</span>
+          <span class="text-xs text-muted">({{ entry.value['@type'] }})</span>
+          @if (hasOverride(entry)) {
+            <span class="text-xs overridden-info">Overridden</span>
+
+            <button class="remove-override-button icon-btn-slim" (click)="overrideRemoved.emit(entry.key)">
+              <span class="material-symbols-rounded text-xs">undo</span>
+            </button>
+          }
         </div>
-        
+
         <div class="value-input flex-1">
           <ng-container [ngSwitch]="entry.value['@type']">
-            <input *ngSwitchCase="'Boolean'" type="checkbox" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" [disabled]="disabled" />
-            <input *ngSwitchCase="'Long'" type="number" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="1" [disabled]="disabled" />
-            <input *ngSwitchCase="'Double'" type="number" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="any" [disabled]="disabled" />
-            <input *ngSwitchCase="'String'" type="text" [ngModel]="entry.value.content" (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" [disabled]="disabled" />
-            <textarea *ngSwitchCase="'Json'" [ngModel]="entry.value.content | json" (ngModelChange)="updateJsonValue(entry.key, $event)" [disabled]="disabled"></textarea>
+            <input *ngSwitchCase="'Boolean'" type="checkbox" [ngModel]="entry.value.content"
+                   (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" [disabled]="disabled"/>
+            <input *ngSwitchCase="'Long'" type="number" [ngModel]="entry.value.content"
+                   (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="1"
+                   [disabled]="disabled"/>
+            <input *ngSwitchCase="'Double'" type="number" [ngModel]="entry.value.content"
+                   (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" step="any"
+                   [disabled]="disabled"/>
+            <input *ngSwitchCase="'String'" type="text" [ngModel]="entry.value.content"
+                   (ngModelChange)="updateValue(entry.key, entry.value['@type'], $event)" [disabled]="disabled"/>
+            <textarea *ngSwitchCase="'Json'" [ngModel]="entry.value.content | json"
+                      (ngModelChange)="updateJsonValue(entry.key, $event)" [disabled]="disabled"></textarea>
             <div *ngSwitchCase="'StringList'" class="flex-col gap-xs">
-              <div *ngFor="let item of entry.value.content; let i = index; trackBy: trackByIndex" class="flex items-center gap-xs">
-                 <input type="text" [ngModel]="item" (ngModelChange)="updateStringListItem(entry.key, i, $event)" [disabled]="disabled" />
-                 <button class="icon-btn danger" (click)="removeStringListItem(entry.key, i)" [disabled]="disabled">
-                    <span class="material-symbols-rounded">remove</span>
-                 </button>
+              <div *ngFor="let item of entry.value.content; let i = index; trackBy: trackByIndex"
+                   class="flex items-center gap-xs">
+                <input type="text" [ngModel]="item" (ngModelChange)="updateStringListItem(entry.key, i, $event)"
+                       [disabled]="disabled"/>
+                <button class="icon-btn danger" (click)="removeStringListItem(entry.key, i)" [disabled]="disabled">
+                  <span class="material-symbols-rounded">remove</span>
+                </button>
               </div>
               <button class="btn-slim" (click)="addStringListItem(entry.key)" [disabled]="disabled">Add Item</button>
             </div>
           </ng-container>
         </div>
-        
+
         <button class="icon-btn-slim danger" (click)="removeEntry(entry.key)" [disabled]="disabled">
           <span class="material-symbols-rounded">delete</span>
         </button>
       </div>
-      
+
       <!-- New Entry -->
       <div class="new-entry card p-sm flex items-center gap-sm" *ngIf="!disabled">
-        <input type="text" placeholder="Key" [(ngModel)]="newKey" class="flex-1" />
+        <input type="text" placeholder="Key" [(ngModel)]="newKey" class="flex-1"/>
         <select [(ngModel)]="newType" class="flex-1">
           <option value="Boolean">Boolean</option>
           <option value="String">String</option>
@@ -66,15 +92,40 @@ import { MetadataValue } from '../../../dtos/MetadataValue';
     .p-sm { padding: var(--spacing-sm); }
     .ml-sm { margin-left: var(--spacing-sm); }
     .icon-btn.danger { color: var(--accent-danger); border: none; background: transparent; }
+    .remove-override-button {
+      padding: 5px;
+    }
+    .key-display {
+      gap: 5px
+    }
+    .overridden-info {
+      color: var(--accent-mint);
+    }
   `]
 })
 export class MetadataEditorComponent {
   @Input() metadata: { [key: string]: MetadataValue } = {};
   @Input() disabled = false;
+  @Input() override?: EnvironmentOverrideDto;
   @Output() metadataChange = new EventEmitter<{ [key: string]: MetadataValue }>();
+  @Output() overrideRemoved = new EventEmitter<string>();
 
   newKey = '';
   newType: MetadataValue['@type'] = 'String';
+
+  hasOverride(keyValue: KeyValue<string, MetadataValue>): boolean {
+    if (!this.override) {
+      return false
+    }
+    for (let metadataKey in this.override.metadata) {
+      if (metadataKey === keyValue.key) {
+        console.log("Found override for key:", keyValue.key, metadataKey)
+        return true
+      }
+    }
+
+    return false
+  }
 
   trackByKey(index: number, item: any) {
     return item.key;

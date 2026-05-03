@@ -16,7 +16,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/web/features")
-@Tag(name = "Web Feature Management", description = "CRUD operations for features")
+@Tag(name = "Web FeatureEntity Management", description = "CRUD operations for features")
 class WebFeatureController(
     private val featureService: FeatureService,
     private val environmentService: EnvironmentService,
@@ -59,24 +59,20 @@ class WebFeatureController(
         @RequestBody request: FeatureCreateRequest
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.createFeature(
-            name = request.name,
-            description = request.description,
-            tags = request.tags,
-        ).toDto(allEnvironments)
+        return featureService.createFeature(request).toDto(allEnvironments)
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update an existing feature (name, description, tags)")
+    @Operation(summary = "Update an existing feature (name, description, tags, global settings, overrides)")
     fun updateFeature(
         @PathVariable id: UUID,
         @RequestBody request: FeatureUpdateRequest
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
         // Validate write access for each environment in request
-        request.environments?.forEach { envUpdate ->
-            val env = environmentService.findEnvironment(envUpdate.environmentId.toString())
-                ?: throw com.vivid.backend.service.exception.ResourceNotFoundException("Environment not found: ${envUpdate.environmentId}")
+        request.overrides?.forEach { overrideUpdate ->
+            val env = environmentService.findEnvironment(overrideUpdate.environmentId.toString())
+                ?: throw com.vivid.backend.service.exception.ResourceNotFoundException("Environment not found: ${overrideUpdate.environmentId}")
             if (!permissionService.hasEnvPermission(env.name, "write")) {
                 throw org.springframework.security.access.AccessDeniedException("No write access for environment: ${env.name}")
             }
@@ -85,15 +81,15 @@ class WebFeatureController(
     }
 
     @PutMapping("/{id}/environments/{environment}")
-    @Operation(summary = "Upsert environment-specific state for a feature")
+    @Operation(summary = "Upsert environment-specific override for a feature")
     @PreAuthorize("@permissionService.hasEnvPermission(#environment, 'write')")
-    fun upsertFeatureEnvironment(
+    fun upsertEnvironmentOverride(
         @PathVariable id: UUID,
         @PathVariable environment: String,
-        @RequestBody request: FeatureEnvironmentUpdateRequest
+        @RequestBody request: EnvironmentOverrideUpdateRequest
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.upsertFeatureEnvironment(id, environment, request).toDto(allEnvironments)
+        return featureService.upsertEnvironmentOverride(id, environment, request).toDto(allEnvironments)
     }
 
     @GetMapping("/tags")

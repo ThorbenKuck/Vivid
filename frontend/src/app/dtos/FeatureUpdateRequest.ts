@@ -1,10 +1,12 @@
 import {MetadataValue} from './MetadataValue';
-import {FeatureEnvironmentUpdateRequest} from './FeatureEnvironmentUpdateRequest';
+import {EnvironmentOverrideUpdateRequest} from './EnvironmentOverrideUpdateRequest';
 
 export interface FeatureUpdateRequest {
   name?: string;
   description?: string;
   tags?: string[];
-  environments?: FeatureEnvironmentUpdateRequest[];
-  assignedTeamIds?: string[];
+  enabled?: boolean;
+  flags?: { [key: string]: boolean };
+  metadata?: { [key: string]: MetadataValue };
+  overrides?: EnvironmentOverrideUpdateRequest[];
 }

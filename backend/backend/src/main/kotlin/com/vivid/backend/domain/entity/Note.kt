@@ -21,5 +21,5 @@ class Note(
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "feature_id", nullable = false)
-    var feature: Feature
+    var feature: FeatureEntity
 ) : BaseUuidEntity(id)

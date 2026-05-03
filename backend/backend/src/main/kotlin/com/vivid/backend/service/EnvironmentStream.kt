@@ -2,8 +2,7 @@ package com.vivid.backend.service
 
 import com.vivid.backend.api.client.dto.toClientDto
 import com.vivid.backend.domain.entity.EnvironmentEntity
-import com.vivid.backend.domain.entity.Feature
-import com.vivid.backend.domain.entity.FeatureEnvironment
+import com.vivid.backend.domain.entity.FeatureEntity
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.http.MediaType
@@ -47,19 +46,21 @@ class EnvironmentStream(
         return subscription.sseEmitter
     }
 
-    fun pushFeature(feature: Feature) {
-        feature.environments.forEach { pushFeature(it) }
+    fun pushFeature(feature: FeatureEntity) {
+        registration.keys.forEach { envId ->
+            pushFeature(feature, envId)
+        }
     }
 
-    fun pushFeature(featureEnvironment: FeatureEnvironment) {
-        val emitters = registration[featureEnvironment.environment.id] ?: return
+    fun pushFeature(feature: FeatureEntity, environmentId: UUID) {
+        val emitters = registration[environmentId] ?: return
 
         if (emitters.isEmpty()) {
             return
         }
 
-        logger.debug("Pushing feature update to subscribers for environment \"{}\"", featureEnvironment.environment.id)
-        val dto = featureEnvironment.toClientDto()
+        logger.debug("Pushing feature update to subscribers for environment \"{}\"", environmentId)
+        val dto = feature.toClientDto(environmentId)
         val event = event()
             .data(objectMapper.writeValueAsString(dto), MediaType.APPLICATION_JSON)
             .id(UUID.randomUUID().toString())

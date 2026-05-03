@@ -4,7 +4,7 @@ export * from './FeatureLinkDto';
 export * from './FeatureCreateRequest';
 export * from './FeatureUpdateRequest';
 export * from './FeatureLinkCreateRequest';
-export * from './FeatureEnvironmentUpdateRequest';
+export * from './EnvironmentOverrideUpdateRequest';
 export * from './EnvironmentDto';
 export * from './EnvironmentCreateRequest';
 export * from './UserDto';

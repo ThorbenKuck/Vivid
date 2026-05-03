@@ -5,7 +5,7 @@ import { Directive, ElementRef, HostListener, Input, OnDestroy, Renderer2 } from
     standalone: true
 })
 export class TooltipDirective implements OnDestroy {
-    @Input('vividTooltip') tooltipText = '';
+    @Input('vividTooltip') tooltipText? = '';
     private tooltipElement: HTMLElement | null = null;
 
     constructor(private el: ElementRef, private renderer: Renderer2) {}
@@ -20,6 +20,7 @@ export class TooltipDirective implements OnDestroy {
     }
 
     private showTooltip() {
+        if (!this.tooltipText) return;
         // 1. Element erstellen
         this.tooltipElement = this.renderer.createElement('span');
         const text = this.renderer.createText(this.tooltipText);

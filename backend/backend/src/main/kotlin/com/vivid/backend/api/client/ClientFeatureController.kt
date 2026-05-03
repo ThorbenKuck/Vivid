@@ -26,7 +26,9 @@ class ClientFeatureController(
         @PathVariable environment: String,
         @RequestHeader(name = "X-Application-Id", required = true) appId: String,
     ): List<ClientFeatureDto> {
-        return featureService.getEnabledFeaturesForClient(environment).map { it.toClientDto() }
+        val env = environmentService.findEnvironment(environment)
+            ?: throw com.vivid.backend.service.exception.ResourceNotFoundException("Environment with id $environment not found")
+        return featureService.getEnabledFeaturesForClient(environment).map { it.toClientDto(env.id) }
     }
 
     @GetMapping("/{key}")
@@ -35,8 +37,9 @@ class ClientFeatureController(
         @PathVariable key: String,
         @RequestHeader(name = "X-Application-Id", required = true) appId: String,
     ): ResponseEntity<ClientFeatureDto> {
+        val env = environmentService.findEnvironment(environment) ?: return ResponseEntity.notFound().build()
         return featureService.findFeature(name = key, environmentIdentifier = environment)
-            ?.toClientDto()
+            ?.toClientDto(env.id)
             ?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.notFound().build()
     }

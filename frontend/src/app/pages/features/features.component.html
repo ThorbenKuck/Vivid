@@ -66,7 +66,8 @@
                 <table-column [key]="env.id || env.name" [label]="env.name" width="60px" [center]="true">
                     <ng-template let-f>
                         <div class="flex flex-1 justify-center">
-                            <env-status [active]="getEnv(f, env.id)?.enabled || false" [haloType]="(getEnv(f, env.id)?.enabled || false) ? null : 'error'"></env-status>
+                            @let active = isResolvedEnabled(f, env.id);
+                            <env-status [active]="active" [haloType]="active ? null : 'error'"></env-status>
                         </div>
                     </ng-template>
                 </table-column>

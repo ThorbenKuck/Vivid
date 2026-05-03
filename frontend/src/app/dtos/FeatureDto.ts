@@ -2,12 +2,18 @@ import { MetadataValue } from './MetadataValue';
 import { FeatureLinkDto } from './FeatureLinkDto';
 import { NoteDto } from './NoteDto';
 
-export interface FeatureEnvironmentDto {
+export enum OverrideStrategy {
+  OVERRIDE = 'OVERRIDE',
+  EXTEND = 'EXTEND'
+}
+
+export interface EnvironmentOverrideDto {
   environmentId: string;
   environmentName: string;
-  enabled: boolean;
+  enabled?: boolean;
   flags: { [key: string]: boolean };
   metadata: { [key: string]: MetadataValue };
+  strategy: OverrideStrategy;
 }
 
 export interface FeatureDto {
@@ -16,7 +22,10 @@ export interface FeatureDto {
   name: string;
   key: string;
   description?: string;
-  environments: FeatureEnvironmentDto[];
+  enabled: boolean;
+  flags: { [key: string]: boolean };
+  metadata: { [key: string]: MetadataValue };
+  overrides: EnvironmentOverrideDto[];
   tags: string[];
   outgoingLinks: FeatureLinkDto[];
   notes: NoteDto[];

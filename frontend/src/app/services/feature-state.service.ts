@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, combineLatest } from 'rxjs';
-import { FeatureDto, FeatureEnvironmentDto } from '../dtos';
+import { FeatureDto, EnvironmentOverrideDto } from '../dtos';
 
 @Injectable({
   providedIn: 'root'
@@ -34,13 +34,14 @@ export class FeatureStateService {
     }
   }
 
-  updateEnvState(envId: string, update: Partial<FeatureEnvironmentDto>) {
+  updateOverride(envId: string, update: Partial<EnvironmentOverrideDto>) {
     const current = this.draftState$.value;
     if (current) {
-      const environments = current.environments.map(env => 
-        env.environmentId === envId ? { ...env, ...update } : env
+      const overrides = current.overrides.map(ovr => 
+        ovr.environmentId === envId ? { ...ovr, ...update } : ovr
       );
-      this.draftState$.next({ ...current, environments });
+      console.log('Updated overrides:', overrides);
+      this.draftState$.next({ ...current, overrides });
     }
   }
 
@@ -68,54 +69,54 @@ export class FeatureStateService {
     );
   }
 
-  isEnvFieldDirty(envId: string, fieldName: keyof FeatureEnvironmentDto): Observable<boolean> {
+  isOverrideFieldDirty(envId: string, fieldName: keyof EnvironmentOverrideDto): Observable<boolean> {
     return combineLatest([this.originalState$, this.draftState$]).pipe(
       map(([original, draft]) => {
         if (!original || !draft) return false;
-        const origEnv = original.environments.find(e => e.environmentId === envId);
-        const draftEnv = draft.environments.find(e => e.environmentId === envId);
-        if (!origEnv || !draftEnv) return false;
-        return JSON.stringify(origEnv[fieldName]) !== JSON.stringify(draftEnv[fieldName]);
+        const origOvr = original.overrides.find(e => e.environmentId === envId);
+        const draftOvr = draft.overrides.find(e => e.environmentId === envId);
+        if (!origOvr || !draftOvr) return false;
+        return JSON.stringify(origOvr[fieldName]) !== JSON.stringify(draftOvr[fieldName]);
       })
     );
   }
 
-  isEnvMetadataKeyDirty(envId: string, key: string): Observable<boolean> {
+  isOverrideMetadataKeyDirty(envId: string, key: string): Observable<boolean> {
     return combineLatest([this.originalState$, this.draftState$]).pipe(
       map(([original, draft]) => {
         if (!original || !draft) return false;
-        const origEnv = original.environments.find(e => e.environmentId === envId);
-        const draftEnv = draft.environments.find(e => e.environmentId === envId);
-        if (!origEnv || !draftEnv) return false;
-        const origVal = origEnv.metadata[key];
-        const draftVal = draftEnv.metadata[key];
+        const origOvr = original.overrides.find(e => e.environmentId === envId);
+        const draftOvr = draft.overrides.find(e => e.environmentId === envId);
+        if (!origOvr || !draftOvr) return false;
+        const origVal = origOvr.metadata[key];
+        const draftVal = draftOvr.metadata[key];
         return JSON.stringify(origVal) !== JSON.stringify(draftVal);
       })
     );
   }
 
-  isEnvFlagDirty(envId: string, key: string): Observable<boolean> {
+  isOverrideFlagDirty(envId: string, key: string): Observable<boolean> {
     return combineLatest([this.originalState$, this.draftState$]).pipe(
       map(([original, draft]) => {
         if (!original || !draft) return false;
-        const origEnv = original.environments.find(e => e.environmentId === envId);
-        const draftEnv = draft.environments.find(e => e.environmentId === envId);
-        if (!origEnv || !draftEnv) return false;
-        const origVal = origEnv.flags[key];
-        const draftVal = draftEnv.flags[key];
+        const origOvr = original.overrides.find(e => e.environmentId === envId);
+        const draftOvr = draft.overrides.find(e => e.environmentId === envId);
+        if (!origOvr || !draftOvr) return false;
+        const origVal = origOvr.flags[key];
+        const draftVal = draftOvr.flags[key];
         return origVal !== draftVal;
       })
     );
   }
 
-  isEnvDirty(envId: string): Observable<boolean> {
+  isOverrideDirty(envId: string): Observable<boolean> {
     return combineLatest([this.originalState$, this.draftState$]).pipe(
       map(([original, draft]) => {
         if (!original || !draft) return false;
-        const origEnv = original.environments.find(e => e.environmentId === envId);
-        const draftEnv = draft.environments.find(e => e.environmentId === envId);
-        if (!origEnv || !draftEnv) return false;
-        return JSON.stringify(origEnv) !== JSON.stringify(draftEnv);
+        const origOvr = original.overrides.find(e => e.environmentId === envId);
+        const draftOvr = draft.overrides.find(e => e.environmentId === envId);
+        if (!origOvr || !draftOvr) return false;
+        return JSON.stringify(origOvr) !== JSON.stringify(draftOvr);
       })
     );
   }

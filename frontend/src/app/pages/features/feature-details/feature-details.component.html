@@ -6,7 +6,22 @@
 </div>
 
 @if (feature$ | async; as f) {
-    <accordion>
+    <div class="master-switch-card card flex items-center justify-between p-md configuration-section"
+         [class.enabled]="f.enabled">
+        <div class="flex items-center gap-md"
+             vividTooltip="Default state if no environment overrides are applied.">
+                    <span class="material-symbols-rounded text-xl"
+                          [style.color]="f.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                        {{ f.enabled ? 'toggle_on' : 'toggle_off' }}
+                    </span>
+            <span class="text-sm font-semibold">Status</span>
+        </div>
+        <button class="btn-toggle" [class.active]="f.enabled" (click)="updateField('enabled', !f.enabled)">
+            {{ f.enabled ? 'Enabled' : 'Disabled' }}
+        </button>
+    </div>
+
+    <accordion [multi]="true">
         <expansion-panel>
             <app-header>
                 <span class="material-symbols-rounded" style="color: var(--accent-mint)">info</span>
@@ -52,15 +67,16 @@
                         <span *ngIf="state.isFieldDirty('tags') | async"
                               class="material-symbols-rounded text-xs dirty-indicator">circle</span>
                     </label>
-                    <app-chiplist [tags]="f.tags" [options]="tagsOptions" (tagsChange)="updateField('tags', $event)"></app-chiplist>
+                    <app-chiplist [tags]="f.tags" [options]="tagsOptions"
+                                  (tagsChange)="updateField('tags', $event)"></app-chiplist>
                 </div>
             </app-content>
         </expansion-panel>
-
         <expansion-panel>
             <app-header>
                 <badge variant="primary" [content]="f.notes?.length || 0">
-                    <span class="material-symbols-rounded" style="color: var(--accent-mint)">chat_bubble</span> Notes & Comments
+                    <span class="material-symbols-rounded" style="color: var(--accent-mint)">chat_bubble</span> Notes &
+                    Comments
                 </badge>
             </app-header>
             <app-content>
@@ -69,7 +85,8 @@
                     <div *ngFor="let note of f.notes" class="note-item flex-col gap-xs pb-sm border-bottom">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold author-name">{{ note.authorName }}</span>
-                            <span class="text-xxs text-muted" [vividTooltip]="note.timestamp">{{ note.timestamp | timeAgo }}</span>
+                            <span class="text-xxs text-muted"
+                                  [vividTooltip]="note.timestamp">{{ note.timestamp | timeAgo }}</span>
                         </div>
                         <div class="note-content text-xs text-secondary">{{ note.content }}</div>
                     </div>
@@ -99,11 +116,11 @@
                 </div>
             </app-content>
         </expansion-panel>
-
         <expansion-panel>
             <app-header>
                 <badge variant="primary" [content]="f.outgoingLinks.length">
-                    <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span> Related Features
+                    <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span> Related
+                    Features
                 </badge>
             </app-header>
             <app-content>
@@ -155,134 +172,223 @@
                 </div>
             </app-content>
         </expansion-panel>
-    </accordion>
-
-    @if (f.environments && f.environments.length === 0) {
-        <app-no-environments-warning></app-no-environments-warning>
-    }
-
-    <tabs>
-        @for (environment of f.environments; track environment.environmentId) {
-            @let writePermission = permissions.hasEnvPermission(environment.environmentName, 'write');
-            <tab>
-                <app-tab-header>
-                    <env-status [active]="environment.enabled" [haloType]="environment.enabled ? null : 'error'"></env-status>
-                    <span class="text-xs font-semibold">{{ environment.environmentName }}</span>
-
-                    @if (!writePermission) {
-                        <span class="material-symbols-rounded lock-icon-sm"
-                              [title]="'No write access to ' + environment.environmentName">lock</span>
-                    }
-
-                    @if (state.isEnvDirty(environment.environmentId) | async) {
-                        <span class="dirty-indicator-dot"></span>
-                    }
-                </app-tab-header>
-
-                <div class="environment-switch master-switch-card card flex items-center justify-between p-md"
-                     [class.enabled]="environment.enabled">
-                    <div class="flex items-center gap-md">
-                            <span class="material-symbols-rounded text-xl"
-                                  [style.color]="environment.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
-                              {{ environment.enabled ? 'toggle_on' : 'toggle_off' }}
-                            </span>
-                        <div class="flex-col">
-                                <span class="text-sm font-semibold">Environment Status ({{ environment.environmentName }}
-                                    )</span>
-                            <span class="text-xs text-muted">{{ environment.enabled ? 'This feature is active in ' + environment.environmentName + '.' : 'This feature is disabled.' }}</span>
-                        </div>
-                    </div>
+        <expansion-panel>
+            <app-header>
+                <badge [variant]="'primary'" [content]="(f.flags | keyvalue).length">
+                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">flag_2</span> Flags
+                </badge>
+            </app-header>
+            <app-content>
+                <div *ngFor="let flag of f.flags | keyvalue; trackBy: trackByFlagKey"
+                     class="flag-row flex items-center gap-md p-xs border-bottom">
+                    <span class="text-xs font-semibold flex-1">{{ flag.key }}</span>
                     <div class="flex items-center gap-sm">
-                            <span *ngIf="state.isEnvFieldDirty(environment.environmentId, 'enabled') | async"
-                                  class="text-xs text-accent-mint italic">Changed</span>
-                        <button class="btn-toggle"
-                                [class.active]="environment.enabled"
-                                (click)="updateEnvField(environment.environmentId, 'enabled', !environment.enabled)"
-                                [disabled]="!writePermission">
-                            {{ environment.enabled ? 'Enabled' : 'Disabled' }}
+                        <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
+                        <button class="icon-btn-slim" (click)="toggleFlag(null, f.flags, flag.key, !flag.value)">
+                                    <span class="material-symbols-rounded"
+                                          [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                                      {{ flag.value ? 'toggle_on' : 'toggle_off' }}
+                                    </span>
+                        </button>
+                        <button class="icon-btn-slim danger" (click)="removeFlag(null, f.flags, flag.key)">
+                            <span class="material-symbols-rounded">delete</span>
                         </button>
                     </div>
                 </div>
+                <div class="add-flag-row flex items-center gap-sm mt-sm">
+                    <input type="text" #newGlobalFlagKey class="form-input text-xs flex-1"
+                           placeholder="New global flag key..."/>
+                    <button class="btn-slim primary"
+                            (click)="addFlag(null, f.flags, newGlobalFlagKey.value); newGlobalFlagKey.value = ''">
+                        <span class="material-symbols-rounded">add</span> Add Flag
+                    </button>
+                </div>
 
-                <accordion [multi]="true">
-                    <expansion-panel>
-                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-sky)">settings</span> Feature Flags</app-header>
-                        <app-content>
-                            <div class="flags-manager flex-col gap-sm">
-                                <div *ngFor="let flag of environment.flags | keyvalue; trackBy: trackByFlagKey"
-                                     class="flag-row flex items-center gap-md p-xs border-bottom">
-                                    <span class="text-xs font-semibold flex-1">{{ flag.key }}</span>
+            </app-content>
+        </expansion-panel>
+        <expansion-panel [collapsed]="false">
+            <app-header>
+                <badge [variant]="'primary'" [content]="(f.metadata | keyvalue).length">
+                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">dataset</span> Metadata
+                </badge>
+            </app-header>
+            <app-content>
+                <app-metadata-editor [metadata]="f.metadata"
+                                     (metadataChange)="updateMetadata(null, $event)"></app-metadata-editor>
+            </app-content>
+        </expansion-panel>
+        <expansion-panel [collapsed]="false">
+            <app-header><span class="material-symbols-rounded" style="color: var(--accent-danger)">rule_settings</span> Environment Overrides</app-header>
+            <app-content>
+                @if (f.overrides && f.overrides.length === 0) {
+                    <app-no-environments-warning></app-no-environments-warning>
+                } @else {
+                    <tabs>
+                        @for (override of f.overrides; track override.environmentId) {
+                            @let writePermission = permissions.hasEnvPermission(override.environmentName, 'write');
+                            @let resolved = resolvePreview(f, override.environmentId);
+                            <tab>
+                                <app-tab-header>
+                                    <env-status [active]="resolved.enabled"
+                                                [haloType]="resolved.enabled ? null : 'error'"></env-status>
+                                    <span class="text-xs font-semibold">{{ override.environmentName }}</span>
+
+                                    @if (!writePermission) {
+                                        <span class="material-symbols-rounded lock-icon-sm"
+                                              [title]="'No write access to ' + override.environmentName">lock</span>
+                                    }
+
+                                    @if (state.isOverrideDirty(override.environmentId) | async) {
+                                        <span class="dirty-indicator-dot"></span>
+                                    }
+                                </app-tab-header>
+
+                                <div class="mb-md card p-sm bg-tertiary environment-behaviour">
+                                    <span class="text-muted">Environment Behaviour</span>
+                                    <button-toggle
+                                            [options]="[
+                            {label: 'Extend', value: 'EXTEND', tooltip: 'Extend the default configuration with environment specific settings'},
+                             {label: 'Override', value: 'OVERRIDE', tooltip: 'Replace the default configuration with environment specific settings'}
+                             ]"
+                                            (valueChange)="updateOverrideField(override.environmentId, 'strategy', $event)"
+                                            [value]="override.strategy"
+                                    ></button-toggle>
+                                </div>
+
+                                <div class="environment-switch master-switch-card card flex items-center justify-between p-md"
+                                     [class.enabled]="resolved.enabled">
+                                    <div class="flex items-center gap-md">
+                            <span class="material-symbols-rounded text-xl"
+                                  [style.color]="resolved.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                              {{ resolved.enabled ? 'toggle_on' : 'toggle_off' }}
+                            </span>
+                                        <div class="flex-col">
+                                            <span class="text-sm font-semibold">Environment Status</span>
+                                            <span class="text-xs text-muted">
+                                {{ override.enabled !== undefined && override.enabled !== null ? 'Overridden' : 'Inherited' }}
+                                                :
+                                                {{ resolved.enabled ? 'Active' : 'Disabled' }}
+                            </span>
+                                        </div>
+                                    </div>
                                     <div class="flex items-center gap-sm">
-                                        <span *ngIf="state.isEnvFlagDirty(environment.environmentId, flag.key) | async"
-                                              class="text-xs text-accent-mint italic">Changed</span>
-                                        <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
-                                        <button class="icon-btn-slim"
-                                                (click)="toggleFlag(environment.environmentId, environment.flags, flag.key, !flag.value)"
+                                        @if (override.enabled !== undefined && override.enabled !== null) {
+                                            <button class="btn-slim danger text-xxs"
+                                                    (click)="removeOverride(override.environmentId, 'enabled')">Clear
+                                                Override
+                                            </button>
+                                        }
+                                        <button class="btn-toggle"
+                                                [class.active]="resolved.enabled"
+                                                (click)="updateOverrideField(override.environmentId, 'enabled', !resolved.enabled)"
                                                 [disabled]="!writePermission">
-                                            <span class="material-symbols-rounded"
-                                                  [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
-                                              {{ flag.value ? 'toggle_on' : 'toggle_off' }}
-                                            </span>
-                                        </button>
-                                        <button class="icon-btn-slim danger"
-                                                (click)="removeFlag(environment.environmentId, environment.flags, flag.key)"
-                                                *hasEnvPermission="[environment.environmentName, 'write']">
-                                            <span class="material-symbols-rounded">delete</span>
+                                            {{ resolved.enabled ? 'Enabled' : 'Disabled' }}
                                         </button>
                                     </div>
                                 </div>
 
-                                <div class="add-flag-row flex items-center gap-sm mt-sm"
-                                     *hasEnvPermission="[environment.environmentName, 'write']">
-                                    <input type="text" #newFlagKey class="form-input text-xs flex-1"
-                                           placeholder="New flag key..."/>
-                                    <button class="btn-slim primary"
-                                            (click)="addFlag(environment.environmentId, environment.flags, newFlagKey.value); newFlagKey.value = ''">
-                                        <span class="material-symbols-rounded">add</span>
-                                        Add Flag
-                                    </button>
-                                </div>
-                            </div>
-                        </app-content>
-                    </expansion-panel>
+                                <accordion [multi]="true">
+                                    <expansion-panel>
+                                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-sky)">settings</span>
+                                            Feature Flags
+                                        </app-header>
+                                        <app-content>
+                                            <div class="flags-manager flex-col gap-sm">
+                                                <div *ngFor="let flag of resolved.flags | keyvalue; trackBy: trackByFlagKey"
+                                                     class="flag-row flex items-center gap-md p-xs border-bottom">
+                                    <span class="text-xs font-semibold flex-1 flex items-center gap-xs">
+                                        {{ flag.key }}
+                                        @if (isFlagOverridden(f, override.environmentId, flag.key)) {
+                                            <span class="badge text-xxs"
+                                                  style="background: var(--color-teriary); color: var(--accent-mint)">Overridden</span>
+                                        } @else {
+                                            <span class="text-xxs text-muted">(Inherited)</span>
+                                        }
+                                    </span>
+                                                    <div class="flex items-center gap-sm">
+                                                        <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
+                                                        <button class="icon-btn-slim"
+                                                                (click)="toggleFlag(override.environmentId, override.flags, flag.key, !flag.value)"
+                                                                [disabled]="!writePermission">
+                                            <span class="material-symbols-rounded"
+                                                  [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
+                                              {{ flag.value ? 'toggle_on' : 'toggle_off' }}
+                                            </span>
+                                                        </button>
+                                                        @if (isFlagOverridden(f, override.environmentId, flag.key)) {
+                                                            <button class="icon-btn-slim danger"
+                                                                    [vividTooltip]="'Reset to default value'"
+                                                                    (click)="removeOverride(override.environmentId, 'flag', flag.key)"
+                                                                    *hasEnvPermission="[override.environmentName, 'write']">
+                                                                <span class="material-symbols-rounded">undo</span>
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                </div>
 
-                    <expansion-panel>
-                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-lavender)">database</span> Metadata</app-header>
-                        <app-content>
-                            <app-metadata-editor [metadata]="environment.metadata"
-                                                 (metadataChange)="updateMetadata(environment.environmentId, $event)"
-                                                 [disabled]="!writePermission">
-                            </app-metadata-editor>
-                        </app-content>
-                    </expansion-panel>
+                                                <div class="add-flag-row flex items-center gap-sm mt-sm"
+                                                     *hasEnvPermission="[override.environmentName, 'write']">
+                                                    <input type="text" #newEnvFlagKey class="form-input text-xs flex-1"
+                                                           placeholder="Override or add flag key..."/>
+                                                    <button class="btn-slim primary"
+                                                            (click)="addFlag(override.environmentId, override.flags, newEnvFlagKey.value); newEnvFlagKey.value = ''">
+                                                        <span class="material-symbols-rounded">add</span>
+                                                        Override Flag
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </app-content>
+                                    </expansion-panel>
 
-                    <expansion-panel>
-                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-lavender)">content_copy</span> Copy From</app-header>
-                        <app-content>
-                            <div class="form-group">
-                                <label class="text-xs text-muted">Select environment to copy state from:</label>
-                                <div class="flex items-center gap-sm mt-xs">
-                                    <select #copySource class="form-input text-xs flex-1">
-                                        <option value="" disabled selected>Choose environment...</option>
-                                        <ng-container *ngFor="let other of f.environments">
-                                            <option *ngIf="other.environmentId !== environment.environmentId"
-                                                    [value]="other.environmentId">
-                                                {{ other.environmentName }}
-                                            </option>
-                                        </ng-container>
-                                    </select>
-                                    <button class="btn-slim"
-                                            (click)="copyFrom(environment.environmentId, copySource.value)">
-                                        Copy State
-                                    </button>
-                                </div>
-                            </div>
-                        </app-content>
-                    </expansion-panel>
-                </accordion>
-            </tab>
-        }
-    </tabs>
+                                    <expansion-panel>
+                                        <app-header><span class="material-symbols-rounded"
+                                                          style="color: var(--accent-lavender)">database</span> Metadata
+                                        </app-header>
+                                        <app-content>
+                                            <app-metadata-editor [metadata]="resolved.metadata"
+                                                                 [override]="override"
+                                                                 (metadataChange)="updateMetadata(override.environmentId, $event)"
+                                                                 (overrideRemoved)="removeOverride(override.environmentId, 'metadata', $event)"
+                                                                 [disabled]="!writePermission">
+                                            </app-metadata-editor>
+                                        </app-content>
+                                    </expansion-panel>
+
+                                    <expansion-panel>
+                                        <app-header><span class="material-symbols-rounded"
+                                                          style="color: var(--accent-lavender)">content_copy</span> Copy
+                                            From
+                                        </app-header>
+                                        <app-content>
+                                            <div class="form-group">
+                                                <label class="text-xs text-muted">Select environment to copy overrides
+                                                    from:</label>
+                                                <div class="flex items-center gap-sm mt-xs">
+                                                    <select #copySource class="form-input text-xs flex-1">
+                                                        <option value="" disabled selected>Choose environment...</option>
+                                                        <ng-container *ngFor="let other of f.overrides">
+                                                            <option *ngIf="other.environmentId !== override.environmentId"
+                                                                    [value]="other.environmentId">
+                                                                {{ other.environmentName }}
+                                                            </option>
+                                                        </ng-container>
+                                                    </select>
+                                                    <button class="btn-slim"
+                                                            (click)="copyFrom(override.environmentId, copySource.value)">
+                                                        Copy Overrides
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </app-content>
+                                    </expansion-panel>
+                                </accordion>
+                            </tab>
+                        }
+                    </tabs>
+                }
+            </app-content>
+        </expansion-panel>
+    </accordion>
 } @else {
     <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
         <app-loading-indicator></app-loading-indicator>
@@ -291,12 +397,13 @@
 }
 
 <div class="action-bar flex items-center justify-center" *ngIf="isDirty$ | async" #actionBar>
-    <div class="action-bar-content flex items-center gap-md card shadow-slim p-sm draggable-handle" (mousedown)="startDragging($event, actionBar)">
+    <div class="action-bar-content flex items-center gap-md card shadow-slim p-sm draggable-handle"
+         (mousedown)="startDragging($event, actionBar)">
         <span class="material-symbols-rounded drag-icon text-muted">drag_indicator</span>
         <span class="text-sm font-semibold">Unsaved Changes</span>
         <div class="flex gap-sm">
-            <button class="btn-slim" (click)="revert()">{{ 'common.revert'  }}</button>
-            <button class="btn-slim primary" (click)="save()">{{ 'common.save'  }}</button>
+            <button class="btn-slim" (click)="revert()">{{ 'common.revert' }}</button>
+            <button class="btn-slim primary" (click)="save()">{{ 'common.save' }}</button>
         </div>
     </div>
 </div>

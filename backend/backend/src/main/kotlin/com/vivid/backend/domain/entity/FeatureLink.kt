@@ -10,11 +10,11 @@ class FeatureLink(
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "source_feature_id", nullable = false)
-    var sourceFeature: Feature,
+    var sourceFeature: FeatureEntity,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "target_feature_id", nullable = false)
-    var targetFeature: Feature,
+    var targetFeature: FeatureEntity,
 
     @Column(name = "link_type")
     var type: String? = null

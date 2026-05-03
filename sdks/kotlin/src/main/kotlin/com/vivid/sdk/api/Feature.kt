@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
  *
  * @property id the unique identifier of the feature
  * @property name the human-readable name of the feature
+ * @property key the unique key of the feature
  * @property enabled whether the main feature flag is enabled
  * @property flags a map of sub-flags and their enabled states
  * @property metadata a map of metadata keys and their values
@@ -16,6 +17,7 @@ import kotlin.reflect.KClass
 data class Feature(
     val id: String,
     val name: String,
+    val key: String,
     val enabled: Boolean,
     val flags: Map<String, Boolean>,
     val metadata: Map<String, MetadataValue>,
@@ -26,10 +28,11 @@ data class Feature(
         private val EMPTY =
             Feature(
                 id = "",
+                name = "",
+                key = "",
                 enabled = false,
                 flags = emptyMap(),
                 metadata = emptyMap(),
-                name = "",
                 timestamp = Instant.ofEpochMilli(0)
             )
 

@@ -4,7 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime, forkJoin, map, of, Subject, Subscription, switchMap, tap, timer} from 'rxjs';
 import {WebFeatureManagementService} from '../../../services/web-feature-management.service';
-import {FeatureDto, FeatureEnvironmentUpdateRequest, MetadataValue} from '../../../dtos';
+import {EnvironmentOverrideDto, FeatureDto, OverrideStrategy, MetadataValue, EnvironmentOverrideUpdateRequest} from '../../../dtos';
 import {TranslateModule} from '@ngx-translate/core';
 import {FormInputComponent} from '../../../shared/components/form-input/form-input.component';
 import {FeatureStateService} from '../../../services/feature-state.service';
@@ -30,6 +30,8 @@ import {TabHeaderComponent} from "../../../shared/components/tabs/tab/tab-header
 import {ToastService} from "../../../services/toast.service";
 import {BadgeComponent} from "../../../shared/components/badge/badge.component";
 import {TooltipDirective} from "../../../shared/directives/tooltip.directive";
+import {VividButtonToggleComponent} from "../../../shared/components/button-toggle/button-toggle.component";
+import {CardComponent} from "../../../shared/components/card/card.component";
 
 @Component({
     selector: 'app-feature-details',
@@ -59,6 +61,8 @@ import {TooltipDirective} from "../../../shared/directives/tooltip.directive";
         TabHeaderComponent,
         BadgeComponent,
         TooltipDirective,
+        VividButtonToggleComponent,
+        CardComponent,
     ],
     templateUrl: './feature-details.component.html',
     styleUrls: ['./feature-details.component.css'],
@@ -108,8 +112,8 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         if (navFeature) {
             console.debug('Bootstrap state from navigation', navFeature);
             this.state.load(navFeature);
-            if (navFeature.environments?.length > 0) {
-                this.selectedEnvId = navFeature.environments[0].environmentId;
+            if (navFeature.overrides?.length > 0) {
+                this.selectedEnvId = navFeature.overrides[0].environmentId;
             }
         }
 
@@ -127,8 +131,8 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
             next: (f) => {
                 this.waitingForBackend = false;
                 this.state.load(f);
-                if (f.environments?.length > 0 && !this.selectedEnvId) {
-                    this.selectedEnvId = f.environments[0].environmentId;
+                if (f.overrides?.length > 0 && !this.selectedEnvId) {
+                    this.selectedEnvId = f.overrides[0].environmentId;
                 }
             }
         });
@@ -177,7 +181,6 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                         name: currentDraft.name,
                         description: currentDraft.description,
                         tags: currentDraft.tags,
-                        environments: currentDraft.environments
                     });
                 }
                 this.newNoteContent = '';
@@ -211,7 +214,6 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                     name: currentDraft.name,
                     description: currentDraft.description,
                     tags: currentDraft.tags,
-                    environments: currentDraft.environments
                 });
             }
             this.featureSearchQuery = '';
@@ -231,7 +233,6 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                     name: currentDraft.name,
                     description: currentDraft.description,
                     tags: currentDraft.tags,
-                    environments: currentDraft.environments
                 });
             }
         });
@@ -244,33 +245,99 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         this.state.updateDraft({[field]: newValue});
     }
 
-    updateMetadata(envId: string, metadata: { [key: string]: MetadataValue }) {
-        this.state.updateEnvState(envId, {metadata});
+    updateMetadata(envId: string | null, metadata: { [key: string]: MetadataValue }) {
+        if (envId === null) {
+            this.state.updateDraft({metadata});
+        } else {
+            this.state.updateOverride(envId, {metadata});
+        }
     }
 
-    updateFlags(envId: string, flags: { [key: string]: boolean }) {
-        this.state.updateEnvState(envId, {flags});
+    updateFlags(envId: string | null, flags: { [key: string]: boolean }) {
+        if (envId === null) {
+            this.state.updateDraft({flags});
+        } else {
+            this.state.updateOverride(envId, {flags});
+        }
     }
 
-    toggleFlag(envId: string, flags: { [key: string]: boolean }, key: string, value: boolean) {
+    toggleFlag(envId: string | null, flags: { [key: string]: boolean }, key: string, value: boolean) {
         const updatedFlags = {...flags, [key]: value};
         this.updateFlags(envId, updatedFlags);
     }
 
-    addFlag(envId: string, flags: { [key: string]: boolean }, key: string) {
+    addFlag(envId: string | null, flags: { [key: string]: boolean }, key: string) {
         if (!key || flags[key] !== undefined) return;
         const updatedFlags = {...flags, [key]: false};
         this.updateFlags(envId, updatedFlags);
     }
 
-    removeFlag(envId: string, flags: { [key: string]: boolean }, key: string) {
+    removeFlag(envId: string | null, flags: { [key: string]: boolean }, key: string) {
         const updatedFlags = {...flags};
         delete updatedFlags[key];
         this.updateFlags(envId, updatedFlags);
     }
 
-    updateEnvField(envId: string, field: 'enabled', value: any) {
-        this.state.updateEnvState(envId, {[field]: value});
+    updateOverrideField(envId: string, field: keyof EnvironmentOverrideDto, value: any) {
+        this.state.updateOverride(envId, {[field]: value});
+    }
+
+    resolvePreview(f: FeatureDto, envId: string) {
+        const override = f.overrides.find(o => o.environmentId === envId);
+        if (!override) return { enabled: f.enabled, flags: f.flags, metadata: f.metadata };
+        
+        if (override.strategy === OverrideStrategy.OVERRIDE) {
+            return {
+                enabled: override.enabled ?? f.enabled,
+                flags: override.flags,
+                metadata: override.metadata
+            };
+        } else {
+            const flags = { ...f.flags, ...override.flags };
+            const metadata = { ...f.metadata };
+            Object.entries(override.metadata).forEach(([key, value]) => {
+                const existing = metadata[key];
+                if (existing && existing['@type'] === 'StringList' && value['@type'] === 'StringList') {
+                     metadata[key] = { ...existing, content: [...existing.content, ...value.content] } as any;
+                } else {
+                    metadata[key] = value;
+                }
+            });
+            return {
+                enabled: override.enabled ?? f.enabled,
+                flags,
+                metadata
+            };
+        }
+    }
+    
+    isFlagOverridden(f: FeatureDto, envId: string, key: string): boolean {
+        const override = f.overrides.find(o => o.environmentId === envId);
+        return !!override && override.flags[key] !== undefined;
+    }
+
+    isMetadataOverridden(f: FeatureDto, envId: string, key: string): boolean {
+        const override = f.overrides.find(o => o.environmentId === envId);
+        return !!override && override.metadata[key] !== undefined;
+    }
+
+    removeOverride(envId: string, type: 'enabled' | 'flag' | 'metadata', key?: string) {
+        const draft = this.state.getDraft();
+        if (!draft) return;
+        const override = draft.overrides.find(o => o.environmentId === envId);
+        if (!override) return;
+
+        if (type === 'enabled') {
+            this.state.updateOverride(envId, { enabled: undefined });
+        } else if (type === 'flag' && key) {
+            const flags = { ...override.flags };
+            delete flags[key];
+            this.state.updateOverride(envId, { flags });
+        } else if (type === 'metadata' && key) {
+            const metadata = { ...override.metadata };
+            delete metadata[key];
+            this.state.updateOverride(envId, { metadata });
+        }
     }
 
     selectEnv(envId: string) {
@@ -284,12 +351,13 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     copyFrom(targetEnvId: string, sourceEnvId: string) {
         const draft = this.state.getDraft();
         if (!draft) return;
-        const sourceEnv = draft.environments.find(e => e.environmentId === sourceEnvId);
-        if (!sourceEnv) return;
-        this.state.updateEnvState(targetEnvId, {
-            enabled: sourceEnv.enabled,
-            flags: JSON.parse(JSON.stringify(sourceEnv.flags)),
-            metadata: JSON.parse(JSON.stringify(sourceEnv.metadata))
+        const sourceOvr = draft.overrides.find(o => o.environmentId === sourceEnvId);
+        if (!sourceOvr) return;
+        this.state.updateOverride(targetEnvId, {
+            enabled: sourceOvr.enabled,
+            flags: JSON.parse(JSON.stringify(sourceOvr.flags)),
+            metadata: JSON.parse(JSON.stringify(sourceOvr.metadata)),
+            strategy: sourceOvr.strategy
         });
     }
 
@@ -301,11 +369,12 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
 
         this.waitingForBackend = true;
 
-        const environments: FeatureEnvironmentUpdateRequest[] = draft.environments.map(env => ({
-            environmentId: env.environmentId,
-            enabled: env.enabled,
-            flags: env.flags,
-            metadata: env.metadata
+        const overrides: EnvironmentOverrideUpdateRequest[] = draft.overrides.map(ovr => ({
+            environmentId: ovr.environmentId,
+            enabled: ovr.enabled,
+            flags: ovr.flags,
+            metadata: ovr.metadata,
+            strategy: ovr.strategy
         }));
 
         // 1. Der API Call
@@ -313,7 +382,10 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
             name: draft.name,
             description: draft.description,
             tags: draft.tags,
-            environments: environments
+            enabled: draft.enabled,
+            flags: draft.flags,
+            metadata: draft.metadata,
+            overrides: overrides
         });
 
         // 2. Der Mindest-Timer

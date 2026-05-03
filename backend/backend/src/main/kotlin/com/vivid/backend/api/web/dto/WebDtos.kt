@@ -1,12 +1,9 @@
 package com.vivid.backend.api.web.dto
 
-import com.vivid.backend.domain.entity.EnvironmentEntity
-import com.vivid.backend.domain.entity.Feature
-import com.vivid.backend.domain.entity.FeatureEnvironment
-import com.vivid.backend.domain.entity.FeatureLink
+import com.vivid.backend.domain.entity.*
 import java.util.*
 
-// Feature DTO represents a feature with environment-specific state (enabled/flags/metadata)
+// FeatureEntity DTO represents a feature with environment-specific state (enabled/flags/metadata)
 // for a given environment context.
 
 data class FeatureDto(
@@ -15,7 +12,10 @@ data class FeatureDto(
     val name: String,
     val key: String,
     val description: String?,
-    val environments: List<FeatureEnvironmentDto>,
+    val enabled: Boolean,
+    val flags: Map<String, Boolean>,
+    val metadata: Map<String, MetadataValue>,
+    val overrides: List<EnvironmentOverrideDto>,
     val tags: List<String>,
     val outgoingLinks: List<FeatureLinkDto>,
     val notes: List<NoteDto>
@@ -28,38 +28,41 @@ data class NoteDto(
     val timestamp: java.time.Instant
 )
 
-fun com.vivid.backend.domain.entity.Note.toDto(): NoteDto = NoteDto(
+fun Note.toDto(): NoteDto = NoteDto(
     id = id,
     content = content,
     authorName = author.username,
     timestamp = timestamp
 )
 
-data class FeatureEnvironmentDto(
+data class EnvironmentOverrideDto(
     val environmentId: UUID,
     val environmentName: String,
-    val enabled: Boolean,
+    val enabled: Boolean?,
     val flags: Map<String, Boolean>,
-    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue>
+    val metadata: Map<String, MetadataValue>,
+    val strategy: OverrideStrategy
 )
 
-fun FeatureEnvironment.toDto(): FeatureEnvironmentDto = FeatureEnvironmentDto(
+fun EnvironmentOverrideEntity.toDto(): EnvironmentOverrideDto = EnvironmentOverrideDto(
     environmentId = environment.id,
     environmentName = environment.name,
     enabled = enabled,
-    flags = flags.toMap(),
-    metadata = metadata.toMap()
+    flags = flags,
+    metadata = metadata,
+    strategy = strategy
 )
 
-fun Feature.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
-    val envDtos = allEnvironments.map { env ->
-        val fe = findFeatureEnvironment(env)
-        FeatureEnvironmentDto(
+fun FeatureEntity.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
+    val overrideDtos = allEnvironments.map { env ->
+        val override = environmentOverrides.find { it.environment.id == env.id }
+        EnvironmentOverrideDto(
             environmentId = env.id,
             environmentName = env.name,
-            enabled = fe?.enabled ?: false,
-            flags = fe?.flags ?: emptyMap(),
-            metadata = fe?.metadata ?: emptyMap()
+            enabled = override?.enabled,
+            flags = override?.flags ?: emptyMap(),
+            metadata = override?.metadata ?: emptyMap(),
+            strategy = override?.strategy ?: OverrideStrategy.OVERRIDE
         )
     }
     return FeatureDto(
@@ -68,7 +71,10 @@ fun Feature.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
         name = name,
         key = key,
         description = description,
-        environments = envDtos,
+        enabled = enabled,
+        flags = flags,
+        metadata = metadata ?: emptyMap(),
+        overrides = overrideDtos,
         tags = tags.toList(),
         outgoingLinks = outgoingLinks.map { it.toDto() },
         notes = notes.map { it.toDto() }
@@ -86,25 +92,32 @@ data class FeatureLinkDto(
 data class FeatureCreateRequest(
     val name: String,
     val description: String?,
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
+    val enabled: Boolean = false,
+    val flags: Map<String, Boolean> = emptyMap(),
+    val metadata: Map<String, MetadataValue> = emptyMap()
 )
 
 data class FeatureUpdateRequest(
     val name: String? = null,
     val description: String? = null,
     val tags: List<String>? = null,
-    val environments: List<FeatureEnvironmentUpdateRequest>? = null
+    val enabled: Boolean? = null,
+    val flags: Map<String, Boolean>? = null,
+    val metadata: Map<String, MetadataValue>? = null,
+    val overrides: List<EnvironmentOverrideUpdateRequest>? = null
+)
+
+data class EnvironmentOverrideUpdateRequest(
+    val environmentId: UUID,
+    val enabled: Boolean? = null,
+    val flags: Map<String, Boolean>? = null,
+    val metadata: Map<String, MetadataValue>? = null,
+    val strategy: OverrideStrategy? = null
 )
 
 data class NoteCreateRequest(
     val content: String
-)
-
-data class FeatureEnvironmentUpdateRequest(
-    val environmentId: UUID,
-    val enabled: Boolean = false,
-    val flags: Map<String, Boolean> = emptyMap(),
-    val metadata: Map<String, com.vivid.backend.domain.entity.MetadataValue> = emptyMap()
 )
 
 data class FeatureLinkCreateRequest(

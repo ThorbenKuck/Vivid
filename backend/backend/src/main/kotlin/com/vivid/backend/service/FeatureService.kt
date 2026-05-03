@@ -2,10 +2,7 @@ package com.vivid.backend.service
 
 import com.vivid.backend.api.web.dto.*
 import com.vivid.backend.asKey
-import com.vivid.backend.domain.entity.Feature
-import com.vivid.backend.domain.entity.FeatureEnvironment
-import com.vivid.backend.domain.entity.FeatureLink
-import com.vivid.backend.domain.repository.FeatureEnvironmentRepository
+import com.vivid.backend.domain.entity.*
 import com.vivid.backend.domain.repository.FeatureRepository
 import com.vivid.backend.service.exception.ResourceNotFoundException
 import com.vivid.backend.toUuidOrNull
@@ -19,7 +16,6 @@ import java.util.*
 @Service
 class FeatureService(
     private val featureRepository: FeatureRepository,
-    private val featureEnvironmentRepository: FeatureEnvironmentRepository,
     private val environmentService: EnvironmentService,
     private val userService: UserService,
     private val environmentStream: EnvironmentStream,
@@ -29,7 +25,7 @@ class FeatureService(
     fun getAllFeatures(
         q: String?,
         pageable: Pageable,
-    ): Page<Feature> {
+    ): Page<FeatureEntity> {
         if (q == null) {
             return featureRepository.findAll(pageable)
         }
@@ -37,21 +33,24 @@ class FeatureService(
     }
 
     @Transactional(readOnly = true)
-    fun getEnabledFeaturesForClient(environmentId: String): List<FeatureEnvironment> {
+    fun getEnabledFeaturesForClient(environmentId: String): List<FeatureEntity> {
         val environment = environmentService.findEnvironment(environmentId)
             ?: throw ResourceNotFoundException("Environment with id $environmentId not found")
-        return featureEnvironmentRepository.findAllByEnvironmentAndEnabledTrue(environment)
+        
+        // Fetch all and filter in memory as instructed (access via feature entity)
+        // Optimization: In a real scenario, we might want to use a custom query.
+        return featureRepository.findAll().filter { it.resolve(environment.id).enabled }
     }
 
     @Transactional(readOnly = true)
-    fun getFeatureById(id: UUID): Feature {
+    fun getFeatureById(id: UUID): FeatureEntity {
         return findFeatureById(id)
     }
 
     @Transactional(readOnly = true)
-    fun getFeatureByRunningNumber(runningNumber: Long): Feature {
+    fun getFeatureByRunningNumber(runningNumber: Long): FeatureEntity {
         return featureRepository.findByRunningNumber(runningNumber)
-            ?: throw ResourceNotFoundException("Feature with number $runningNumber not found")
+            ?: throw ResourceNotFoundException("FeatureEntity with number $runningNumber not found")
     }
 
     private fun String.determineKey(): String {
@@ -70,44 +69,48 @@ class FeatureService(
 
     @Transactional
     fun createFeature(
-        name: String,
-        description: String?,
-        tags: List<String> = emptyList()
-    ): Feature {
+        request: FeatureCreateRequest
+    ): FeatureEntity {
         val runningNumber = featureRepository.getNextRunningNumber()
-        val key = name.determineKey()
-        val feature = Feature(
-            name = name,
+        val key = request.name.determineKey()
+        val feature = FeatureEntity(
+            name = request.name,
             key = key,
             runningNumber = runningNumber,
-            description = description,
-            tags = tags.toMutableSet(),
+            description = request.description,
+            tags = request.tags.toMutableSet(),
+            enabled = request.enabled,
+            flags = request.flags.toMutableMap(),
+            metadata = request.metadata
         )
         environmentStream.pushFeature(feature)
         return featureRepository.save(feature)
     }
 
     @Transactional
-    fun updateFeature(id: UUID, request: FeatureUpdateRequest): Feature {
+    fun updateFeature(id: UUID, request: FeatureUpdateRequest): FeatureEntity {
         val feature = findFeatureById(id)
         request.name?.let { feature.name = it }
         request.description?.let { feature.description = it }
         request.tags?.let { feature.tags = it.toMutableSet() }
+        request.enabled?.let { feature.enabled = it }
+        request.flags?.let { feature.flags = it.toMutableMap() }
+        request.metadata?.let { feature.metadata = it }
 
-        request.environments?.forEach { envUpdate ->
-            val environment = environmentService.findEnvironment(envUpdate.environmentId.toString())
-                ?: throw ResourceNotFoundException("Environment with id ${envUpdate.environmentId} not found")
+        request.overrides?.forEach { overrideUpdate ->
+            val environment = environmentService.findEnvironment(overrideUpdate.environmentId.toString())
+                ?: throw ResourceNotFoundException("Environment with id ${overrideUpdate.environmentId} not found")
 
-            val existing = feature.environments.find { it.environment.id == environment.id }
-            val fe = existing ?: FeatureEnvironment(
+            val existing = feature.environmentOverrides.find { it.environment.id == environment.id }
+            val override = existing ?: EnvironmentOverrideEntity(
                 feature = feature,
-                environment = environment,
-                enabled = envUpdate.enabled
-            ).also { feature.environments.add(it) }
+                environment = environment
+            ).also { feature.environmentOverrides.add(it) }
 
-            fe.enabled = envUpdate.enabled
-            fe.flags = envUpdate.flags.toMutableMap()
-            fe.metadata = envUpdate.metadata
+            overrideUpdate.enabled?.let { override.enabled = it }
+            overrideUpdate.flags?.let { override.flags = it.toMutableMap() }
+            overrideUpdate.metadata?.let { override.metadata = it }
+            overrideUpdate.strategy?.let { override.strategy = it }
         }
 
         environmentStream.pushFeature(feature)
@@ -115,26 +118,27 @@ class FeatureService(
     }
 
     @Transactional
-    fun upsertFeatureEnvironment(
+    fun upsertEnvironmentOverride(
         featureId: UUID,
         environmentId: String,
-        request: FeatureEnvironmentUpdateRequest,
-    ): Feature {
+        request: EnvironmentOverrideUpdateRequest,
+    ): FeatureEntity {
         val feature = findFeatureById(featureId)
         val environment = environmentService.findEnvironment(environmentId)
             ?: throw ResourceNotFoundException("Environment with id $environmentId not found")
 
-        val fe = feature.environments.find { it.environment.id == environment.id }
-            ?: FeatureEnvironment(
+        val override = feature.environmentOverrides.find { it.environment.id == environment.id }
+            ?: EnvironmentOverrideEntity(
                 feature = feature,
-                environment = environment,
-                enabled = false
-            ).also { feature.environments.add(it) }
+                environment = environment
+            ).also { feature.environmentOverrides.add(it) }
 
-        fe.enabled = request.enabled
-        fe.flags = request.flags.toMutableMap()
-        fe.metadata = request.metadata
-        environmentStream.pushFeature(fe)
+        request.enabled?.let { override.enabled = it }
+        request.flags?.let { override.flags = it.toMutableMap() }
+        request.metadata?.let { override.metadata = it }
+        request.strategy?.let { override.strategy = it }
+        
+        environmentStream.pushFeature(feature, environment.id)
 
         return featureRepository.save(feature)
     }
@@ -146,7 +150,7 @@ class FeatureService(
     }
 
     @Transactional
-    fun addFeatureLink(sourceId: UUID, request: FeatureLinkCreateRequest): Feature {
+    fun addFeatureLink(sourceId: UUID, request: FeatureLinkCreateRequest): FeatureEntity {
         val sourceFeature = findFeatureById(sourceId)
         val targetFeature = findFeatureById(request.targetFeatureId)
         val link = FeatureLink(
@@ -159,7 +163,7 @@ class FeatureService(
     }
 
     @Transactional
-    fun removeFeatureLink(sourceId: UUID, linkId: UUID): Feature {
+    fun removeFeatureLink(sourceId: UUID, linkId: UUID): FeatureEntity {
         val sourceFeature = findFeatureById(sourceId)
         sourceFeature.outgoingLinks.removeIf { it.id == linkId }
         return featureRepository.save(sourceFeature)
@@ -169,7 +173,7 @@ class FeatureService(
     fun getAllTags(): Set<String> = featureRepository.findAllDistinctTags().toSet()
 
     @Transactional
-    fun addNote(featureId: UUID, authorId: UUID, request: NoteCreateRequest): Feature {
+    fun addNote(featureId: UUID, authorId: UUID, request: NoteCreateRequest): FeatureEntity {
         val feature = findFeatureById(featureId)
         val author = userService.findById(authorId)
         val note = com.vivid.backend.domain.entity.Note(
@@ -181,21 +185,19 @@ class FeatureService(
         return featureRepository.save(feature)
     }
 
-    private fun findFeatureById(id: UUID): Feature {
+    private fun findFeatureById(id: UUID): FeatureEntity {
         return featureRepository.findById(id)
-            .orElseThrow { ResourceNotFoundException("Feature with id $id not found") }
+            .orElseThrow { ResourceNotFoundException("FeatureEntity with id $id not found") }
     }
 
     @Transactional(readOnly = true)
-    fun findFeature(name: String, environmentIdentifier: String): FeatureEnvironment? {
+    fun findFeature(name: String, environmentIdentifier: String): FeatureEntity? {
         val environment = environmentService.findEnvironment(environmentIdentifier)
-        val feature = name.toUuidOrNull()?.let { featureRepository.findByIdOrNull(it) }
+            ?: throw ResourceNotFoundException("Environment with id $environmentIdentifier not found")
+            
+        return name.toUuidOrNull()?.let { featureRepository.findByIdOrNull(it) }
             ?: featureRepository.findByKey(name)
             ?: name.toLongOrNull()?.let { featureRepository.findByRunningNumber(it) }
             ?: featureRepository.findByName(name)
-            ?: return null
-
-        val environmentValue = feature.environments.find { it.environment == environment } ?: return null
-        return environmentValue
     }
 }

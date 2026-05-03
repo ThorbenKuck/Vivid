@@ -1,7 +1,6 @@
 package com.vivid.backend.service
 
-import com.vivid.backend.domain.entity.Feature
-import com.vivid.backend.domain.repository.FeatureEnvironmentRepository
+import com.vivid.backend.domain.entity.FeatureEntity
 import com.vivid.backend.domain.repository.FeatureRepository
 import com.vivid.backend.api.web.dto.FeatureCreateRequest
 import com.vivid.backend.api.web.dto.FeatureUpdateRequest
@@ -23,7 +22,7 @@ class FeatureServiceTest {
     private lateinit var featureRepository: FeatureRepository
 
     @Mock
-    private lateinit var featureEnvironmentRepository: FeatureEnvironmentRepository
+    private lateinit var environmentStream: EnvironmentStream
 
     @Mock
     private lateinit var environmentService: EnvironmentService
@@ -37,15 +36,12 @@ class FeatureServiceTest {
     @Test
     fun `should create feature successfully`() {
         val request = FeatureCreateRequest(name = "test-feature", description = "test desc")
-        val feature = Feature(name = request.name, description = request.description, runningNumber = 0, key = "test-feature")
+        val feature = FeatureEntity(name = request.name, description = request.description, runningNumber = 0, key = "test-feature")
         
         whenever(featureRepository.getNextRunningNumber()).thenReturn(42L)
-        whenever(featureRepository.save(any<Feature>())).thenReturn(feature)
+        whenever(featureRepository.save(any<FeatureEntity>())).thenReturn(feature)
         
-        val result = featureService.createFeature(
-            name = request.name,
-            description = request.description,
-        )
+        val result = featureService.createFeature(request)
         
         assertNotNull(result)
         assertEquals(request.name, result.name)
@@ -54,7 +50,7 @@ class FeatureServiceTest {
     @Test
     fun `should get feature by id`() {
         val id = UUID.randomUUID()
-        val feature = Feature(id = id, name = "test-feature", key = "test-feature", runningNumber = 0)
+        val feature = FeatureEntity(id = id, name = "test-feature", key = "test-feature", runningNumber = 0)
         
         whenever(featureRepository.findById(id)).thenReturn(Optional.of(feature))
         
@@ -77,11 +73,11 @@ class FeatureServiceTest {
     @Test
     fun `should update feature`() {
         val id = UUID.randomUUID()
-        val existingFeature = Feature(id = id, name = "old-name", key = "old-name", runningNumber = 0)
+        val existingFeature = FeatureEntity(id = id, name = "old-name", key = "old-name", runningNumber = 0)
         val updateRequest = FeatureUpdateRequest(name = "new-name", description = null, tags = null)
         
         whenever(featureRepository.findById(id)).thenReturn(Optional.of(existingFeature))
-        whenever(featureRepository.save(any<Feature>())).thenAnswer { it.arguments[0] }
+        whenever(featureRepository.save(any<FeatureEntity>())).thenAnswer { it.arguments[0] }
         
         val result = featureService.updateFeature(id, updateRequest)
         

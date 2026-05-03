@@ -25,7 +25,7 @@ class WebConfiguration: WebMvcConfigurer {
             .info(
                 Info()
                     .title("Vivid API")
-                    .description("Feature Management Platform API")
+                    .description("FeatureEntity Management Platform API")
                     .version("v1.0.0")
             )
     }

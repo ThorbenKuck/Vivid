@@ -79,8 +79,12 @@ export class FeaturesComponent implements OnInit {
         }
     }
 
-    getEnv(f: FeatureDto, envId: string) {
-        return f.environments.find(env => env.environmentId === envId);
+    isResolvedEnabled(f: FeatureDto, envId: string): boolean {
+        const override = f.overrides.find(env => env.environmentId === envId);
+        if (override && override.enabled !== null && override.enabled !== undefined) {
+            return override.enabled;
+        }
+        return f.enabled;
     }
 
     openDetails(f: FeatureDto) {
@@ -100,7 +104,10 @@ export class FeaturesComponent implements OnInit {
         this.api.createFeature({
             name: v.name!,
             description: v.description || undefined,
-            tags: []
+            tags: [],
+            enabled: false,
+            flags: {},
+            metadata: {}
         }).subscribe(feature => {
             // Preload into details via router state for instant draft editing
             this.showAdd = false;

@@ -1,71 +1,56 @@
-# Task: Refactor Vivid to "Global Defaults with Environment Overrides"
+# Task: Refactor Vivid Core Architecture & Implement Environment-Aware Metrics
 
-## Context & Goal
-Currently, **Vivid** manages feature flags and metadata strictly per environment. We want to pivot to a model where the **Feature** entity holds the "Global Truth" (Default values), and **Environments** can either **Override** or **Extend** those defaults.
-
-This refactoring affects both the Backend (Spring Boot/JPA) and the Frontend (Angular). Since we are in the prototype phase, database migrations can discard old data.
+## 1. Objective
+Refactor **Vivid** to support global feature defaults with environment-specific overrides and introduce a technology-agnostic distribution system with environment-aware client tracking.
 
 ---
 
-## 1. Backend Refactoring (Domain & Logic)
+## 2. Backend Refactoring (Spring Boot)
 
-### A. Feature Entity Updates
-*   **New Fields:** Add `enabled` (boolean), `flags` (Map<String, Boolean>), and `metadata` (List<MetadataValue>). These represent the global default state.
-*   **Relation:** Add a collection of `EnvironmentOverride` entities.
-*   **Cascade:** Ensure `CascadeType.ALL` and `orphanRemoval = true` are set.
+### A. Feature & Environment Overrides
+*   **Feature Entity:** Add `enabled` (boolean), `flags` (Map<String, Boolean>), and `metadata` (Map<String, MetadataValue>). These are the global defaults.
+*   **EnvironmentOverride Entity:** Links `Feature` and `Environment`.
+    *   Fields: `enabled` (nullable Boolean), `flags` (Map), `metadata` (Map).
+    *   Strategy: `OverrideStrategy` (ENUM: `OVERRIDE`, `EXTEND`).
+*   **Resolution Logic:** Implement a resolver that merges defaults with overrides. Use `JOIN FETCH` for performance. Access overrides via the `Feature` entity directly (no separate repository calls for every check).
 
-### B. EnvironmentOverride Entity (New)
-Create a new entity/Value Object to handle specialization:
-*   **Link:** Direct many-to-one relationship to `Feature` and `Environment`.
-*   **Fields:** `enabled` (Boolean, nullable), `flags` (Map), `metadata` (List).
-*   **Strategy:** Add an Enum `OverrideStrategy` with two values:
-  1.  `OVERRIDE`: The environment values completely replace the global defaults.
-  2.  `EXTEND`: The environment values are merged with global defaults (Maps are merged, Lists are appended).
-*   **Lifecycle:** If a Feature or Environment is deleted, the corresponding `EnvironmentOverride` must be deleted (Cascade).
+### B. Technology-Agnostic Distribution
+*   **Abstraction:** Create a `FeatureDistributionProvider` interface (e.g., for SSE, Kafka).
+*   **Decoupling:** Use Spring `ApplicationEventPublisher`. When a feature is updated, fire a `FeatureChangedEvent`. All active `DistributionProviders` should listen and push updates.
+*   **SSE:** Refactor existing `EnvironmentStream` into a provider implementation.
 
-### C. Business Logic & Resolution
-Implement a resolver (preferably within the `Feature` entity or a Domain Service):
-*   Logic: `resolve(feature, environmentId?)`
-*   If `environmentId` is null: Return global defaults.
-*   If `environmentId` is provided:
-  *   Check for an `EnvironmentOverride`.
-  *   If found: Apply `OverrideStrategy` logic.
-  *   If not found: Fall back to global defaults.
-*   **Implementation Note:** Access overrides directly via the Feature entity (`feature.getEnvironmentOverrides().find(...)`) rather than creating a separate `EnvironmentOverrideRepository`. Use `JOIN FETCH` where necessary to avoid N+1 issues.
-
-### D. Cleanup
-
-We will no longer need to maintain the `FeatureEnvironment` entity. This will be replaced by the `EnvironmentOverride` entity, which will encapsulate all environment-specific overrides.
-*   Cleanup the entities and remove the `FeatureEnvironment` entity.
-*   In the `ClientFeatureController`, map the `ClientFeatureDto` based on the optional environment overrides using the same logic as in our Business Logic.
+### C. Environment-Aware Client Registry
+*   **Entity `VividClient`:** Must be bound to an `Environment`.
+    *   Unique Identity: Combination of `clientName/id` and `environmentId`.
+    *   Fields: `lastSeen`, `technologies` (List of strings like "SSE", "Kafka", "Polling"), `clientVersion`.
+*   **Heartbeat Endpoint:** `POST /api/v1/clients/heartbeat`. SDKs must report their presence. The backend updates the `lastSeen` timestamp for that specific client-environment pair.
 
 ---
 
-## 2. Frontend Refactoring (UI/UX)
+## 3. Frontend Refactoring (Angular)
 
-### A. Layout Restructuring
-*   **Global Configuration:** Move the creation and editing of Flags and Metadata definitions to a "Global" header section above the Environment tabs.
-*   **Environment Tabs:** The tabs should now only display the specialized state for that specific environment.
-*   **Override UI:** In the Environment tab, provide a way to "Add Override" for specific flags or metadata.
+### A. Global CSS & Design
+*   **Constraint:** You **MUST** use the global CSS variables defined in `styles.scss` for all styling. Maintain the existing design language.
 
-### B. Visual Feedback (Crucial)
-*   **Indicator:** Users must see at a glance if a value is "Inherited" from Global or "Overridden/Extended" locally.
-*   Use subtle UI hints (e.g., a dot, a color shift, or a "Modified" label) to highlight overridden fields.
-*   Make sure to also use a consistent visual hierarchy and spacing for readability.
-*   In the Environment tab, provide a clear visual indicator if the feature is active here and if anything has been overwritten.
-
-### C. Styling Constraints
-*   **Global CSS:** You **MUST** use the existing global CSS variables defined in `styles.scss` for colors, spacing, and sizing.
-*   **Consistency:** Maintain unified component sizing and the existing design language of Vivid.
-
----
-
-## 3. Technical Requirements
-*   **DB Migration:** Update the schema. You are allowed to drop/recreate tables as we are not live yet.
-*   **Clean Code:** Use "Tell, Don't Ask" principles. Keep the resolution logic encapsulated.
-*   **Frontend Logic:** Handle the "Extend" vs "Override" logic in the UI to show the user a "Preview" of the resulting state.
+### B. UI Views
+*   **Feature Configuration:**
+    *   Top: Global Default settings.
+    *   Tabs: Environment-specific overrides.
+    *   **Visual Indicator:** Use a clear visual hint (e.g., icon or colored label) to show if a value is "Inherited", "Overridden", or "Extended".
+*   **Usage Tab (within Feature):** List clients that have requested this feature, grouped by their environment.
+*   **Clients Dashboard (New Page):** A comprehensive list of all registered clients.
+    *   Group or filter by Environment.
+    *   Show "Online/Offline" status based on `lastSeen`.
+*   **Settings Page (New Page):** Display status of available `DistributionProviders` (e.g., SSE active, Kafka enabled).
 
 ---
 
-**Please start by analyzing the current `Feature` and `Environment` entities.**
+## 4. Technical Quality
+*   **Migrations:** You may drop and recreate tables (prototype stage).
+*   **Efficiency:** Ensure the heartbeat endpoint is high-performance. Avoid N+1 queries by fetching relationships correctly.
+*   **Immutability:** Use functional patterns for map/list merging in the "EXTEND" logic.
+
+---
+
+**Please start by providing a technical design document for the `EnvironmentOverride` resolution and the `VividClient` registry before implementing the code.**
 **Respect the ".junie/guidelines.md" file**
