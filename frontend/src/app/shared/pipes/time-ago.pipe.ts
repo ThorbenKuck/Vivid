@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true
 })
 export class TimeAgoPipe implements PipeTransform {
-  transform(value: string | Date | number): string {
+  transform(value: string | Date | number | undefined): string {
     if (!value) return '';
     const date = new Date(value);
     const now = new Date();

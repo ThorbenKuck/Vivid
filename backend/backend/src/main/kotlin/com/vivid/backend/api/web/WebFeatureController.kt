@@ -1,10 +1,7 @@
 package com.vivid.backend.api.web
 
 import com.vivid.backend.api.web.dto.*
-import com.vivid.backend.service.EnvironmentService
-import com.vivid.backend.service.FeatureService
-import com.vivid.backend.service.PermissionService
-import com.vivid.backend.service.UserService
+import com.vivid.backend.service.*
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
@@ -21,7 +18,8 @@ class WebFeatureController(
     private val featureService: FeatureService,
     private val environmentService: EnvironmentService,
     private val permissionService: PermissionService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val featureUsageService: FeatureUsageService
 ) {
 
     @GetMapping
@@ -40,7 +38,9 @@ class WebFeatureController(
         @PathVariable id: UUID
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.getFeatureById(id).toDto(allEnvironments)
+        val feature = featureService.getFeatureById(id)
+        val usage = featureUsageService.getUsageForFeature(feature.id)
+        return feature.toDto(allEnvironments, usage)
     }
 
     @GetMapping("/number/{runningNumber}")
@@ -49,7 +49,9 @@ class WebFeatureController(
         @PathVariable runningNumber: Long
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.getFeatureByRunningNumber(runningNumber).toDto(allEnvironments)
+        val feature = featureService.getFeatureByRunningNumber(runningNumber)
+        val usage = featureUsageService.getUsageForFeature(feature.id)
+        return feature.toDto(allEnvironments, usage)
     }
 
     @PostMapping
@@ -59,7 +61,8 @@ class WebFeatureController(
         @RequestBody request: FeatureCreateRequest
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.createFeature(request).toDto(allEnvironments)
+        val feature = featureService.createFeature(request)
+        return feature.toDto(allEnvironments)
     }
 
     @PutMapping("/{id}")
@@ -77,7 +80,9 @@ class WebFeatureController(
                 throw org.springframework.security.access.AccessDeniedException("No write access for environment: ${env.name}")
             }
         }
-        return featureService.updateFeature(id, request).toDto(allEnvironments)
+        val feature = featureService.updateFeature(id, request)
+        val usage = featureUsageService.getUsageForFeature(feature.id)
+        return feature.toDto(allEnvironments, usage)
     }
 
     @PutMapping("/{id}/environments/{environment}")
@@ -89,7 +94,9 @@ class WebFeatureController(
         @RequestBody request: EnvironmentOverrideUpdateRequest
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.upsertEnvironmentOverride(id, environment, request).toDto(allEnvironments)
+        val feature = featureService.upsertEnvironmentOverride(id, environment, request)
+        val usage = featureUsageService.getUsageForFeature(feature.id)
+        return feature.toDto(allEnvironments, usage)
     }
 
     @GetMapping("/tags")
@@ -113,7 +120,9 @@ class WebFeatureController(
         @RequestBody request: FeatureLinkCreateRequest
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.addFeatureLink(id, request).toDto(allEnvironments)
+        val feature = featureService.addFeatureLink(id, request)
+        val usage = featureUsageService.getUsageForFeature(feature.id)
+        return feature.toDto(allEnvironments, usage)
     }
 
     @DeleteMapping("/{id}/links/{linkId}")
@@ -123,7 +132,9 @@ class WebFeatureController(
         @PathVariable linkId: UUID
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.removeFeatureLink(id, linkId).toDto(allEnvironments)
+        val feature = featureService.removeFeatureLink(id, linkId)
+        val usage = featureUsageService.getUsageForFeature(feature.id)
+        return feature.toDto(allEnvironments, usage)
     }
 
     @PostMapping("/{id}/notes")
@@ -138,6 +149,8 @@ class WebFeatureController(
         val user = userService.findByKeycloakId(keycloakId)
             ?: throw com.vivid.backend.service.exception.ResourceNotFoundException("User not found")
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        return featureService.addNote(id, user.id!!, request).toDto(allEnvironments)
+        val feature = featureService.addNote(id, user.id!!, request)
+        val usage = featureUsageService.getUsageForFeature(feature.id)
+        return feature.toDto(allEnvironments, usage)
     }
 }

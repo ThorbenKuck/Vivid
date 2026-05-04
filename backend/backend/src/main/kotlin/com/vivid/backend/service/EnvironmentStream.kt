@@ -6,6 +6,7 @@ import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import com.vivid.backend.domain.event.FeatureChangedEvent
 import com.vivid.backend.domain.repository.FeatureRepository
 import com.vivid.backend.domain.support.ApplicationIdentifier
+import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.context.event.EventListener
@@ -20,10 +21,12 @@ import java.util.concurrent.ConcurrentHashMap
 private val logger = LoggerFactory.getLogger(EnvironmentStream::class.java)
 
 @Component
+@Transactional
 class EnvironmentStream(
     private val objectMapper: ObjectMapper,
     private val featureRepository: FeatureRepository,
     private val clientService: VividClientService,
+    private val featureUsageService: FeatureUsageService,
 ) : FeatureDistributionProvider, DisposableBean {
 
     private val registration = ConcurrentHashMap<UUID, MutableList<EnvironmentSubscription>>()
@@ -91,6 +94,12 @@ class EnvironmentStream(
         emitters.forEach {
             try {
                 it.sseEmitter.send(event)
+
+                it.applicationId?.let { applicationId ->
+                    try {
+                        clientService.recordUsage(feature, applicationId)
+                    } catch (_: Exception) {}
+                }
             } catch (e: Exception) {
                 it.sseEmitter.completeWithError(e)
             }

@@ -8,8 +8,12 @@
 @if (feature$ | async; as f) {
     <div class="master-switch-card card flex items-center justify-between p-md configuration-section"
          [class.enabled]="f.enabled">
-        <div><env-status [active]="f.enabled"></env-status> Status</div>
-        <slide-toggle [checked]="f.enabled" [label]="f.enabled ? 'Enabled' : 'Disabled'" (onToggle)="updateField('enabled', $event)"></slide-toggle>
+        <div>
+            <env-status [active]="f.enabled"></env-status>
+            Status
+        </div>
+        <slide-toggle [checked]="f.enabled" [label]="f.enabled ? 'Enabled' : 'Disabled'"
+                      (onToggle)="updateField('enabled', $event)"></slide-toggle>
     </div>
 
     <accordion [multi]="true">
@@ -174,7 +178,8 @@
                      class="flag-row flex items-center gap-md p-xs border-bottom">
                     <span class="font-semibold flex-1">{{ flag.key }}</span>
                     <div class="flex items-center gap-sm">
-                        <slide-toggle [checked]="flag.value" (onToggle)="toggleFlag(null, f.flags, flag.key, $event)" [label]="flag.value ? 'ON' : 'OFF'"></slide-toggle>
+                        <slide-toggle [checked]="flag.value" (onToggle)="toggleFlag(null, f.flags, flag.key, $event)"
+                                      [label]="flag.value ? 'ON' : 'OFF'"></slide-toggle>
                         <button class="icon-btn-slim danger" (click)="removeFlag(null, f.flags, flag.key)">
                             <span class="material-symbols-rounded">delete</span>
                         </button>
@@ -203,7 +208,41 @@
             </app-content>
         </expansion-panel>
         <expansion-panel>
-            <app-header><span class="material-symbols-rounded" style="color: var(--accent-danger)">rule_settings</span> Environment Overrides</app-header>
+            <app-header>
+                <badge [variant]="'primary'" [content]="(usagePage$ | async)?.totalCount || 0">
+                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">monitoring</span> Usage
+                </badge>
+            </app-header>
+            <app-content>
+                @if (usagePage$ | async; as usagePage) {
+                    @if (usagePage.totalCount == 0) {
+                        <div>No usage data available</div>
+                    } @else {
+                        <app-table [page]="usagePage" [rowIdKey]="'appName'">
+                            <table-column key="appName" label="Client">
+                                <ng-template let-row>
+                                    <span class="text-xs font-semibold">{{ row.appName }}</span>
+                                </ng-template>
+                            </table-column>
+                            @for (ovr of f.overrides; track ovr.environmentId) {
+                                <table-column [key]="ovr.environmentId"
+                                              [label]="ovr.environmentName">
+                                    <ng-template let-row>
+                                <span class="text-xs" [class.text-muted]="!row[ovr.environmentId]">
+                                    {{ row[ovr.environmentId] ? (row[ovr.environmentId] | timeAgo) : '-' }}
+                                </span>
+                                    </ng-template>
+                                </table-column>
+                            }
+                        </app-table>
+                    }
+                }
+            </app-content>
+        </expansion-panel>
+        <expansion-panel>
+            <app-header><span class="material-symbols-rounded" style="color: var(--accent-danger)">rule_settings</span>
+                Environment Overrides
+            </app-header>
             <app-content>
                 @if (f.overrides && f.overrides.length === 0) {
                     <app-no-environments-warning></app-no-environments-warning>
@@ -274,7 +313,8 @@
 
                                 <accordion [multi]="true">
                                     <expansion-panel>
-                                        <app-header><span class="material-symbols-rounded" style="color: var(--accent-sky)">settings</span>
+                                        <app-header><span class="material-symbols-rounded"
+                                                          style="color: var(--accent-sky)">settings</span>
                                             Feature Flags
                                         </app-header>
                                         <app-content>
@@ -350,7 +390,8 @@
                                                     from:</label>
                                                 <div class="flex items-center gap-sm mt-xs">
                                                     <select #copySource class="form-input text-xs flex-1">
-                                                        <option value="" disabled selected>Choose environment...</option>
+                                                        <option value="" disabled selected>Choose environment...
+                                                        </option>
                                                         <ng-container *ngFor="let other of f.overrides">
                                                             <option *ngIf="other.environmentId !== override.environmentId"
                                                                     [value]="other.environmentId">
@@ -363,36 +404,6 @@
                                                         Copy Overrides
                                                     </button>
                                                 </div>
-                                            </div>
-                                        </app-content>
-                                    </expansion-panel>
-
-                                    <expansion-panel>
-                                        <app-header>
-                                            @let envClients = getClientsForEnvironment(allClients$ | async, override.environmentId);
-                                            <badge [variant]="'primary'" [content]="envClients.length">
-                                                <span class="material-symbols-rounded" style="color: var(--accent-lavender)">devices</span> Usage
-                                            </badge>
-                                        </app-header>
-                                        <app-content>
-                                            <div class="clients-list flex-col gap-sm">
-                                                @for (client of getClientsForEnvironment(allClients$ | async, override.environmentId); track client.id) {
-                                                    <div class="client-usage-item flex items-center justify-between p-sm border-bottom">
-                                                        <div class="flex items-center gap-sm">
-                                                            <span class="status-indicator-mini" [class.online]="client.isOnline"></span>
-                                                            <div class="flex-col">
-                                                                <span class="text-xs font-semibold">{{ client.clientName }}</span>
-                                                                <span class="text-xxs text-muted">{{ client.externalId }}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex items-center gap-sm">
-                                                            <span class="text-xxs tag-pill">{{ client.clientVersion }}</span>
-                                                            <span class="text-xxs text-muted">{{ client.lastSeen | timeAgo }}</span>
-                                                        </div>
-                                                    </div>
-                                                } @empty {
-                                                    <div class="text-xs text-muted italic p-sm">No clients currently active in this environment.</div>
-                                                }
                                             </div>
                                         </app-content>
                                     </expansion-panel>

@@ -3,6 +3,7 @@ package com.vivid.backend.service
 import com.vivid.backend.api.MissingClientRegistrationException
 import com.vivid.backend.api.MissingClientTokenException
 import com.vivid.backend.domain.entity.VividClientEntity
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import com.vivid.backend.domain.repository.VividClientRepository
 import com.vivid.backend.domain.support.ApplicationIdentifier
 import org.springframework.scheduling.annotation.Async
@@ -15,6 +16,7 @@ import java.util.*
 class VividClientService(
     private val repository: VividClientRepository,
     private val settingsService: SettingsService,
+    private val featureUsageService: FeatureUsageService,
 ) {
 
     @Transactional
@@ -34,9 +36,10 @@ class VividClientService(
     @Transactional
     fun seen(
         applicationId: ApplicationIdentifier,
-    ) {
+    ): VividClientEntity {
         val entity = resolveEntity(applicationId)
         entity.lastSeen = Instant.now()
+        return entity
     }
 
     private fun resolveEntity(
@@ -76,4 +79,10 @@ class VividClientService(
     @Transactional(readOnly = true)
     fun getClientsByEnvironment(environmentId: UUID): List<VividClientEntity> =
         repository.findAllByEnvironmentId(environmentId)
+
+    @Transactional
+    fun recordUsage(feature: FeatureEntity, applicationId: ApplicationIdentifier) {
+        val entity = resolveEntity(applicationId)
+        featureUsageService.recordUsage(feature, entity)
+    }
 }

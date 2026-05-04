@@ -29,4 +29,11 @@ export interface FeatureDto {
   tags: string[];
   outgoingLinks: FeatureLinkDto[];
   notes: NoteDto[];
+  usage?: FeatureUsageDto[];
+}
+
+export interface FeatureUsageDto {
+  clientName: string;
+  environmentId: string;
+  lastSeen: string;
 }

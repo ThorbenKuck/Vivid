@@ -33,8 +33,10 @@ import {ToastService} from "../../../services/toast.service";
 import {BadgeComponent} from "../../../shared/components/badge/badge.component";
 import {TooltipDirective} from "../../../shared/directives/tooltip.directive";
 import {VividButtonToggleComponent} from "../../../shared/components/button-toggle/button-toggle.component";
-import {Page} from "../../../shared/components/table/datastructure";
+import {Page, pageOf} from "../../../shared/components/table/datastructure";
 import {SlideToggleComponent} from "../../../shared/components/slide-toggle/slide-toggle.component";
+import {TableComponent} from "../../../shared/components/table/table.component";
+import {TableColumnComponent} from "../../../shared/components/table/table-column.component";
 
 @Component({
     selector: 'app-feature-details',
@@ -66,6 +68,8 @@ import {SlideToggleComponent} from "../../../shared/components/slide-toggle/slid
         TooltipDirective,
         VividButtonToggleComponent,
         SlideToggleComponent,
+        TableComponent,
+        TableColumnComponent
     ],
     templateUrl: './feature-details.component.html',
     styleUrls: ['./feature-details.component.css'],
@@ -96,6 +100,26 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
 
     feature$ = this.state.feature$;
     isDirty$ = this.state.isDirty$;
+
+    usagePage$ = this.feature$.pipe(
+        map(f => {
+            if (!f || !f.usage) return pageOf([]);
+
+            const matrix: { [appName: string]: any } = {};
+            const appNames = new Set<string>();
+
+            f.usage.forEach(u => {
+                appNames.add(u.clientName);
+                if (!matrix[u.clientName]) {
+                    matrix[u.clientName] = { appName: u.clientName };
+                }
+                matrix[u.clientName][u.environmentId] = u.lastSeen;
+            });
+
+            const content = Array.from(appNames).sort().map(appName => matrix[appName]);
+            return pageOf(content)
+        })
+    );
 
     allClients$: Observable<Page<VividClient>>;
 
@@ -454,4 +478,6 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
     }
+
+    protected readonly JSON = JSON;
 }

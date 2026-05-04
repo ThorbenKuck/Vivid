@@ -7,7 +7,7 @@ import java.util.*
 @Entity(name = "VividClient")
 @Table(
     name = "vivid_clients",
-    uniqueConstraints = [UniqueConstraint(columnNames = ["external_id", "environment_id"])]
+    uniqueConstraints = [UniqueConstraint(columnNames = ["client_name", "environment_id"])]
 )
 class VividClientEntity(
     @Id

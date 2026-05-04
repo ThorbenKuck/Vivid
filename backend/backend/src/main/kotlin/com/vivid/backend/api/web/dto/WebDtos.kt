@@ -2,6 +2,7 @@ package com.vivid.backend.api.web.dto
 
 import com.vivid.backend.domain.entity.*
 import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
+import com.vivid.backend.domain.entity.infrastructure.FeatureUsageEntity
 import java.util.*
 
 // FeatureEntity DTO represents a feature with environment-specific state (enabled/flags/metadata)
@@ -19,7 +20,14 @@ data class FeatureDto(
     val overrides: List<EnvironmentOverrideDto>,
     val tags: List<String>,
     val outgoingLinks: List<FeatureLinkDto>,
-    val notes: List<NoteDto>
+    val notes: List<NoteDto>,
+    val usage: List<FeatureUsageDto> = emptyList()
+)
+
+data class FeatureUsageDto(
+    val clientName: String,
+    val environmentId: UUID,
+    val lastSeen: java.time.Instant
 )
 
 data class NoteDto(
@@ -54,7 +62,7 @@ fun EnvironmentOverrideEntity.toDto(): EnvironmentOverrideDto = EnvironmentOverr
     strategy = strategy
 )
 
-fun FeatureEntity.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
+fun FeatureEntity.toDto(allEnvironments: List<EnvironmentEntity>, usage: List<FeatureUsageEntity> = emptyList()): FeatureDto {
     val overrideDtos = allEnvironments.map { env ->
         val override = environmentOverrides.find { it.environment.id == env.id }
         EnvironmentOverrideDto(
@@ -78,9 +86,16 @@ fun FeatureEntity.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
         overrides = overrideDtos,
         tags = tags.toList(),
         outgoingLinks = outgoingLinks.map { it.toDto() },
-        notes = notes.map { it.toDto() }
+        notes = notes.map { it.toDto() },
+        usage = usage.map { it.toDto() }
     )
 }
+
+fun FeatureUsageEntity.toDto(): FeatureUsageDto = FeatureUsageDto(
+    clientName = client.clientName,
+    environmentId = client.environment.id,
+    lastSeen = lastSeen
+)
 
 data class FeatureLinkDto(
     val id: UUID?,
