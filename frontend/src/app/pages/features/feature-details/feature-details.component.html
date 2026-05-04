@@ -8,17 +8,8 @@
 @if (feature$ | async; as f) {
     <div class="master-switch-card card flex items-center justify-between p-md configuration-section"
          [class.enabled]="f.enabled">
-        <div class="flex items-center gap-md"
-             vividTooltip="Default state if no environment overrides are applied.">
-                    <span class="material-symbols-rounded text-xl"
-                          [style.color]="f.enabled ? 'var(--accent-mint)' : 'var(--text-muted)'">
-                        {{ f.enabled ? 'toggle_on' : 'toggle_off' }}
-                    </span>
-            <span class="text-sm font-semibold">Status</span>
-        </div>
-        <button class="btn-toggle" [class.active]="f.enabled" (click)="updateField('enabled', !f.enabled)">
-            {{ f.enabled ? 'Enabled' : 'Disabled' }}
-        </button>
+        <div><env-status [active]="f.enabled"></env-status> Status</div>
+        <slide-toggle [checked]="f.enabled" [label]="f.enabled ? 'Enabled' : 'Disabled'" (onToggle)="updateField('enabled', $event)"></slide-toggle>
     </div>
 
     <accordion [multi]="true">
@@ -181,15 +172,9 @@
             <app-content>
                 <div *ngFor="let flag of f.flags | keyvalue; trackBy: trackByFlagKey"
                      class="flag-row flex items-center gap-md p-xs border-bottom">
-                    <span class="text-xs font-semibold flex-1">{{ flag.key }}</span>
+                    <span class="font-semibold flex-1">{{ flag.key }}</span>
                     <div class="flex items-center gap-sm">
-                        <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
-                        <button class="icon-btn-slim" (click)="toggleFlag(null, f.flags, flag.key, !flag.value)">
-                                    <span class="material-symbols-rounded"
-                                          [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
-                                      {{ flag.value ? 'toggle_on' : 'toggle_off' }}
-                                    </span>
-                        </button>
+                        <slide-toggle [checked]="flag.value" (onToggle)="toggleFlag(null, f.flags, flag.key, $event)" [label]="flag.value ? 'ON' : 'OFF'"></slide-toggle>
                         <button class="icon-btn-slim danger" (click)="removeFlag(null, f.flags, flag.key)">
                             <span class="material-symbols-rounded">delete</span>
                         </button>

@@ -34,6 +34,7 @@ import {BadgeComponent} from "../../../shared/components/badge/badge.component";
 import {TooltipDirective} from "../../../shared/directives/tooltip.directive";
 import {VividButtonToggleComponent} from "../../../shared/components/button-toggle/button-toggle.component";
 import {Page} from "../../../shared/components/table/datastructure";
+import {SlideToggleComponent} from "../../../shared/components/slide-toggle/slide-toggle.component";
 
 @Component({
     selector: 'app-feature-details',
@@ -64,6 +65,7 @@ import {Page} from "../../../shared/components/table/datastructure";
         BadgeComponent,
         TooltipDirective,
         VividButtonToggleComponent,
+        SlideToggleComponent,
     ],
     templateUrl: './feature-details.component.html',
     styleUrls: ['./feature-details.component.css'],
