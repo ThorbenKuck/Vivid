@@ -7,6 +7,7 @@ import com.vivid.sdk.spring.condition.ConditionalOnFeatureStream
 import com.vivid.sdk.spring.condition.ConditionalOnVivid
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.ObjectProvider
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.PropertySource
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler
 import org.springframework.web.client.RestClient
+import tools.jackson.databind.ObjectMapper
 
 private val logger = LoggerFactory.getLogger(VividRestAutoConfiguration::class.java)
 
@@ -38,21 +40,39 @@ class VividRestAutoConfiguration {
     @ConditionalOnMissingBean(SpringFeatureApi::class, FeatureApi::class)
     fun springFeatureApi(
         restProperties: VividRestProperties,
-        properties: VividProperties,
+        vividProperties: VividProperties,
     ): SpringFeatureApi {
         logger.debug("Creating SpringFeatureApi with properties: {}", restProperties)
         val restClient = RestClient.builder().baseUrl(restProperties.baseUrl).build()
-        return SpringFeatureApi(restClient, restProperties, properties)
+        return SpringFeatureApi(restClient, restProperties, vividProperties)
+    }
+
+    @Bean
+    @ConditionalOnProperty("spring.vivid.rest.heartbeat.enabled")
+    fun heartbeat(
+        vividProperties: VividProperties,
+        objectMapper: ObjectMapper,
+        restProperties: VividRestProperties,
+        executor: ObjectProvider<TaskScheduler>,
+    ): VividHeartbeat {
+        val restClient = RestClient.builder().baseUrl(restProperties.baseUrl).build()
+        return VividHeartbeat(
+            vividProperties = vividProperties,
+            restProperties = restProperties,
+            executor = executor.getIfUnique { SimpleAsyncTaskScheduler() },
+            restClient = restClient,
+            objectMapper = objectMapper,
+        )
     }
 
     @Bean
     @ConditionalOnFeatureStream("rest")
     @ConditionalOnBean(FeatureApi::class)
     fun restFeatureStream(
-        executor: ObjectProvider<TaskScheduler>,
         pollingProperties: VividPollingProperties,
         api: FeatureApi,
         cache: FeatureCache,
+        executor: ObjectProvider<TaskScheduler>,
     ): RestFeatureStream {
         logger.debug("REST feature stream enabled")
         return RestFeatureStream(

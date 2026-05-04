@@ -13,10 +13,6 @@
   letter-spacing: -0.3px;
 }
 
-.search-bar {
-  flex: 0 1 320px;
-}
-
 .mt-xs { margin-top: var(--spacing-xs); }
 .ml-sm { margin-left: var(--spacing-sm); }
 .p-sm { padding: var(--spacing-sm); }

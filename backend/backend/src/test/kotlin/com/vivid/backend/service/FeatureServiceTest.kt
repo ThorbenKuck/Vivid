@@ -1,6 +1,6 @@
 package com.vivid.backend.service
 
-import com.vivid.backend.domain.entity.FeatureEntity
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import com.vivid.backend.domain.repository.FeatureRepository
 import com.vivid.backend.api.web.dto.FeatureCreateRequest
 import com.vivid.backend.api.web.dto.FeatureUpdateRequest
@@ -13,6 +13,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import org.springframework.context.ApplicationEventPublisher
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -22,7 +23,7 @@ class FeatureServiceTest {
     private lateinit var featureRepository: FeatureRepository
 
     @Mock
-    private lateinit var environmentStream: EnvironmentStream
+    private lateinit var eventPublisher: ApplicationEventPublisher
 
     @Mock
     private lateinit var environmentService: EnvironmentService

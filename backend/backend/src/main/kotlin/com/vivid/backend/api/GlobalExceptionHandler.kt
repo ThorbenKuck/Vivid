@@ -45,6 +45,18 @@ class GlobalExceptionHandler {
         )
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
+
+    @ExceptionHandler(MissingClientRegistrationException::class)
+    fun handleMissingRegistration(): ResponseEntity<String> {
+        logger.warn("Client registration missing; Client tried to use Vivid API without previous registration")
+        return ResponseEntity("Your client is not registered. Please register your client before requesting data from Vivid.", HttpStatus.FORBIDDEN)
+    }
+
+    @ExceptionHandler(MissingClientTokenException::class)
+    fun handleMissingToken(): ResponseEntity<String> {
+        logger.warn("Client token missing; Client tried to use Vivid API without a token")
+        return ResponseEntity("You are missing a client token. Please provide a client token.", HttpStatus.FORBIDDEN)
+    }
 }
 
 data class ErrorResponse(
@@ -52,3 +64,7 @@ data class ErrorResponse(
     val message: String,
     val timestamp: LocalDateTime
 )
+
+class MissingClientRegistrationException : Exception()
+
+class MissingClientTokenException : Exception()

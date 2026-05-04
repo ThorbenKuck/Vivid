@@ -455,3 +455,19 @@ env-status {
 .env-tabs-wrapper {
     margin-top: var(--spacing-lg);
 }
+
+.status-indicator-mini {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--status-error);
+}
+
+.status-indicator-mini.online {
+    background-color: var(--status-success);
+    box-shadow: 0 0 4px var(--status-success);
+}
+
+.client-usage-item:hover {
+    background-color: var(--surface-hover);
+}

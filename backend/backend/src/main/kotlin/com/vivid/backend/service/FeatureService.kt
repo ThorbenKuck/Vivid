@@ -3,9 +3,12 @@ package com.vivid.backend.service
 import com.vivid.backend.api.web.dto.*
 import com.vivid.backend.asKey
 import com.vivid.backend.domain.entity.*
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import com.vivid.backend.domain.repository.FeatureRepository
 import com.vivid.backend.service.exception.ResourceNotFoundException
 import com.vivid.backend.toUuidOrNull
+import com.vivid.backend.domain.event.FeatureChangedEvent
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -18,7 +21,7 @@ class FeatureService(
     private val featureRepository: FeatureRepository,
     private val environmentService: EnvironmentService,
     private val userService: UserService,
-    private val environmentStream: EnvironmentStream,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     @Transactional(readOnly = true)
@@ -83,8 +86,9 @@ class FeatureService(
             flags = request.flags.toMutableMap(),
             metadata = request.metadata
         )
-        environmentStream.pushFeature(feature)
-        return featureRepository.save(feature)
+        val saved = featureRepository.save(feature)
+        eventPublisher.publishEvent(FeatureChangedEvent(saved.id))
+        return saved
     }
 
     @Transactional
@@ -113,8 +117,9 @@ class FeatureService(
             overrideUpdate.strategy?.let { override.strategy = it }
         }
 
-        environmentStream.pushFeature(feature)
-        return featureRepository.save(feature)
+        val saved = featureRepository.save(feature)
+        eventPublisher.publishEvent(FeatureChangedEvent(saved.id))
+        return saved
     }
 
     @Transactional
@@ -138,9 +143,10 @@ class FeatureService(
         request.metadata?.let { override.metadata = it }
         request.strategy?.let { override.strategy = it }
         
-        environmentStream.pushFeature(feature, environment.id)
+        val saved = featureRepository.save(feature)
+        eventPublisher.publishEvent(FeatureChangedEvent(saved.id, listOf(environment.id)))
 
-        return featureRepository.save(feature)
+        return saved
     }
 
     @Transactional

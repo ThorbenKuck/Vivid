@@ -11,11 +11,12 @@ import {LoadingIndicator} from "../../shared/components/loading-indicator/loadin
 import {TableColumnComponent} from "../../shared/components/table/table-column.component";
 import {TableComponent} from "../../shared/components/table/table.component";
 import {Page, Pageable} from "../../shared/components/table/datastructure";
+import {ContentHeaderComponent} from "../../shared/components/content-header/content-header.component";
 
 @Component({
     selector: 'app-environments',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, HasPermissionDirective, LoadingIndicator, TableColumnComponent, TableComponent],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, HasPermissionDirective, LoadingIndicator, TableColumnComponent, TableComponent, ContentHeaderComponent],
     templateUrl: './environments.component.html',
     styleUrls: ['./environments.component.css']
 })

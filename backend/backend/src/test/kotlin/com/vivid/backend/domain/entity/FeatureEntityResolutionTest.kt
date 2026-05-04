@@ -1,5 +1,6 @@
 package com.vivid.backend.domain.entity
 
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*

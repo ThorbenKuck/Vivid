@@ -2,9 +2,13 @@ package com.vivid.backend.service
 
 import com.vivid.backend.api.client.dto.toClientDto
 import com.vivid.backend.domain.entity.EnvironmentEntity
-import com.vivid.backend.domain.entity.FeatureEntity
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
+import com.vivid.backend.domain.event.FeatureChangedEvent
+import com.vivid.backend.domain.repository.FeatureRepository
+import com.vivid.backend.domain.support.ApplicationIdentifier
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.DisposableBean
+import org.springframework.context.event.EventListener
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
@@ -18,13 +22,32 @@ private val logger = LoggerFactory.getLogger(EnvironmentStream::class.java)
 @Component
 class EnvironmentStream(
     private val objectMapper: ObjectMapper,
-): DisposableBean {
+    private val featureRepository: FeatureRepository,
+    private val clientService: VividClientService,
+) : FeatureDistributionProvider, DisposableBean {
 
     private val registration = ConcurrentHashMap<UUID, MutableList<EnvironmentSubscription>>()
 
-    fun register(environment: EnvironmentEntity, applicationId: String?): SseEmitter {
+    @EventListener
+    override fun onFeatureChanged(event: FeatureChangedEvent) {
+        val feature = featureRepository.findById(event.featureId).orElse(null) ?: return
+
+        if (event.environmentIds == null) {
+            pushFeature(feature)
+        } else {
+            event.environmentIds.forEach { envId ->
+                pushFeature(feature, envId)
+            }
+        }
+    }
+
+    fun register(
+        environment: EnvironmentEntity,
+        applicationIdentifier: ApplicationIdentifier,
+    ): SseEmitter {
+        clientService.registerTechnologie(applicationIdentifier, "sse")
         val registrations = registration.computeIfAbsent(environment.id) { mutableListOf() }
-        val subscription = EnvironmentSubscription(applicationId)
+        val subscription = EnvironmentSubscription(applicationIdentifier)
         val emitter = subscription.sseEmitter
         registrations.add(subscription)
         emitter.onCompletion {
@@ -42,7 +65,7 @@ class EnvironmentStream(
             emitter.complete()
         }
 
-        logger.info("Registered SSE subscription for application \"{}\" at environment \"{}\"({})", applicationId, environment.id, registrations.size)
+        logger.info("Registered SSE subscription for application \"{}\" at environment \"{}\"({})", applicationIdentifier, environment.id, registrations.size)
         return subscription.sseEmitter
     }
 
@@ -79,7 +102,7 @@ class EnvironmentStream(
     }
 
     data class EnvironmentSubscription(
-        val applicationId: String?,
+        val applicationId: ApplicationIdentifier?,
         val sseEmitter: SseEmitter = SseEmitter(-1),
     )
 }

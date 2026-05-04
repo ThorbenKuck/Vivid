@@ -2,8 +2,10 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {debounceTime, forkJoin, map, of, Subject, Subscription, switchMap, tap, timer} from 'rxjs';
+import {debounceTime, forkJoin, map, Observable, of, Subject, Subscription, switchMap, tap, timer} from 'rxjs';
 import {WebFeatureManagementService} from '../../../services/web-feature-management.service';
+import {ClientRegistryService} from '../../../services/client-registry.service';
+import {VividClient} from '../../../dtos/VividClient';
 import {EnvironmentOverrideDto, FeatureDto, OverrideStrategy, MetadataValue, EnvironmentOverrideUpdateRequest} from '../../../dtos';
 import {TranslateModule} from '@ngx-translate/core';
 import {FormInputComponent} from '../../../shared/components/form-input/form-input.component';
@@ -31,7 +33,7 @@ import {ToastService} from "../../../services/toast.service";
 import {BadgeComponent} from "../../../shared/components/badge/badge.component";
 import {TooltipDirective} from "../../../shared/directives/tooltip.directive";
 import {VividButtonToggleComponent} from "../../../shared/components/button-toggle/button-toggle.component";
-import {CardComponent} from "../../../shared/components/card/card.component";
+import {Page} from "../../../shared/components/table/datastructure";
 
 @Component({
     selector: 'app-feature-details',
@@ -62,7 +64,6 @@ import {CardComponent} from "../../../shared/components/card/card.component";
         BadgeComponent,
         TooltipDirective,
         VividButtonToggleComponent,
-        CardComponent,
     ],
     templateUrl: './feature-details.component.html',
     styleUrls: ['./feature-details.component.css'],
@@ -94,14 +95,18 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     feature$ = this.state.feature$;
     isDirty$ = this.state.isDirty$;
 
+    allClients$: Observable<Page<VividClient>>;
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private api: WebFeatureManagementService,
+        private clientRegistry: ClientRegistryService,
         public state: FeatureStateService,
         public permissions: PermissionService,
         private toastService: ToastService,
     ) {
+        this.allClients$ = this.clientRegistry.getAllClients();
     }
 
     ngOnInit(): void {
@@ -156,6 +161,11 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
                 this.showFeatureSuggestions = true;
             }
         });
+    }
+
+    getClientsForEnvironment(clients: Page<VividClient> | null, environmentId: string): VividClient[] {
+        if (!clients) return [];
+        return clients.content.filter(c => c.environmentId === environmentId);
     }
 
     ngOnDestroy(): void {

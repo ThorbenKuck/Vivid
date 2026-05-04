@@ -1,0 +1,8 @@
+<label class="slide-toggle-container" (click)="$event.preventDefault(); toggle()">
+    <div class="switch" [class.is-checked]="checked()">
+        <div class="handle"></div>
+    </div>
+    @if (label()) {
+        <span class="toggle-label">{{ label() }}</span>
+    }
+</label>

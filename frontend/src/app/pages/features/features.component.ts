@@ -14,6 +14,8 @@ import {Page, Pageable} from "../../shared/components/table/datastructure";
 import {TableColumnComponent} from "../../shared/components/table/table-column.component";
 import {EnvStatusComponent} from "../../shared/components/env-status/env-status.component";
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
+import {ContentHeaderComponent} from "../../shared/components/content-header/content-header.component";
+import {CardComponent} from "../../shared/components/card/card.component";
 
 @Component({
     selector: 'app-main-content',
@@ -28,7 +30,9 @@ import {LoadingIndicator} from "../../shared/components/loading-indicator/loadin
         TableComponent,
         TableColumnComponent,
         EnvStatusComponent,
-        LoadingIndicator
+        LoadingIndicator,
+        ContentHeaderComponent,
+        CardComponent
     ],
     templateUrl: './features.component.html',
     styleUrls: ['./features.component.css']

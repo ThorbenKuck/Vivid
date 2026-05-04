@@ -1,6 +1,7 @@
 package com.vivid.backend.api.web.dto
 
 import com.vivid.backend.domain.entity.*
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import java.util.*
 
 // FeatureEntity DTO represents a feature with environment-specific state (enabled/flags/metadata)
@@ -62,7 +63,7 @@ fun FeatureEntity.toDto(allEnvironments: List<EnvironmentEntity>): FeatureDto {
             enabled = override?.enabled,
             flags = override?.flags ?: emptyMap(),
             metadata = override?.metadata ?: emptyMap(),
-            strategy = override?.strategy ?: OverrideStrategy.OVERRIDE
+            strategy = override?.strategy ?: OverrideStrategy.EXTEND
         )
     }
     return FeatureDto(
@@ -156,5 +157,29 @@ fun EnvironmentEntity.toDto() = EnvironmentDto(
 data class EnvironmentCreateRequest(
     val name: String,
     val description: String?
+)
+
+data class ClientRegistryDto(
+    val id: UUID,
+    val clientToken: String?,
+    val clientName: String,
+    val environmentId: UUID,
+    val environmentName: String,
+    val lastSeen: java.time.Instant?,
+    val technologies: Set<String>,
+    val clientVersion: String?,
+    val isOnline: Boolean
+)
+
+fun VividClientEntity.toDto(onlineThreshold: java.time.Duration): ClientRegistryDto = ClientRegistryDto(
+    id = id,
+    clientToken = clientToken,
+    clientName = clientName,
+    environmentId = environment.id,
+    environmentName = environment.name,
+    lastSeen = lastSeen,
+    technologies = technologies,
+    clientVersion = clientVersion,
+    isOnline = lastSeen?.isAfter(java.time.Instant.now().minus(onlineThreshold)) ?: false
 )
 

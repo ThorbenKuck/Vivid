@@ -1,0 +1,65 @@
+<content-header>
+    <h1 class="page-title">Clients Registry</h1>
+    <div class="search-bar">
+        <app-form-input
+                icon="search"
+                [placeholder]="'common.search' "
+                [(ngModel)]="q">
+        </app-form-input>
+    </div>
+</content-header>
+
+@if (clients$ | async; as clients) {
+    @if (clients.content.length > 0) {
+        <app-table [page]="clients" [rowIdKey]="'id'">
+            <table-column key="online" label="Status">
+                <ng-template let-f>
+                    <env-status [active]="f.online"></env-status>
+                    <span class="text-xs">{{ f.online ? 'Online' : 'Offline' }}</span>
+                </ng-template>
+            </table-column>
+
+            <table-column key="name" label="Name">
+                <ng-template let-f>
+                    <div class="font-medium">{{ f.clientName }}</div>
+                    <div class="text-xs text-muted">{{ f.externalId }}</div>
+                </ng-template>
+            </table-column>
+
+            <table-column key="environment" label="Environment">
+                <ng-template let-f>
+                    <badge>{{ f.environmentName }}</badge>
+                </ng-template>
+            </table-column>
+
+            <table-column key="lastSeen" label="Last Seen">
+                <ng-template let-f>
+                    <div class="text-sm">{{ f.lastSeen | date: 'medium' }}</div>
+                </ng-template>
+            </table-column>
+
+            <table-column key="sdkVersion" label="SDK Version">
+                <ng-template let-f>
+                    <div class="text-sm">{{ f.clientVersion }}</div>
+                </ng-template>
+            </table-column>
+
+            <table-column key="technologies" label="Technologies">
+                <ng-template let-f>
+                    <div class="flex gap-xs flex-wrap">
+                        @for (tech of f.technologies; track tech) {
+                            <span class="tag-pill text-xs">{{ tech }}</span>
+                        }
+                    </div>
+                </ng-template>
+            </table-column>
+        </app-table>
+    } @else {
+        <div>No clients yet</div>
+    }
+} @else {
+    <div class="loading-state flex-col items-center justify-center py-lg">
+        <app-loading-indicator></app-loading-indicator>
+        <p class="text-secondary">{{ 'common.loading' }}</p>
+    </div>
+}

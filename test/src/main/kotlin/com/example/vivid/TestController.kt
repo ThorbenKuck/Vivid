@@ -46,6 +46,8 @@ class TestController(
         test.isTrue()
         test.isFalse()
 
+        testfeature.getMetadata("supported-sending-systems").contains("WWSTR")
+
         return features.get(feature).getMetadata(name)
     }
 }

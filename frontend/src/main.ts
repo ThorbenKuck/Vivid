@@ -15,6 +15,8 @@ import {EnvironmentDetailsComponent} from "./app/pages/environments/environment-
 import {PermissionService} from "./app/services/permission.service";
 import {catchError, of} from "rxjs";
 import {authInterceptor} from "./app/shared/interceptors/auth.interceptor";
+import {ClientsComponent} from "./app/pages/clients/clients.component";
+import {SettingsComponent} from "./app/pages/settings/settings.component";
 
 const routes: Routes = [
     {path: '', pathMatch: 'full', redirectTo: 'features'},
@@ -43,6 +45,14 @@ const routes: Routes = [
     {
         path: 'environments/:id',
         component: EnvironmentDetailsComponent,
+    },
+    {
+        path: 'clients',
+        component: ClientsComponent,
+    },
+    {
+        path: 'settings',
+        component: SettingsComponent,
     }
 ];
 

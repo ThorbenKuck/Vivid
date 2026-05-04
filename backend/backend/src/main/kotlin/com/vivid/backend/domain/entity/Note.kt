@@ -1,5 +1,6 @@
 package com.vivid.backend.domain.entity
 
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import jakarta.persistence.*
 import java.time.Instant
 import java.util.*

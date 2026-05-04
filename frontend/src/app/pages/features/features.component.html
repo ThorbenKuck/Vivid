@@ -1,4 +1,4 @@
-<div class="page-header flex justify-between items-center gap-md">
+<content-header>
     <h1 class="page-title text-lg">{{ 'features.title' }}</h1>
     <div class="search-bar">
         <app-form-input
@@ -8,7 +8,7 @@
                 (keyup.enter)="search()">
         </app-form-input>
     </div>
-</div>
+</content-header>
 
 @if ((environments$ | async)?.length !== 0) {
     <button class="fab" *hasPermission="['environments', 'write']" (click)="toggleAdd()" [title]="'common.add'">
@@ -39,7 +39,8 @@
 </div>
 
 @if (featuresPage$ | async; as page) {
-    @if (environments$ | async; as envs) {
+    @let envs = environments$ | async;
+    @if (envs && envs.length > 0) {
         <app-table [page]="page" (pageChange)="loadData($event)" [rowIdKey]="'runningNumber'">
             <table-column key="id" label="#" width="40px" [center]="true">
                 <ng-template let-f>
@@ -91,7 +92,7 @@
             </ng-template>
         </app-table>
     } @else {
-        No environments!
+        No Features yet
     }
 } @else {
     <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">

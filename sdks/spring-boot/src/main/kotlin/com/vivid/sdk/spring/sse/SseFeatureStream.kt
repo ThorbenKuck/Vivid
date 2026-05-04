@@ -6,8 +6,10 @@ import com.vivid.sdk.api.Feature
 import com.vivid.sdk.spring.VividProperties
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpStatus
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.util.retry.Retry.backoff
@@ -36,15 +38,18 @@ class SseFeatureStream(
                 .build(vividProperties.environment.trim().removeSuffix("/"))
         }
 
-        sseProperties.apiKey?.let { webClientBuild.header(sseProperties.apiTokenHeaderName, it) }
-        vividProperties.applicationId?.let { webClientBuild.header(sseProperties.applicationIdHeaderName, it) }
+        sseProperties.headerNames.applyTo(webClientBuild, vividProperties)
 
         val eventStream: Flux<ServerSentEvent<Feature>> = webClientBuild.retrieve()
             .bodyToFlux(SSE_TYPE)
             .timeout(ofMinutes(5))
             .retryWhen(
                 backoff(Long.MAX_VALUE, ofSeconds(2))
-                    .doBeforeRetry { logger.warn("SSE connection lost, retrying...") }
+                    .filter { error ->
+                        error !is WebClientResponseException ||
+                                error.statusCode != HttpStatus.FORBIDDEN
+                    }
+                    .doBeforeRetry { logger.warn("SSE connection lost. " + it.failure().localizedMessage + ". Retrying...") }
             )
 
         val disposable = eventStream.subscribe(
@@ -52,7 +57,11 @@ class SseFeatureStream(
                 logger.debug("Received SSE event with data: {}", event.data())
                 event.data()?.let { callback.onNext(it) }
             }, { error ->
-                logger.error("Error in SSE feature stream: {}", error.message, error)
+                if (error is WebClientResponseException.Forbidden) {
+                    logger.error("Cannot use Sse feature stream: {}", error.responseBodyAsString)
+                } else {
+                    logger.error("Error in SSE feature stream: {}", error.message, error)
+                }
             }
         )
         logger.debug("Subscription to SSE feature stream established.")

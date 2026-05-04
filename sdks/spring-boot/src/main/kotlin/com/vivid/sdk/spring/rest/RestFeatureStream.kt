@@ -6,6 +6,7 @@ import com.vivid.sdk.FeatureStream
 import com.vivid.sdk.Subscription
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.TaskScheduler
+import java.time.Instant
 import java.util.concurrent.ScheduledFuture
 
 private val logger = LoggerFactory.getLogger(RestFeatureStream::class.java)
@@ -23,7 +24,7 @@ class RestFeatureStream(
     override fun subscribe(callback: FeatureStream.Callback): Subscription {
         val future = executor.scheduleAtFixedRate({
             callback.doPoll()
-        }, pollingProperties.interval)
+        }, Instant.now().plus(pollingProperties.interval), pollingProperties.interval)
         return PollingSubscription(future)
     }
 

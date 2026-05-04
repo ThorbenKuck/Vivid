@@ -1,5 +1,6 @@
 package com.vivid.backend.domain.entity
 
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
@@ -36,5 +37,5 @@ class EnvironmentOverrideEntity(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var strategy: OverrideStrategy = OverrideStrategy.OVERRIDE
+    var strategy: OverrideStrategy = OverrideStrategy.EXTEND,
 ) : BaseUuidEntity(id)

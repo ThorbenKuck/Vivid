@@ -206,7 +206,7 @@
 
             </app-content>
         </expansion-panel>
-        <expansion-panel [collapsed]="false">
+        <expansion-panel>
             <app-header>
                 <badge [variant]="'primary'" [content]="(f.metadata | keyvalue).length">
                     <span class="material-symbols-rounded" style="color: var(--accent-sky)">dataset</span> Metadata
@@ -217,7 +217,7 @@
                                      (metadataChange)="updateMetadata(null, $event)"></app-metadata-editor>
             </app-content>
         </expansion-panel>
-        <expansion-panel [collapsed]="false">
+        <expansion-panel>
             <app-header><span class="material-symbols-rounded" style="color: var(--accent-danger)">rule_settings</span> Environment Overrides</app-header>
             <app-content>
                 @if (f.overrides && f.overrides.length === 0) {
@@ -378,6 +378,36 @@
                                                         Copy Overrides
                                                     </button>
                                                 </div>
+                                            </div>
+                                        </app-content>
+                                    </expansion-panel>
+
+                                    <expansion-panel>
+                                        <app-header>
+                                            @let envClients = getClientsForEnvironment(allClients$ | async, override.environmentId);
+                                            <badge [variant]="'primary'" [content]="envClients.length">
+                                                <span class="material-symbols-rounded" style="color: var(--accent-lavender)">devices</span> Usage
+                                            </badge>
+                                        </app-header>
+                                        <app-content>
+                                            <div class="clients-list flex-col gap-sm">
+                                                @for (client of getClientsForEnvironment(allClients$ | async, override.environmentId); track client.id) {
+                                                    <div class="client-usage-item flex items-center justify-between p-sm border-bottom">
+                                                        <div class="flex items-center gap-sm">
+                                                            <span class="status-indicator-mini" [class.online]="client.isOnline"></span>
+                                                            <div class="flex-col">
+                                                                <span class="text-xs font-semibold">{{ client.clientName }}</span>
+                                                                <span class="text-xxs text-muted">{{ client.externalId }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex items-center gap-sm">
+                                                            <span class="text-xxs tag-pill">{{ client.clientVersion }}</span>
+                                                            <span class="text-xxs text-muted">{{ client.lastSeen | timeAgo }}</span>
+                                                        </div>
+                                                    </div>
+                                                } @empty {
+                                                    <div class="text-xs text-muted italic p-sm">No clients currently active in this environment.</div>
+                                                }
                                             </div>
                                         </app-content>
                                     </expansion-panel>

@@ -34,8 +34,7 @@ class SpringFeatureApi(
                 }
                 .headers {
                     it.accept = listOf(MediaType.APPLICATION_JSON)
-                    it.add(restProperties.applicationIdHeaderName, vividProperties.applicationId)
-                    restProperties.apiToken?.let { token -> it.add(restProperties.apiTokenHeaderName, token) }
+                    restProperties.headerNames.applyTo(it, vividProperties)
                 }
                 .retrieve()
                 .toEntity<Feature>()
@@ -56,12 +55,11 @@ class SpringFeatureApi(
             logger.debug("Fetching all features for environment ${vividProperties.environment}")
             return restClient.get()
                 .uri {
-                    it.path("/api/client/features/{environment}") // Nutze .path() statt Segmente für mehr Kontrolle
+                    it.path("/api/client/features/{environment}")
                         .build(vividProperties.environment.trim().removeSuffix("/"))                }
                 .headers {
                     it.accept = listOf(MediaType.APPLICATION_JSON)
-                    it.add(restProperties.applicationIdHeaderName, vividProperties.applicationId)
-                    restProperties.apiToken?.let { token -> it.add(restProperties.apiTokenHeaderName, token) }
+                    restProperties.headerNames.applyTo(it, vividProperties)
                 }
                 .retrieve()
                 .toEntity<List<Feature>>()

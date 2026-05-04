@@ -1,5 +1,5 @@
-<div class="page-header flex justify-between items-center gap-md">
-  <h1 class="page-title text-lg">Environments</h1>
+<content-header>
+  <h1 class="page-title">Environments</h1>
   <div class="search-bar">
     <app-form-input 
       icon="search" 
@@ -8,7 +8,7 @@
       (keyup.enter)="search()">
     </app-form-input>
   </div>
-</div>
+</content-header>
 
 <button *hasPermission="['environments', 'write']" class="fab" (click)="toggleAdd()" [title]="'common.add' ">
   <span class="material-symbols-rounded">add</span>
@@ -46,7 +46,9 @@
   </div>
 </div>
 
-@if (result(); as res) {
+@let res = result();
+@if (res) {
+    @if (res.totalCount > 0) {
     <app-table [page]="res" (pageChange)="loadData($event)" [rowIdKey]="'id'">
         <table-column key="id" label="name">
             <ng-template let-f>
@@ -76,6 +78,9 @@
             }
         </ng-template>
     </app-table>
+    } @else {
+        No Environments yet
+    }
 } @else {
     <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
         <app-loading-indicator></app-loading-indicator>

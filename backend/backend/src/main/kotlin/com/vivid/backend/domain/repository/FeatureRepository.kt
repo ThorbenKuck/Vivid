@@ -1,6 +1,6 @@
 package com.vivid.backend.domain.repository
 
-import com.vivid.backend.domain.entity.FeatureEntity
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -14,7 +14,7 @@ interface FeatureRepository : JpaRepository<FeatureEntity, UUID> {
     @Query(
         """
     select distinct f from Feature f
-    left join fetch f.environmentOverrides
+    left join f.environmentOverrides
     left join f.tags t
     where (:q is null or :q = '' or lower(f.name) like lower(concat('%', :q, '%'))
            or lower(coalesce(f.description, '')) like lower(concat('%', :q, '%'))
