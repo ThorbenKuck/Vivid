@@ -28,11 +28,12 @@ interface FeatureReference: FeatureOperations {
 
         override fun isEnabled(name: String): Boolean? {
             val cachedValue = cache.get(key) ?: return null
+            val flag = cachedValue.flags[name] ?: return null
             if (!cachedValue.enabled) {
                 return false
             }
 
-            return cachedValue.flags[name]
+            return flag
         }
 
         override fun <T : MetadataValue> getMetadata(

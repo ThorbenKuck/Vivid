@@ -41,18 +41,7 @@ data class HeartbeatRequest(
     val environment: String,
     val technologies: Set<String>,
     val clientVersion: String?,
-) {
-    fun toEntity(getEnvironment: (String) -> EnvironmentEntity): VividClientEntity {
-        return VividClientEntity(
-            clientName = applicationName,
-            clientToken = clientToken,
-            environment = getEnvironment(environment),
-            technologies = technologies.toMutableSet(),
-            clientVersion = clientVersion,
-            lastSeen = Instant.now(),
-        )
-    }
-}
+)
 
 data class ClientRegistryDto(
     val id: UUID,

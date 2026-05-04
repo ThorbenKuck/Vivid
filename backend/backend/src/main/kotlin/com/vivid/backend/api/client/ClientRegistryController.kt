@@ -17,9 +17,15 @@ class ClientRegistryController(
 
     @PostMapping("/heartbeat")
     fun heartbeat(@RequestBody request: HeartbeatRequest) {
-        vividClientService.registerHeartbeat(request.toEntity {
-            environmentService.findEnvironment(request.environment)
-                ?: throw IllegalArgumentException("Environment not found: ${request.environment}")
-        })
+        val environment = environmentService.findEnvironment(request.environment)
+            ?: throw IllegalArgumentException("Environment not found: ${request.environment}")
+
+        vividClientService.registerHeartbeat(
+            clientName = request.applicationName,
+            environment = environment,
+            clientToken = request.clientToken,
+            technologies = request.technologies,
+            clientVersion = request.clientVersion
+        )
     }
 }

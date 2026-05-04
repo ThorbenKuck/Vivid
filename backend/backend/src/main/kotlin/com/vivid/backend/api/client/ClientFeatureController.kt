@@ -29,12 +29,11 @@ class ClientFeatureController(
         applicationIdentifier: ApplicationIdentifier?,
     ): List<ClientFeatureDto> {
         val client = applicationIdentifier?.let { clientService.seen(it) }
-        val env = client?.environment
-            ?: environmentService.findEnvironment(environment)
+        val env = environmentService.findEnvironment(environment)
             ?: throw ResourceNotFoundException("Environment with id $environment not found")
         val features = featureService.getEnabledFeaturesForClient(environment)
         client?.let { c ->
-            features.forEach { f -> featureUsageService.recordUsage(f, c) }
+            features.forEach { f -> featureUsageService.recordUsage(f, c, env) }
         }
         return features.map { it.toClientDto(env.id) }
     }
@@ -50,7 +49,7 @@ class ClientFeatureController(
         val feature = featureService.findFeature(name = key, environmentIdentifier = environment)
             ?: return ResponseEntity.notFound().build()
 
-        client?.let { featureUsageService.recordUsage(feature, it) }
+        client?.let { featureUsageService.recordUsage(feature, it, env) }
 
         return ResponseEntity.ok(feature.toClientDto(env.id))
     }

@@ -1,0 +1,10 @@
+
+.btn-error {
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.generate-button {
+    height: fit-content;
+    align-self: end;
+}

@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event
 import tools.jackson.databind.ObjectMapper
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 private val logger = LoggerFactory.getLogger(EnvironmentStream::class.java)
 
@@ -26,10 +27,9 @@ class EnvironmentStream(
     private val objectMapper: ObjectMapper,
     private val featureRepository: FeatureRepository,
     private val clientService: VividClientService,
-    private val featureUsageService: FeatureUsageService,
 ) : FeatureDistributionProvider, DisposableBean {
 
-    private val registration = ConcurrentHashMap<UUID, MutableList<EnvironmentSubscription>>()
+    private val registration = ConcurrentHashMap<UUID, CopyOnWriteArrayList<EnvironmentSubscription>>()
 
     @EventListener
     override fun onFeatureChanged(event: FeatureChangedEvent) {
@@ -49,7 +49,7 @@ class EnvironmentStream(
         applicationIdentifier: ApplicationIdentifier,
     ): SseEmitter {
         clientService.registerTechnologie(applicationIdentifier, "sse")
-        val registrations = registration.computeIfAbsent(environment.id) { mutableListOf() }
+        val registrations = registration.computeIfAbsent(environment.id) { CopyOnWriteArrayList() }
         val subscription = EnvironmentSubscription(applicationIdentifier)
         val emitter = subscription.sseEmitter
         registrations.add(subscription)

@@ -11,7 +11,9 @@ data class FeatureUsageId(
     @Column(name = "feature_id")
     val featureId: UUID,
     @Column(name = "client_id")
-    val clientId: UUID
+    val clientId: UUID,
+    @Column(name = "environment_id")
+    val environmentId: UUID
 ) : Serializable
 
 @Entity(name = "FeatureUsage")
@@ -29,6 +31,11 @@ class FeatureUsageEntity(
     @MapsId("clientId")
     @JoinColumn(name = "client_id")
     var client: VividClientEntity,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("environmentId")
+    @JoinColumn(name = "environment_id")
+    var environment: com.vivid.backend.domain.entity.EnvironmentEntity,
 
     @Column(name = "last_seen", nullable = false)
     var lastSeen: Instant = Instant.now()

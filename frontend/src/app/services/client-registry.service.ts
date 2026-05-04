@@ -16,4 +16,20 @@ export class ClientRegistryService {
             map((response) => pageOf(response))
         );
     }
+
+    getClient(id: string): Observable<VividClient> {
+        return this.http.get<VividClient>(`${this.apiUrl}/${id}`);
+    }
+
+    deleteClient(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+
+    updateClient(id: string, clientName: string, clientToken?: string): Observable<VividClient> {
+        return this.http.put<VividClient>(`${this.apiUrl}/${id}`, { clientName, clientToken });
+    }
+
+    createClient(clientName: string, clientToken?: string): Observable<VividClient> {
+        return this.http.post<VividClient>(this.apiUrl, { clientName, clientToken });
+    }
 }

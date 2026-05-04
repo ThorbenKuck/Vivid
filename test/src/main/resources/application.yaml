@@ -2,7 +2,7 @@ spring.vivid:
   rest:
     base-url: http://localhost:8080
   application-name: test
-  environment: Dev
+  environment: DEV
   streams:
     - sse
     - rest

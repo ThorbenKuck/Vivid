@@ -135,8 +135,9 @@ interface FeatureOperations {
          * @return true if enabled, false otherwise
          */
         override fun isEnabled(name: String): Boolean? {
+            val flagValue = feature.flags[name] ?: return null
             if (!feature.enabled) return false
-            return feature.flags[name]
+            return flagValue
         }
 
         /**

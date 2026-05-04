@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {PageHeaderComponent} from './components/header/page-header.component';
 import {SidebarComponent} from './components/sidebar/sidebar.component';
@@ -10,11 +10,12 @@ import {LoadingIndicator} from "./shared/components/loading-indicator/loading-in
 import {catchError, finalize, forkJoin, map, Observable, of, shareReplay, take} from "rxjs";
 import {ToastComponent} from './shared/components/toast/toast.component';
 import {PermissionService} from "./services/permission.service";
+import {ModalComponent} from "./shared/components/modal/modal.component";
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [CommonModule, PageHeaderComponent, SidebarComponent, RouterOutlet, LoadingIndicator, ToastComponent],
+    imports: [CommonModule, PageHeaderComponent, SidebarComponent, RouterOutlet, LoadingIndicator, ToastComponent, ModalComponent],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css']
 })

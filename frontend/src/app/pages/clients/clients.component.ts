@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Observable} from 'rxjs';
@@ -12,6 +12,8 @@ import {Page} from "../../shared/components/table/datastructure";
 import {EnvStatusComponent} from "../../shared/components/env-status/env-status.component";
 import {BadgeComponent} from "../../shared/components/badge/badge.component";
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
+import {RouterLink} from "@angular/router";
+import {ModalService} from "../../services/modal.service";
 
 @Component({
     selector: 'app-clients',
@@ -26,6 +28,7 @@ import {LoadingIndicator} from "../../shared/components/loading-indicator/loadin
         EnvStatusComponent,
         BadgeComponent,
         LoadingIndicator,
+        RouterLink,
     ],
     templateUrl: './clients.component.html',
     styleUrls: ['./clients.component.css']
@@ -33,8 +36,10 @@ import {LoadingIndicator} from "../../shared/components/loading-indicator/loadin
 export class ClientsComponent implements OnInit {
     clients$: Observable<Page<VividClient>>;
     q: string = '';
+    private clientRegistryService = inject(ClientRegistryService);
+    private modalService = inject(ModalService);
 
-    constructor(private clientRegistryService: ClientRegistryService) {
+    constructor() {
         this.clients$ = this.clientRegistryService.getAllClients();
     }
 
@@ -47,7 +52,27 @@ export class ClientsComponent implements OnInit {
         return clients.filter(c =>
             c.clientName.toLowerCase().includes(lowerQ) ||
             (c.clientToken != null && c.clientToken.toLowerCase().includes(lowerQ)) ||
-            c.environmentName.toLowerCase().includes(lowerQ)
+            c.presences.some(p => p.environmentName.toLowerCase().includes(lowerQ))
         );
+    }
+
+    deleteClient(client: VividClient) {
+        this.modalService.confirm("Delete Client", `Are you sure you want to delete the client "${client.clientName}"? This will also remove all its presences.`).subscribe(confirmed => {
+            if (confirmed) {
+                this.clientRegistryService.deleteClient(client.id).subscribe(() => {
+                    this.clients$ = this.clientRegistryService.getAllClients();
+                });
+            }
+        });
+    }
+
+    createClient() {
+        this.modalService.prompt("Create Client", "Enter the name of the new client:").subscribe(name => {
+            if (name) {
+                this.clientRegistryService.createClient(name).subscribe(() => {
+                    this.clients$ = this.clientRegistryService.getAllClients();
+                });
+            }
+        });
     }
 }

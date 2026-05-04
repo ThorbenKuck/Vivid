@@ -16,6 +16,7 @@ import {PermissionService} from "./app/services/permission.service";
 import {catchError, of} from "rxjs";
 import {authInterceptor} from "./app/shared/interceptors/auth.interceptor";
 import {ClientsComponent} from "./app/pages/clients/clients.component";
+import {ClientDetailsComponent} from "./app/pages/clients/client-details/client-details.component";
 import {SettingsComponent} from "./app/pages/settings/settings.component";
 
 const routes: Routes = [
@@ -49,6 +50,10 @@ const routes: Routes = [
     {
         path: 'clients',
         component: ClientsComponent,
+    },
+    {
+        path: 'clients/:id',
+        component: ClientDetailsComponent,
     },
     {
         path: 'settings',

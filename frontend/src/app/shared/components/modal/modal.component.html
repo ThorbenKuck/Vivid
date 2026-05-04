@@ -1,0 +1,21 @@
+@if (service.activeConfig(); as config) {
+    <div class="modal-backdrop">
+        <div class="modal-wrapper">
+            <header>
+                <h2 class="title">{{ config.title }}</h2>
+            </header>
+
+            <div class="content">
+                <p>{{ config.message }}</p>
+                @if (config.type === 'prompt') {
+                    <input type="text" [(ngModel)]="inputValue" (keyup.enter)="onConfirm()" autofocus class="vivid-input">
+                }
+            </div>
+
+            <footer>
+                <button class="btn-secondary" (click)="onCancel()">Abbrechen</button>
+                <button class="btn-primary" (click)="onConfirm()">OK</button>
+            </footer>
+        </div>
+    </div>
+}

@@ -38,17 +38,6 @@ class TestController(
 
     @GetMapping("/{feature}/meta/{name}")
     fun meta(@PathVariable feature: String, @PathVariable name: String): Any? {
-        if (features.get(feature).getMetadata(name).contains("DEBER")) {
-            return "TRUE"
-        }
-
-        val test: MetadataValue? = features.get(feature).getMetadata(name)
-        test.contains("local")
-        test.isTrue()
-        test.isFalse()
-
-        testfeature.getMetadata("supported-sending-systems").contains("WWSTR")
-
         return features.get(feature).getMetadata(name)
     }
 }

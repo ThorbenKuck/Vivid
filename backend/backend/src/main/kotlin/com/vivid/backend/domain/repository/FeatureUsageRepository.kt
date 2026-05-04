@@ -7,4 +7,5 @@ import java.util.UUID
 
 interface FeatureUsageRepository : JpaRepository<FeatureUsageEntity, FeatureUsageId> {
     fun findAllByFeatureId(featureId: UUID): List<FeatureUsageEntity>
+    fun findAllByClientId(clientId: UUID): List<FeatureUsageEntity>
 }

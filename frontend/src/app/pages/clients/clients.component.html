@@ -12,50 +12,45 @@
 @if (clients$ | async; as clients) {
     @if (clients.content.length > 0) {
         <app-table [page]="clients" [rowIdKey]="'id'">
-            <table-column key="online" label="Status">
-                <ng-template let-f>
-                    <env-status [active]="f.online"></env-status>
-                    <span class="text-xs">{{ f.online ? 'Online' : 'Offline' }}</span>
-                </ng-template>
-            </table-column>
-
             <table-column key="name" label="Name">
                 <ng-template let-f>
-                    <div class="font-medium">{{ f.clientName }}</div>
-                    <div class="text-xs text-muted">{{ f.externalId }}</div>
+                    <div class="name-column">
+                        <div class="font-medium">{{ f.clientName }}</div>
+                        <div class="text-xs text-muted">{{ f.clientToken }}</div>
+                    </div>
                 </ng-template>
             </table-column>
 
-            <table-column key="environment" label="Environment">
-                <ng-template let-f>
-                    <badge>{{ f.environmentName }}</badge>
-                </ng-template>
-            </table-column>
-
-            <table-column key="lastSeen" label="Last Seen">
-                <ng-template let-f>
-                    <div class="text-sm">{{ f.lastSeen | date: 'medium' }}</div>
-                </ng-template>
-            </table-column>
-
-            <table-column key="sdkVersion" label="SDK Version">
-                <ng-template let-f>
-                    <div class="text-sm">{{ f.clientVersion }}</div>
-                </ng-template>
-            </table-column>
-
-            <table-column key="technologies" label="Technologies">
+            <table-column key="status" label="Presence">
                 <ng-template let-f>
                     <div class="flex gap-xs flex-wrap">
-                        @for (tech of f.technologies; track tech) {
-                            <span class="tag-pill text-xs">{{ tech }}</span>
+                        @for (presence of f.presences; track presence.environmentId) {
+                            <badge [variant]="presence.online ? 'success' : 'primary'">
+                                <div class="flex items-center gap-xs">
+                                    <env-status [active]="presence.online"></env-status>
+                                    {{ presence.environmentName }}
+                                </div>
+                            </badge>
                         }
+                        @if (!f.presences || f.presences.length === 0) {
+                            <span class="text-xs text-muted italic">No presence recorded</span>
+                        }
+                    </div>
+                </ng-template>
+            </table-column>
+
+            <table-column key="actions" label="Actions" width="120px">
+                <ng-template let-f>
+                    <div class="flex gap-sm">
+                        <button class="btn btn-icon" [routerLink]="['/clients', f.id]" title="Open Details">
+                            <span class="material-symbols-rounded">open_in_new</span>
+                        </button>
                     </div>
                 </ng-template>
             </table-column>
         </app-table>
     } @else {
-        <div>No clients yet</div>
+        <div class="empty-state">No clients yet</div>
     }
 } @else {
     <div class="loading-state flex-col items-center justify-center py-lg">
@@ -63,3 +58,7 @@
         <p class="text-secondary">{{ 'common.loading' }}</p>
     </div>
 }
+
+<button (click)="createClient()" class="fab">
+    <span class="material-symbols-rounded">add</span>
+</button>

@@ -2,25 +2,29 @@ package com.vivid.backend.service
 
 import com.vivid.backend.domain.entity.EnvironmentEntity
 import com.vivid.backend.domain.entity.VividClientEntity
+import com.vivid.backend.domain.entity.VividClientPresenceEntity
 import com.vivid.backend.domain.entity.internal.SettingsEntity
+import com.vivid.backend.domain.repository.VividClientPresenceRepository
 import com.vivid.backend.domain.repository.VividClientRepository
 import com.vivid.backend.domain.support.ApplicationIdentifier
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import java.util.*
 
 class VividClientServiceTest {
 
     private val vividClientRepository = mock(VividClientRepository::class.java)
+    private val presenceRepository = mock(VividClientPresenceRepository::class.java)
     private val settingsService = mock(SettingsService::class.java)
     private val featureUsageService = mock(FeatureUsageService::class.java)
     private lateinit var service: VividClientService
 
     @BeforeEach
     fun setup() {
-        service = VividClientService(vividClientRepository, settingsService, featureUsageService)
+        service = VividClientService(vividClientRepository, presenceRepository, settingsService, featureUsageService)
         `when`(settingsService.getSettings()).thenReturn(SettingsEntity())
     }
 
@@ -32,17 +36,18 @@ class VividClientServiceTest {
         
         val existing = VividClientEntity(
             clientName = "ServiceA",
-            environment = environment,
             clientToken = "token"
         )
         
-        `when`(vividClientRepository.findByClientTokenAndEnvironment("token", environment)).thenReturn(existing)
-        `when`(vividClientRepository.save(any(VividClientEntity::class.java))).thenAnswer { it.arguments[0] }
+        `when`(vividClientRepository.findByClientName("ServiceA")).thenReturn(existing)
+        `when`(vividClientRepository.findByClientToken("token")).thenReturn(existing)
+        `when`(presenceRepository.findByClientAndEnvironment(existing, environment)).thenReturn(null)
+        `when`(presenceRepository.save(any(VividClientPresenceEntity::class.java))).thenAnswer { it.arguments[0] }
 
         val result = service.seen(appId)
 
         assertNotNull(result)
         assertEquals("ServiceA", result.clientName)
-        assertNotNull(result.lastSeen)
+        verify(presenceRepository).save(any(VividClientPresenceEntity::class.java))
     }
 }

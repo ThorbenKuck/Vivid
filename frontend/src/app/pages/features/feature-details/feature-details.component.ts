@@ -211,11 +211,6 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         });
     }
 
-    getClientsForEnvironment(clients: Page<VividClient> | null, environmentId: string): VividClient[] {
-        if (!clients) return [];
-        return clients.content.filter(c => c.environmentId === environmentId);
-    }
-
     ngOnDestroy(): void {
         this.sub?.unsubscribe();
         this.searchSubject.complete();

@@ -1,6 +1,7 @@
 package com.vivid.backend.api.web.dto
 
 import com.vivid.backend.domain.entity.*
+import com.vivid.backend.domain.entity.VividClientPresenceEntity
 import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
 import com.vivid.backend.domain.entity.infrastructure.FeatureUsageEntity
 import java.util.*
@@ -26,7 +27,10 @@ data class FeatureDto(
 
 data class FeatureUsageDto(
     val clientName: String,
+    val featureKey: String,
+    val featureName: String,
     val environmentId: UUID,
+    val environmentName: String,
     val lastSeen: java.time.Instant
 )
 
@@ -62,7 +66,10 @@ fun EnvironmentOverrideEntity.toDto(): EnvironmentOverrideDto = EnvironmentOverr
     strategy = strategy
 )
 
-fun FeatureEntity.toDto(allEnvironments: List<EnvironmentEntity>, usage: List<FeatureUsageEntity> = emptyList()): FeatureDto {
+fun FeatureEntity.toDto(
+    allEnvironments: List<EnvironmentEntity>,
+    usage: List<FeatureUsageEntity> = emptyList(),
+): FeatureDto {
     val overrideDtos = allEnvironments.map { env ->
         val override = environmentOverrides.find { it.environment.id == env.id }
         EnvironmentOverrideDto(
@@ -93,7 +100,10 @@ fun FeatureEntity.toDto(allEnvironments: List<EnvironmentEntity>, usage: List<Fe
 
 fun FeatureUsageEntity.toDto(): FeatureUsageDto = FeatureUsageDto(
     clientName = client.clientName,
-    environmentId = client.environment.id,
+    featureKey = feature.key,
+    featureName = feature.name,
+    environmentId = environment.id,
+    environmentName = environment.name,
     lastSeen = lastSeen
 )
 
@@ -198,10 +208,7 @@ data class EnvironmentUpdateRequest(
     val rules: List<EnvironmentRuleDto>? = null
 )
 
-data class ClientRegistryDto(
-    val id: UUID,
-    val clientToken: String?,
-    val clientName: String,
+data class ClientPresenceDto(
     val environmentId: UUID,
     val environmentName: String,
     val lastSeen: java.time.Instant?,
@@ -210,15 +217,33 @@ data class ClientRegistryDto(
     val isOnline: Boolean
 )
 
-fun VividClientEntity.toDto(onlineThreshold: java.time.Duration): ClientRegistryDto = ClientRegistryDto(
+data class ClientRegistryDto(
+    val id: UUID,
+    val clientToken: String?,
+    val clientName: String,
+    val presences: List<ClientPresenceDto>,
+    val featureUsage: List<FeatureUsageDto> = emptyList()
+)
+
+fun VividClientEntity.toDto(onlineThreshold: java.time.Duration, featureUsage: List<FeatureUsageEntity> = emptyList()): ClientRegistryDto = ClientRegistryDto(
     id = id,
     clientToken = clientToken,
     clientName = clientName,
+    presences = presences.map { it.toDto(onlineThreshold) },
+    featureUsage = featureUsage.map { it.toDto() }
+)
+
+fun VividClientPresenceEntity.toDto(onlineThreshold: java.time.Duration): ClientPresenceDto = ClientPresenceDto(
     environmentId = environment.id,
     environmentName = environment.name,
     lastSeen = lastSeen,
     technologies = technologies,
     clientVersion = clientVersion,
-    isOnline = lastSeen?.isAfter(java.time.Instant.now().minus(onlineThreshold)) ?: false
+    isOnline = lastSeen.isAfter(java.time.Instant.now().minus(onlineThreshold))
+)
+
+data class ClientUpdateRequest(
+    val clientName: String,
+    val clientToken: String?
 )
 

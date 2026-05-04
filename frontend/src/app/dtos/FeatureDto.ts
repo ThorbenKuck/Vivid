@@ -34,6 +34,9 @@ export interface FeatureDto {
 
 export interface FeatureUsageDto {
   clientName: string;
+  featureKey: string;
+  featureName: string;
   environmentId: string;
+  environmentName: string;
   lastSeen: string;
 }
