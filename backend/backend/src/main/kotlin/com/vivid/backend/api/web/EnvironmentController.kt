@@ -1,9 +1,6 @@
 package com.vivid.backend.api.web
 
-import com.vivid.backend.api.web.dto.EnvironmentCreateRequest
-import com.vivid.backend.api.web.dto.EnvironmentDto
-import com.vivid.backend.api.web.dto.PageDto
-import com.vivid.backend.api.web.dto.toDto
+import com.vivid.backend.api.web.dto.*
 import com.vivid.backend.service.EnvironmentService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -44,6 +41,24 @@ class EnvironmentController(
         @RequestBody request: EnvironmentCreateRequest
     ): EnvironmentDto = environmentService.create(request).toDto()
 
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update environment")
+    @PreAuthorize("@permissionService.hasPermission('environments', 'write')")
+    fun update(
+        @PathVariable id: UUID,
+        @RequestBody request: EnvironmentUpdateRequest
+    ): EnvironmentDto = environmentService.update(id, request).toDto()
+
+    @PostMapping("/reorder")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Reorder environments")
+    @PreAuthorize("@permissionService.hasPermission('environments', 'write')")
+    fun reorder(
+        @RequestBody ids: List<UUID>
+    ): List<EnvironmentDto> {
+        return environmentService.reorder(ids).map { it.toDto() }
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete environment")
@@ -55,8 +70,7 @@ class EnvironmentController(
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Delete environment")
+    @Operation(summary = "Get environment by ID")
     @PreAuthorize("@permissionService.hasPermission('environments', 'read')")
     fun getEnvironment(
         @PathVariable id: UUID

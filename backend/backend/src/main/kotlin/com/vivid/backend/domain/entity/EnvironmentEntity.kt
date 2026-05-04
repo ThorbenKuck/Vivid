@@ -1,6 +1,8 @@
 package com.vivid.backend.domain.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.*
 
 @Entity(name = "Environment")
@@ -15,8 +17,17 @@ class EnvironmentEntity(
     var key: String,
 
     @Column(nullable = false)
-    var weight: Int? = null,
+    var sortOrder: Int = 0,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", nullable = false)
+    var rules: List<EnvironmentRule> = emptyList(),
 
     @Column(columnDefinition = "TEXT")
     var description: String? = null
 ): BaseUuidEntity(id)
+
+data class EnvironmentRule(
+    val type: String,
+    val config: Map<String, Any?>
+)

@@ -151,6 +151,21 @@ fun FeatureLink.toDto(): FeatureLinkDto = FeatureLinkDto(
     type = this.type
 )
 
+data class EnvironmentRuleDto(
+    val type: String,
+    val config: Map<String, Any?>
+)
+
+fun EnvironmentRule.toDto() = EnvironmentRuleDto(
+    type = type,
+    config = config
+)
+
+fun EnvironmentRuleDto.toEntity() = EnvironmentRule(
+    type = type,
+    config = config
+)
+
 // Environment DTOs
 
 data class EnvironmentDto(
@@ -158,7 +173,8 @@ data class EnvironmentDto(
     val name: String,
     val description: String?,
     val key: String,
-    val weight: Int?
+    val sortOrder: Int,
+    val rules: List<EnvironmentRuleDto>
 )
 
 fun EnvironmentEntity.toDto() = EnvironmentDto(
@@ -166,12 +182,20 @@ fun EnvironmentEntity.toDto() = EnvironmentDto(
     name = this.name,
     key = this.key,
     description = this.description,
-    weight = this.weight,
+    sortOrder = this.sortOrder,
+    rules = this.rules.map { it.toDto() }
 )
 
 data class EnvironmentCreateRequest(
     val name: String,
     val description: String?
+)
+
+data class EnvironmentUpdateRequest(
+    val name: String? = null,
+    val description: String? = null,
+    val sortOrder: Int? = null,
+    val rules: List<EnvironmentRuleDto>? = null
 )
 
 data class ClientRegistryDto(

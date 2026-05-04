@@ -48,6 +48,15 @@ export class HttpService {
     );
   }
 
+  patch<T>(url: string, body: any, params?: any): Observable<T> {
+    return this.http.patch<T>(this.formatUrl(url), body, {
+      headers: this.getHeaders(),
+      params: this.formatParams(params, url)
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   put<T>(url: string, body: any, params?: any): Observable<T> {
     return this.http.put<T>(this.formatUrl(url), body, {
       headers: this.getHeaders(),

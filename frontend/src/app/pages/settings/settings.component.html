@@ -20,6 +20,12 @@
                     <div class="settings-column">Allow Dynamic Client Registration <span class="material-symbols-rounded" vividTooltip="Disabling this option prevents clients from registering themselves dynamically. If disabled, you need to register clients before they can interact with vivid.">info</span></div>
                     <div class="settings-column"><slide-toggle [(checked)]="settings.allowDynamicClientRegistration" [label]="settings.allowDynamicClientRegistration ? 'Enabled' : 'Disabled'"></slide-toggle></div>
                 </div>
+                <div class="settings-row">
+                    <div class="settings-column">Online Threshold <span class="material-symbols-rounded" vividTooltip="How long a client is considered online before it is considered offline.">info</span></div>
+                    <div class="settings-column">
+                        <duration-picker [(duration)]="settings.onlineThreshold"></duration-picker>
+                    </div>
+                </div>
             </div>
         } @else {
             <app-loading-indicator></app-loading-indicator>

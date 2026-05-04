@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Wir starten unsichtbar und faden über 0.3s ein */
+    /* Wir starten unsichtbar und faden über 0.5s ein */
     animation: fadeInDelay 0.5s ease-in forwards;
 }
 

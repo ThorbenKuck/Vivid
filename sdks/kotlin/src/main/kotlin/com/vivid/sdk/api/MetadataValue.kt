@@ -48,7 +48,7 @@ fun MetadataValue?.isFalse(): Boolean? {
 
 fun MetadataValue?.contains(value: String): Boolean {
     return when (this) {
-        is StringMetadataValue -> this.content == value
+        is StringMetadataValue -> this.content.contains(value)
         is StringListMetadataValue -> this.content.contains(value)
         else -> false
     }

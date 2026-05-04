@@ -37,14 +37,6 @@
   padding: var(--spacing-lg);
 }
 
-.tag-pill {
-  padding: 2px 8px;
-  background: var(--surface-elevated);
-  border: var(--border-thin);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-}
-
 .team-dot {
   width: 16px;
   height: 16px;

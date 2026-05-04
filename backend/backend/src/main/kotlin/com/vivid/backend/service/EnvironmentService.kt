@@ -1,6 +1,8 @@
 package com.vivid.backend.service
 
 import com.vivid.backend.api.web.dto.EnvironmentCreateRequest
+import com.vivid.backend.api.web.dto.EnvironmentUpdateRequest
+import com.vivid.backend.api.web.dto.toEntity
 import com.vivid.backend.asKey
 import com.vivid.backend.domain.entity.EnvironmentEntity
 import com.vivid.backend.domain.repository.EnvironmentRepository
@@ -30,6 +32,7 @@ class EnvironmentService(
                     ignoreCase = true
                 ) == true
             }
+            .sortedBy { it.sortOrder }
             .toList()
 
         val visibleEnvironments = permissionsService.filterVisibleEnvironments(environments)
@@ -61,7 +64,7 @@ class EnvironmentService(
     }
 
     @Transactional(readOnly = true)
-    fun getAll(): List<EnvironmentEntity> = environmentRepository.findAll()
+    fun getAll(): List<EnvironmentEntity> = environmentRepository.findAll().sortedBy { it.sortOrder }
 
     @Transactional
     fun create(request: EnvironmentCreateRequest): EnvironmentEntity {
@@ -69,12 +72,47 @@ class EnvironmentService(
             throw IllegalArgumentException("Environment with name '${request.name}' already exists")
         }
 
+        val maxSortOrder = environmentRepository.findAll().maxOfOrNull { it.sortOrder } ?: -1
+
         val e = EnvironmentEntity(
             name = request.name,
             description = request.description,
-            key = request.name.determineKey()
+            key = request.name.determineKey(),
+            sortOrder = maxSortOrder + 1
         )
         return environmentRepository.save(e)
+    }
+
+    @Transactional
+    fun update(id: UUID, request: EnvironmentUpdateRequest): EnvironmentEntity {
+        val env = environmentRepository.findByIdOrNull(id)
+            ?: throw ResourceNotFoundException("Environment with id $id not found")
+
+        request.name?.let {
+            if (it != env.name && environmentRepository.existsByNameIgnoreCase(it)) {
+                throw IllegalArgumentException("Environment with name '$it' already exists")
+            }
+            env.name = it
+            env.key = it.determineKey()
+        }
+        request.description?.let { env.description = it }
+        request.sortOrder?.let { env.sortOrder = it }
+        request.rules?.let { rules ->
+            env.rules = rules.map { it.toEntity() }
+        }
+
+        return environmentRepository.save(env)
+    }
+
+    @Transactional
+    fun reorder(ids: List<UUID>): List<EnvironmentEntity> {
+        val environments = environmentRepository.findAllById(ids)
+        ids.forEachIndexed { index, uuid ->
+            environments.find { it.id == uuid }?.let {
+                it.sortOrder = index
+            }
+        }
+        return environmentRepository.saveAll(environments)
     }
 
     @Transactional

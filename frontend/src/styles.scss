@@ -315,3 +315,11 @@ main {
   letter-spacing: -0.3px;
   flex-grow: 1;
 }
+
+.tag-pill {
+  padding: 2px 8px;
+  background: var(--surface-elevated);
+  border: var(--border-thin);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}

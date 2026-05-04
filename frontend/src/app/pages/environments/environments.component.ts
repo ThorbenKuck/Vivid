@@ -10,13 +10,14 @@ import {HasPermissionDirective} from '../../shared/directives/has-permission.dir
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
 import {TableColumnComponent} from "../../shared/components/table/table-column.component";
 import {TableComponent} from "../../shared/components/table/table.component";
-import {Page, Pageable} from "../../shared/components/table/datastructure";
+import {Page, Pageable, pageOf} from "../../shared/components/table/datastructure";
 import {ContentHeaderComponent} from "../../shared/components/content-header/content-header.component";
+import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
     selector: 'app-environments',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, HasPermissionDirective, LoadingIndicator, TableColumnComponent, TableComponent, ContentHeaderComponent],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, FormInputComponent, HasPermissionDirective, LoadingIndicator, TableColumnComponent, TableComponent, ContentHeaderComponent, DragDropModule],
     templateUrl: './environments.component.html',
     styleUrls: ['./environments.component.css']
 })
@@ -31,6 +32,7 @@ export class EnvironmentsComponent implements OnInit {
     private router = inject(Router)
 
     showAdd = false;
+    reorderMode = signal(false);
     confirmDeleteId: string | null = null;
     addForm = this.fb.group({name: ['', Validators.required], description: ['']});
 
@@ -50,6 +52,41 @@ export class EnvironmentsComponent implements OnInit {
 
     toggleAdd() {
         this.showAdd = !this.showAdd;
+    }
+
+    toggleReorder() {
+        console.log('Toggle reorder');
+        if (this.reorderMode()) {
+            // Save order
+            const res = this.result();
+            if (res) {
+                const ids = res.content.map(e => e.id);
+                this.envs.reorder(ids).subscribe(envs => {
+                    this.reorderMode.set(false);
+                    // this.result.set(pageOf(envs));
+                });
+            } else {
+                this.reorderMode.set(false);
+            }
+        } else {
+            // Load all environments for reordering (ignoring pagination for now as reorder usually needs all)
+            this.envs.loadAll().subscribe(envs => {
+                this.result.set(pageOf(envs));
+                this.reorderMode.set(true);
+            });
+        }
+    }
+
+    drop(event: CdkDragDrop<EnvironmentDto[]>) {
+        const res = this.result();
+        if (res) {
+            const content = [...res.content];
+            moveItemInArray(content, event.previousIndex, event.currentIndex);
+            this.result.set({
+                ...res,
+                content: content
+            });
+        }
     }
 
     add() {

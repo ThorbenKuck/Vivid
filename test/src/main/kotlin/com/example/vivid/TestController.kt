@@ -8,6 +8,7 @@ import com.vivid.sdk.api.isFalse
 import com.vivid.sdk.api.isTrue
 import com.vivid.sdk.api.metadata.StringListMetadataValue
 import com.vivid.sdk.api.metadata.StringMetadataValue
+import com.vivid.sdk.getMetadata
 import com.vivid.sdk.spring.qualifier.Vivid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

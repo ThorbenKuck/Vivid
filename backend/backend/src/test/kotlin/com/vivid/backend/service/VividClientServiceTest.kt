@@ -15,11 +15,12 @@ class VividClientServiceTest {
 
     private val vividClientRepository = mock(VividClientRepository::class.java)
     private val settingsService = mock(SettingsService::class.java)
+    private val featureUsageService = mock(FeatureUsageService::class.java)
     private lateinit var service: VividClientService
 
     @BeforeEach
     fun setup() {
-        service = VividClientService(vividClientRepository, settingsService)
+        service = VividClientService(vividClientRepository, settingsService, featureUsageService)
         `when`(settingsService.getSettings()).thenReturn(SettingsEntity())
     }
 

@@ -6,3 +6,32 @@
     color: var(--text-muted);
     font-style: italic;
 }
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.form-group label {
+    margin-left: var(--spacing-sm);
+}
+
+.rule-item {
+    border: 1px solid var(--border-color);
+}
+
+.border-top {
+    border-top: 1px solid var(--border-color);
+}
+
+.no-description {
+    line-height: 1.5;
+}
+.icon-btn-slim {
+    background: transparent;
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+}

@@ -15,7 +15,6 @@ import {TableColumnComponent} from "../../shared/components/table/table-column.c
 import {EnvStatusComponent} from "../../shared/components/env-status/env-status.component";
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
 import {ContentHeaderComponent} from "../../shared/components/content-header/content-header.component";
-import {CardComponent} from "../../shared/components/card/card.component";
 
 @Component({
     selector: 'app-main-content',
@@ -32,7 +31,6 @@ import {CardComponent} from "../../shared/components/card/card.component";
         EnvStatusComponent,
         LoadingIndicator,
         ContentHeaderComponent,
-        CardComponent
     ],
     templateUrl: './features.component.html',
     styleUrls: ['./features.component.css']

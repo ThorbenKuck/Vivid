@@ -12,10 +12,13 @@ import {TooltipDirective} from "../../shared/directives/tooltip.directive";
 import {SlideToggleComponent} from "../../shared/components/slide-toggle/slide-toggle.component";
 import {ToastService} from "../../services/toast.service";
 
+import {DurationPickerComponent} from "../../shared/components/duration-picker/duration-picker.component";
+import {DurationPipe} from "../../shared/pipes/duration.pipe";
+
 @Component({
     selector: 'app-settings',
     standalone: true,
-    imports: [CommonModule, LoadingIndicator, ContentHeaderComponent, BadgeComponent, CardComponent, TooltipDirective, SlideToggleComponent],
+    imports: [CommonModule, LoadingIndicator, ContentHeaderComponent, BadgeComponent, CardComponent, TooltipDirective, SlideToggleComponent, DurationPickerComponent, DurationPipe],
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.css']
 })

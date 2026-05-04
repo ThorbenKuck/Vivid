@@ -57,6 +57,18 @@ export class EnvironmentService {
         );
     }
 
+    update(id: string, req: Partial<EnvironmentDto>): Observable<EnvironmentDto> {
+        return this.http.patch<EnvironmentDto>(`${this.baseUrl}/${id}`, req).pipe(
+            tap(() => this.refresh())
+        );
+    }
+
+    reorder(ids: string[]): Observable<EnvironmentDto[]> {
+        return this.http.post<EnvironmentDto[]>(`${this.baseUrl}/reorder`, ids).pipe(
+            tap(it => this.environmentsSubject.next(it))
+        );
+    }
+
     delete(id: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
             tap(() => this.refresh())

@@ -1,8 +1,11 @@
-<div class="page-header flex items-center gap-md">
-    <button class="icon-btn-slim" (click)="backToFeatures()" [title]="'common.back' ">
-        <span class="material-symbols-rounded">arrow_back</span>
-    </button>
-    <h1 class="page-title text-lg">Details</h1>
+<div class="page-header flex items-center justify-between gap-md">
+    <div class="flex items-center gap-md">
+        <button class="icon-btn-slim" (click)="backToFeatures()" [title]="'common.back' ">
+            <span class="material-symbols-rounded">arrow_back</span>
+        </button>
+        <h1 class="page-title text-lg">Details</h1>
+        <badge *ngIf="hasAnyViolation$ | async" variant="danger" content="!" vividTooltip="Rule violations detected in environments"></badge>
+    </div>
 </div>
 
 @if (feature$ | async; as f) {
@@ -256,6 +259,12 @@
                                     <env-status [active]="resolved.enabled"
                                                 [haloType]="resolved.enabled ? null : 'error'"></env-status>
                                     <span class="text-xs font-semibold">{{ override.environmentName }}</span>
+
+                                    @if (violations$ | async; as violations) {
+                                        @if (violations[override.environmentId]?.length) {
+                                            <badge variant="danger" content="!" [vividTooltip]="violations[override.environmentId][0].message"></badge>
+                                        }
+                                    }
 
                                     @if (!writePermission) {
                                         <span class="material-symbols-rounded lock-icon-sm"

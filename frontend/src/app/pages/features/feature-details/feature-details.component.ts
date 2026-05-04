@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {debounceTime, forkJoin, map, Observable, of, Subject, Subscription, switchMap, tap, timer} from 'rxjs';
+import {debounceTime, forkJoin, map, Observable, of, Subject, Subscription, switchMap, tap, timer, combineLatest} from 'rxjs';
 import {WebFeatureManagementService} from '../../../services/web-feature-management.service';
 import {ClientRegistryService} from '../../../services/client-registry.service';
 import {VividClient} from '../../../dtos/VividClient';
@@ -37,6 +37,8 @@ import {Page, pageOf} from "../../../shared/components/table/datastructure";
 import {SlideToggleComponent} from "../../../shared/components/slide-toggle/slide-toggle.component";
 import {TableComponent} from "../../../shared/components/table/table.component";
 import {TableColumnComponent} from "../../../shared/components/table/table-column.component";
+import {RulesEngineService, RuleViolation} from "../../../services/rules-engine.service";
+import {EnvironmentService} from "../../../services/environment.service";
 
 @Component({
     selector: 'app-feature-details',
@@ -122,6 +124,23 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     );
 
     allClients$: Observable<Page<VividClient>>;
+    violations$ = combineLatest([
+        this.feature$,
+        this.environmentService.environments$
+    ]).pipe(
+        map(([feature, environments]) => {
+            if (!feature || !environments) return {} as { [envId: string]: RuleViolation[] };
+            const result: { [envId: string]: RuleViolation[] } = {};
+            environments.forEach(env => {
+                result[env.id] = this.rulesEngine.evaluate(feature, env, environments);
+            });
+            return result;
+        })
+    );
+
+    hasAnyViolation$ = this.violations$.pipe(
+        map(violations => Object.values(violations).some(v => v.length > 0))
+    );
 
     constructor(
         private route: ActivatedRoute,
@@ -131,8 +150,11 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         public state: FeatureStateService,
         public permissions: PermissionService,
         private toastService: ToastService,
+        private rulesEngine: RulesEngineService,
+        private environmentService: EnvironmentService,
     ) {
         this.allClients$ = this.clientRegistry.getAllClients();
+        this.environmentService.loadAll();
     }
 
     ngOnInit(): void {
