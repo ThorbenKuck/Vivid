@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties("permission")
 class PermissionProperties(
-    val rolePrefix: String = "vivid:",
+    val rolePrefix: String = "vivid",
     val adminRole: String = "admin",
     /**
      * Can be set explicitly to provide a "super user" role.

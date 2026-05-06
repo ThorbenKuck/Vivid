@@ -1,9 +1,9 @@
 <content-header>
-    <h1 class="page-title text-lg">{{ 'features.title' }}</h1>
+    <h1 class="page-title text-lg">{{ 'FEATURES.TITLE' | translate }}</h1>
     <div class="search-bar">
         <app-form-input
                 icon="search"
-                [placeholder]="'common.search' "
+                [placeholder]="'COMMON.SEARCH' | translate"
                 [(ngModel)]="q"
                 (keyup.enter)="search()">
         </app-form-input>
@@ -11,28 +11,28 @@
 </content-header>
 
 @if ((environments$ | async)?.length !== 0) {
-    <button class="fab" *hasPermission="['features', 'write']" (click)="toggleAdd()" [title]="'common.add'">
+    <button class="fab" *hasPermission="['features', 'write']" (click)="toggleAdd()" [title]="'COMMON.ADD' | translate">
         <span class="material-symbols-rounded">add</span>
     </button>
 }
 
 <div class="modal-overlay" *ngIf="showAdd" (click)="toggleAdd()">
     <div class="modal-card" (click)="$event.stopPropagation()">
-        <h2 class="modal-title">{{ 'features.add' }}</h2>
+        <h2 class="modal-title">{{ 'FEATURES.ADD' | translate }}</h2>
         <form [formGroup]="addForm" class="flex-col gap-md">
             <div class="form-group">
-                <label class="text-xs text-muted">{{ 'common.name' }}</label>
-                <app-form-input formControlName="name" [placeholder]="'common.name' "></app-form-input>
+                <label class="text-xs text-muted">{{ 'COMMON.NAME' | translate }}</label>
+                <app-form-input formControlName="name" [placeholder]="'COMMON.NAME' | translate"></app-form-input>
             </div>
             <div class="form-group">
-                <label class="text-xs text-muted">{{ 'common.description' }}</label>
-                <textarea formControlName="description" [placeholder]="'common.description' " rows="3"></textarea>
+                <label class="text-xs text-muted">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+                <textarea formControlName="description" [placeholder]="'COMMON.DESCRIPTION' | translate" rows="3"></textarea>
             </div>
         </form>
         <div class="modal-actions flex justify-end gap-sm">
-            <button class="btn-slim" (click)="toggleAdd()">{{ 'common.cancel' }}</button>
+            <button class="btn-slim" (click)="toggleAdd()">{{ 'COMMON.CANCEL' | translate }}</button>
             <button class="btn-slim primary" (click)="add()" [disabled]="addForm.invalid || !addForm.value.name">
-                {{ 'common.create' }}
+                {{ 'COMMON.CREATE' | translate }}
             </button>
         </div>
     </div>
@@ -48,7 +48,7 @@
                 </ng-template>
             </table-column>
 
-            <table-column key="name" label="Name" width="1fr">
+            <table-column key="name" [label]="'COMMON.NAME' | translate" width="1fr">
                 <ng-template let-f>
                     <div class="ml-4">
                         <div class="font-medium">{{ f.name }}</div>
@@ -74,10 +74,10 @@
                 </table-column>
             }
 
-            <table-column key="actions" label="Actions" width="120px">
+            <table-column key="actions" [label]="'COMMON.ACTIONS' | translate" width="120px">
                 <ng-template let-f>
                     <button class="btn-slim" (click)="$event.stopPropagation(); openDetails(f)">
-                        <span>Open</span>
+                        <span>{{ 'COMMON.OPEN' | translate }}</span>
                         <span class="material-symbols-rounded">open_in_new</span>
                     </button>
                 </ng-template>
@@ -87,16 +87,16 @@
                 @if (f.description; as desc) {
                     <p class="feature-description">{{ desc }}</p>
                 } @else {
-                    <p class="missing-feature-description">Keine Beschreibung vorhanden</p>
+                    <p class="missing-feature-description">{{ 'FEATURES.NO_DESCRIPTION' | translate }}</p>
                 }
             </ng-template>
         </app-table>
     } @else {
-        No Features yet
+        {{ 'FEATURES.EMPTY' | translate }}
     }
 } @else {
     <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
         <app-loading-indicator></app-loading-indicator>
-        <p class="text-secondary">{{ 'common.loading' }}</p>
+        <p class="text-secondary">{{ 'COMMON.LOADING' | translate }}</p>
     </div>
 }

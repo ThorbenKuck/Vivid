@@ -20,6 +20,16 @@ const sidebars: SidebarsConfig = {
     'sdks',
     {
       type: 'category',
+      label: 'User Guide',
+      items: [
+        'user-guide/features',
+        'user-guide/environments',
+        'user-guide/clients',
+        'user-guide/settings',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Security',
       items: ['security/permissions'],
     },

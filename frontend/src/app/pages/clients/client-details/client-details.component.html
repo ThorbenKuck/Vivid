@@ -1,7 +1,7 @@
 @if (client$ | async; as client) {
     <div class="page-header flex items-center justify-between gap-md">
         <div class="flex items-center gap-md">
-            <button class="icon-btn-slim" routerLink="/clients" [title]="'common.back' ">
+            <button class="icon-btn-slim" routerLink="/clients" [title]="'COMMON.BACK' | translate">
                 <span class="material-symbols-rounded">arrow_back</span>
             </button>
         </div>
@@ -11,55 +11,55 @@
     <div class="page-content flex-col gap-lg">
         <!-- Danger Zone -->
         <card [collapsable]="true">
-            <h3 vivid-card-title><span class="material-symbols-rounded">settings</span> Client Management</h3>
+            <h3 vivid-card-title><span class="material-symbols-rounded">settings</span> {{ 'CLIENTS.MANAGEMENT' | translate }}</h3>
             <div class="flex-col gap-md">
                 <div class="flex gap-md items-end">
                     <div class="form-group flex-1">
-                        <label class="text-xs text-muted">Application Name</label>
+                        <label class="text-xs text-muted">{{ 'CLIENTS.APP_NAME' | translate }}</label>
                         <app-form-input #nameInput [value]="client.clientName" [disabled]="!permissionService.hasPermission('clients', 'write')"></app-form-input>
                     </div>
                 </div>
                 <div class="flex gap-md items-end">
                     <div class="form-group flex-1">
-                        <label class="text-xs text-muted">Client Token</label>
+                        <label class="text-xs text-muted">{{ 'CLIENTS.CLIENT_TOKEN' | translate }}</label>
                         <app-form-input #tokenInput [value]="client.clientToken || ''" [disabled]="!permissionService.hasPermission('clients', 'write')"></app-form-input>
                     </div>
                 </div>
                 <p class="text-xs text-error font-medium">
-                    Warning: Changing these values will break any existing SDK integrations using the old values.
+                    {{ 'CLIENTS.DANGER_ZONE_WARNING' | translate }}
                 </p>
             </div>
 
             <div vivid-card-actions *hasPermission="['clients', 'write']">
                 <button class="btn btn-primary h-[36px]" (click)="updateClient(client, nameInput.value, tokenInput.value)">
-                    Save Changes
+                    {{ 'COMMON.SAVE_CHANGES' | translate }}
                 </button>
             </div>
         </card>
 
         <!-- Environment Presence -->
-        <card title="Environment Presence" [collapsable]="true">
-            <h3 vivid-card-title><span class="material-symbols-rounded">lan</span>Environment Details</h3>
+        <card [title]="'CLIENTS.ENV_PRESENCE' | translate" [collapsable]="true">
+            <h3 vivid-card-title><span class="material-symbols-rounded">lan</span>{{ 'CLIENTS.ENV_DETAILS' | translate }}</h3>
             <app-table [page]="toPage(client.presences)" [rowIdKey]="'environmentId'">
-                <table-column key="status" label="Status">
+                <table-column key="status" [label]="'COMMON.STATUS' | translate">
                     <ng-template let-p>
                         <div class="flex items-center gap-xs">
                             <env-status [active]="p.online"></env-status>
-                            {{ p.online ? 'Online' : 'Offline' }}
+                            {{ (p.online ? 'COMMON.ACTIVE' : 'COMMON.DISABLED') | translate }}
                         </div>
                     </ng-template>
                 </table-column>
-                <table-column key="environmentName" label="Environment">
+                <table-column key="environmentName" [label]="'NAV.ENVIRONMENTS' | translate">
                     <ng-template let-p>
                         <badge variant="primary" [content]="p.environmentName"></badge>
                     </ng-template>
                 </table-column>
-                <table-column key="lastSeen" label="Last Seen">
+                <table-column key="lastSeen" [label]="'CLIENTS.LAST_SEEN' | translate">
                     <ng-template let-p>
                         {{ p.lastSeen | duration }}
                     </ng-template>
                 </table-column>
-                <table-column key="clientVersion" label="SDK Version">
+                <table-column key="clientVersion" [label]="'CLIENTS.SDK_VERSION' | translate">
                     <ng-template let-p>
                         {{ p.clientVersion || 'N/A' }}
                     </ng-template>
@@ -68,21 +68,21 @@
         </card>
 
         <!-- Feature Usage -->
-        <card title="Feature Usage" [collapsable]="true">
-            <h3 vivid-card-title><span class="material-symbols-rounded">analytics</span>Used Features</h3>
+        <card [title]="'CLIENTS.FEATURE_USAGE' | translate" [collapsable]="true">
+            <h3 vivid-card-title><span class="material-symbols-rounded">analytics</span>{{ 'CLIENTS.USED_FEATURES' | translate }}</h3>
             @if (client.featureUsage && client.featureUsage.length > 0) {
                 <app-table [page]="toPage(client.featureUsage)" [rowIdKey]="'featureKey'">
-                    <table-column key="featureName" label="Feature">
+                    <table-column key="featureName" [label]="'NAV.FEATURES' | translate">
                         <ng-template let-u>
                             <div class="font-medium">{{ u.featureName || u.featureKey }}</div>
                         </ng-template>
                     </table-column>
-                    <table-column key="environmentId" label="Environment">
+                    <table-column key="environmentId" [label]="'NAV.ENVIRONMENTS' | translate">
                         <ng-template let-u>
                             <badge [variant]="'primary'" [content]="u.environmentName || u.environmentId"></badge>
                         </ng-template>
                     </table-column>
-                    <table-column key="lastSeen" label="Last Request">
+                    <table-column key="lastSeen" [label]="'CLIENTS.LAST_REQUEST' | translate">
                         <ng-template let-u>
                             {{ u.lastSeen | duration }}
                         </ng-template>
@@ -90,20 +90,20 @@
                 </app-table>
             } @else {
                 <div class="empty-state py-md italic text-muted text-center">
-                    No feature usage recorded yet for this application.
+                    {{ 'CLIENTS.NO_USAGE_RECORDED' | translate }}
                 </div>
             }
         </card>
 
         <card *hasPermission="['clients', 'write']" [collapsable]="true">
-            <h3 vivid-card-title><span class="material-symbols-rounded">emergency_home</span>Danger Zone</h3>
+            <h3 vivid-card-title><span class="material-symbols-rounded">emergency_home</span>{{ 'CLIENTS.DANGER_ZONE' | translate }}</h3>
 
-            You can delete this client all associated data, including its presence in environments and feature usage records. This action cannot be undone.
+            {{ 'CLIENTS.DANGER_ZONE_DESC' | translate }}
 
             <div vivid-card-actions>
                 <button class="btn btn-error" (click)="deleteClient(client)">
                     <span class="material-symbols-rounded">delete</span>
-                    Delete
+                    {{ 'COMMON.DELETE' | translate }}
                 </button>
             </div>
         </card>

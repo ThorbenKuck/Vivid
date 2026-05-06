@@ -1,52 +1,52 @@
 <content-header>
-    <h1 class="page-title">Environments</h1>
+    <h1 class="page-title">{{ 'ENVIRONMENTS.TITLE' | translate }}</h1>
     <button *hasPermission="['environments', 'write']" class="btn-slim reorder-button" (click)="toggleReorder()"
             [class.primary]="reorderMode()">
         <span class="material-symbols-rounded">{{ reorderMode() ? 'save' : 'reorder' }}</span>
-        <span>{{ reorderMode() ? 'Save Order' : 'Reorder' }}</span>
+        <span>{{ (reorderMode() ? 'ENVIRONMENTS.SAVE_ORDER' : 'ENVIRONMENTS.REORDER') | translate }}</span>
     </button>
     <div class="search-bar">
         <app-form-input
                 icon="search"
-                [placeholder]="'common.search' "
+                [placeholder]="'COMMON.SEARCH' | translate"
                 [(ngModel)]="q"
                 (keyup.enter)="search()">
         </app-form-input>
     </div>
 </content-header>
 
-<button *hasPermission="['environments', 'write']" class="fab" (click)="toggleAdd()" [title]="'common.add' ">
+<button *hasPermission="['environments', 'write']" class="fab" (click)="toggleAdd()" [title]="'COMMON.ADD' | translate">
     <span class="material-symbols-rounded">add</span>
 </button>
 
 <!-- Modals -->
 <div class="modal-overlay flex items-center justify-center" *ngIf="showAdd" (click)="toggleAdd()">
     <div class="modal-card card flex-col gap-md" (click)="$event.stopPropagation()">
-        <h2 class="modal-title text-base">Add Environment</h2>
+        <h2 class="modal-title text-base">{{ 'ENVIRONMENTS.ADD' | translate }}</h2>
         <form [formGroup]="addForm" class="flex-col gap-md">
             <div class="form-group">
-                <label class="text-xs text-muted">Name</label>
-                <app-form-input formControlName="name" placeholder="Name"></app-form-input>
+                <label class="text-xs text-muted">{{ 'COMMON.NAME' | translate }}</label>
+                <app-form-input formControlName="name" [placeholder]="'COMMON.NAME' | translate"></app-form-input>
             </div>
             <div class="form-group">
-                <label class="text-xs text-muted">{{ 'common.description' }}</label>
-                <textarea formControlName="description" [placeholder]="'common.description' " rows="3"></textarea>
+                <label class="text-xs text-muted">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+                <textarea formControlName="description" [placeholder]="'COMMON.DESCRIPTION' | translate" rows="3"></textarea>
             </div>
         </form>
         <div class="modal-actions flex justify-end gap-sm">
-            <button class="btn-slim" (click)="toggleAdd()">{{ 'common.cancel' }}</button>
-            <button class="btn-slim primary" (click)="add()" [disabled]="addForm.invalid">{{ 'common.add' }}</button>
+            <button class="btn-slim" (click)="toggleAdd()">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button class="btn-slim primary" (click)="add()" [disabled]="addForm.invalid">{{ 'COMMON.ADD' | translate }}</button>
         </div>
     </div>
 </div>
 
 <div class="modal-overlay flex items-center justify-center" *ngIf="confirmDeleteId" (click)="cancelDelete()">
     <div class="modal-card card flex-col gap-md" (click)="$event.stopPropagation()">
-        <h2 class="modal-title text-base">{{ 'common.confirm_action' }}</h2>
-        <p class="text-sm text-secondary">{{ 'environments.confirmDelete' }}</p>
+        <h2 class="modal-title text-base">{{ 'COMMON.CONFIRM_ACTION' | translate }}</h2>
+        <p class="text-sm text-secondary">{{ 'ENVIRONMENTS.CONFIRM_DELETE' | translate }}</p>
         <div class="modal-actions flex justify-end gap-sm">
-            <button class="btn-slim" (click)="cancelDelete()">{{ 'common.cancel' }}</button>
-            <button class="btn-slim danger" (click)="confirmDelete()">{{ 'common.delete' }}</button>
+            <button class="btn-slim" (click)="cancelDelete()">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button class="btn-slim danger" (click)="confirmDelete()">{{ 'COMMON.DELETE' | translate }}</button>
         </div>
     </div>
 </div>
@@ -67,21 +67,21 @@
             </div>
         } @else {
             <app-table [page]="res" (pageChange)="loadData($event)" [rowIdKey]="'id'">
-                <table-column key="id" label="name">
+                <table-column key="id" [label]="'COMMON.NAME' | translate">
                     <ng-template let-f>
                         <span class="material-symbols-rounded" style="color: var(--accent-sky); margin-right: 10px;">public</span> {{ f.name }}
                     </ng-template>
                 </table-column>
 
-                <table-column key="actions" label="Actions" width="120px">
+                <table-column key="actions" [label]="'COMMON.ACTIONS' | translate" width="120px">
                     <ng-template let-f>
                         <button class="btn-slim" (click)="$event.stopPropagation(); open(f.id)">
-                            <span>Open</span>
+                            <span>{{ 'COMMON.OPEN' | translate }}</span>
                             <span class="material-symbols-rounded">open_in_new</span>
                         </button>
 
                         <button *hasPermission="['environments', 'write']" class="icon-btn-slim danger"
-                                (click)="$event.stopPropagation(); askDelete(f.id)" [title]="'common.delete' ">
+                                (click)="$event.stopPropagation(); askDelete(f.id)" [title]="'COMMON.DELETE' | translate">
                             <span class="material-symbols-rounded">delete</span>
                         </button>
 
@@ -90,19 +90,19 @@
 
                 <ng-template #expandedRowTemplate let-f>
                     @if (f.description; as desc) {
-                        <p class="feature-description">{{ desc }}</p>
+                        <p class="environment-description">{{ desc }}</p>
                     } @else {
-                        <p class="missing-feature-description">Keine Beschreibung vorhanden</p>
+                        <p class="missing-environment-description">{{ 'ENVIRONMENTS.NO_DESCRIPTION' | translate }}</p>
                     }
                 </ng-template>
             </app-table>
         }
     } @else {
-        No Environments yet
+        {{ 'ENVIRONMENTS.EMPTY' | translate }}
     }
 } @else {
     <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
         <app-loading-indicator></app-loading-indicator>
-        <p class="text-secondary">{{ 'common.loading' }}</p>
+        <p class="text-secondary">{{ 'COMMON.LOADING' | translate }}</p>
     </div>
 }

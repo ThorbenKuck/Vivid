@@ -6,20 +6,20 @@
         <app-loading-indicator *ngIf="loading()"></app-loading-indicator>
 
         <div *ngIf="!loading() && !error()">
-            <div *ngIf="issuer; else noProvider" class="auth-options">
+            <div *ngIf="issuer()" class="auth-options">
                 <button (click)="onLogin()">
                     <span class="icon">🔒</span>
-                    Login with External Provider
+                    {{ 'LOGIN.LOGIN_WITH' | translate:{issuer: issuer()} }}
                 </button>
             </div>
             <ng-template #noProvider>
-                <p class="warning">No external authentication provider is configured.</p>
+                <p class="warning">{{ 'LOGIN.NO_AUTH_PROVIDER' | translate }}</p>
             </ng-template>
         </div>
 
         <div *ngIf="error()" class="error-state">
             <p class="error-message">{{ error() }}</p>
-            <button class="retry-button" (click)="loadConfig()">Retry</button>
+            <button class="retry-button" (click)="loadConfig()">{{ 'COMMON.RETRY' | translate }}</button>
         </div>
     </div>
 </div>

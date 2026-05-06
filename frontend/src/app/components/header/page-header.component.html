@@ -1,5 +1,5 @@
 <div class="header-content">
-    <button class="menu-btn" (click)="onToggleSidebar()" title="Toggle sidebar">
+    <button class="menu-btn" (click)="onToggleSidebar()" [title]="'NAV.TOGGLE_SIDEBAR' | translate">
     <span class="material-symbols-rounded">
       {{ collapsed ? 'menu' : 'menu_open' }}
     </span>

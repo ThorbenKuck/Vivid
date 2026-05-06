@@ -13,7 +13,7 @@ class PermissionService(
     private val properties: PermissionProperties,
 ) {
 
-    private val adminRole = properties.rolePrefix + properties.adminRole
+    private val adminRole = properties.rolePrefix + ":" + properties.adminRole
     private val superUserPermissions = PermissionSetDto(
         admin = true,
         environments = "write",
@@ -53,13 +53,13 @@ class PermissionService(
             return superUserPermissions
         }
 
-        val envAdmin = roles.contains("${properties.rolePrefix}env:admin")
-        val envAllWrite = envAdmin || roles.contains("${properties.rolePrefix}env:all:write")
-        val envAllRead = envAllWrite || roles.contains("${properties.rolePrefix}env:all:read")
+        val envAdmin = roles.contains("${properties.rolePrefix}:env:admin")
+        val envAllWrite = envAdmin || roles.contains("${properties.rolePrefix}:env:all:write")
+        val envAllRead = envAllWrite || roles.contains("${properties.rolePrefix}:env:all:read")
 
         val specificEnv = mutableMapOf<String, String>()
         roles.forEach { role ->
-            if (role.startsWith("${properties.rolePrefix}env:")) {
+            if (role.startsWith("${properties.rolePrefix}:env:")) {
                 val parts = role.split(":")
                 if (parts.size == 3) {
                     val envId = parts[1]
@@ -90,10 +90,10 @@ class PermissionService(
 
     private fun getAccessLevel(roles: Collection<String>, resource: String): String {
         return when {
-            roles.contains("${properties.rolePrefix}$resource:write") -> "write"
-            roles.contains("${properties.rolePrefix}$resource:read") -> "read"
-            roles.contains("${properties.rolePrefix}all:read") -> "read"
-            roles.contains("${properties.rolePrefix}all:write") -> "write"
+            roles.contains("${properties.rolePrefix}:$resource:write") -> "write"
+            roles.contains("${properties.rolePrefix}:$resource:read") -> "read"
+            roles.contains("${properties.rolePrefix}:all:read") -> "read"
+            roles.contains("${properties.rolePrefix}:all:write") -> "write"
             else -> properties.defaultVisibility[resource] ?: "none"
         }
     }

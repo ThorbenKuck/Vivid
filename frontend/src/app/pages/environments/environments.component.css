@@ -26,6 +26,17 @@
   border: none;
 }
 
+.environment-description {
+  padding: var(--spacing-lg);
+}
+
+.missing-environment-description {
+  flex-grow: 1;
+  text-align: center;
+  font-style: italic;
+  padding: var(--spacing-lg);
+}
+
 .icon-btn-slim:hover {
   background: var(--surface-elevated);
 }

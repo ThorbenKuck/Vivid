@@ -2,24 +2,23 @@
 
 import {bootstrapApplication} from '@angular/platform-browser';
 import {provideRouter, Routes, withInMemoryScrolling} from '@angular/router';
-import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptorsFromDi} from '@angular/common/http';
-import {APP_INITIALIZER} from '@angular/core';
+import {HttpClient, provideHttpClient, withInterceptors, withInterceptorsFromDi} from '@angular/common/http';
 import {AppComponent} from './app/app.component';
 import {FeaturesComponent} from './app/pages/features/features.component';
 import {loadingInterceptor} from './app/shared/interceptors/loading.interceptor';
-// import {AuthInterceptor} from './app/shared/interceptors/auth.interceptor';
 import 'zone.js';
 import {FeatureDetailsComponent} from "./app/pages/features/feature-details/feature-details.component";
 import {EnvironmentsComponent} from "./app/pages/environments/environments.component";
 import {EnvironmentDetailsComponent} from "./app/pages/environments/environment-details/environment-details.component";
-import {PermissionService} from "./app/services/permission.service";
-import {catchError, of} from "rxjs";
 import {authInterceptor} from "./app/shared/interceptors/auth.interceptor";
 import {ClientsComponent} from "./app/pages/clients/clients.component";
 import {ClientDetailsComponent} from "./app/pages/clients/client-details/client-details.component";
 import {SettingsComponent} from "./app/pages/settings/settings.component";
 import {Error403Component} from "./app/pages/error-403/error-403.component";
 import {permissionGuard} from "./app/shared/guards/permission.guard";
+import {provideTranslateService, TranslateService} from "@ngx-translate/core";
+import {provideTranslateHttpLoader} from "@ngx-translate/http-loader";
+import {APP_INITIALIZER} from "@angular/core";
 
 const routes: Routes = [
     {path: '', pathMatch: 'full', redirectTo: 'features'},
@@ -88,14 +87,23 @@ bootstrapApplication(AppComponent, {
             scrollPositionRestoration: 'enabled',
         })),
         provideHttpClient(withInterceptorsFromDi(), withInterceptors([loadingInterceptor, authInterceptor])),
+        provideTranslateService({
+            defaultLanguage: 'en'
+        }),
+        ...provideTranslateHttpLoader({
+            prefix: './assets/i18n/',
+            suffix: '.json'
+        }),
+        {
+            provide: APP_INITIALIZER,
+            useFactory: (translate: TranslateService) => () => {
+                translate.addLangs(['en', 'de']);
+                const savedLang = localStorage.getItem('vivid_lang');
+                return translate.use(savedLang || 'en');
+            },
+            deps: [TranslateService],
+            multi: true
+        },
         // {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
-        // {
-        //     provide: APP_INITIALIZER,
-        //     useFactory: (permissionService: PermissionService) => () => permissionService.fetchPermissions().pipe(
-        //         catchError(() => of(null))
-        //     ),
-        //     deps: [PermissionService],
-        //     multi: true
-        // }
     ]
 }).catch(err => console.error(err));

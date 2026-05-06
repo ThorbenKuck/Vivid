@@ -4,6 +4,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ClientRegistryService} from '../../../services/client-registry.service';
 import {VividClient} from '../../../dtos/VividClient';
 import {Observable, switchMap} from 'rxjs';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ContentHeaderComponent} from "../../../shared/components/content-header/content-header.component";
 import {CardComponent} from "../../../shared/components/card/card.component";
 import {TableComponent} from "../../../shared/components/table/table.component";
@@ -25,6 +26,7 @@ import {PermissionService} from "../../../services/permission.service";
   imports: [
     CommonModule,
     RouterLink,
+    TranslateModule,
     CardComponent,
     TableComponent,
     TableColumnComponent,
@@ -45,6 +47,7 @@ export class ClientDetailsComponent implements OnInit {
   private clientRegistryService = inject(ClientRegistryService);
   private modalService = inject(ModalService);
   protected permissionService = inject(PermissionService);
+  private translate = inject(TranslateService);
 
   client$!: Observable<VividClient>;
 
@@ -63,25 +66,29 @@ export class ClientDetailsComponent implements OnInit {
   updateClient(client: VividClient, newName: string, newToken?: string) {
     if (newName === client.clientName && newToken === client.clientToken) return;
 
-    this.modalService.prompt(
-      "Confirm Changes",
-      `Changing the name or token will break existing SDK integrations. Please type the application name "${client.clientName}" to confirm:`
-    ).subscribe(confirmation => {
-      if (confirmation === client.clientName) {
-        this.clientRegistryService.updateClient(client.id, newName, newToken).subscribe(() => {
-          this.router.navigate(['/clients']);
-        });
-      }
+    this.translate.get(['CLIENTS.CONFIRM_CHANGES', 'CLIENTS.UPDATE_CONFIRM_PROMPT'], {name: client.clientName}).subscribe(t => {
+      this.modalService.prompt(
+        t['CLIENTS.CONFIRM_CHANGES'],
+        t['CLIENTS.UPDATE_CONFIRM_PROMPT']
+      ).subscribe(confirmation => {
+        if (confirmation === client.clientName) {
+          this.clientRegistryService.updateClient(client.id, newName, newToken).subscribe(() => {
+            this.router.navigate(['/clients']);
+          });
+        }
+      });
     });
   }
 
   deleteClient(client: VividClient) {
-    this.modalService.confirm("Delete Client", `Are you sure you want to delete the client "${client.clientName}"?`).subscribe(confirmed => {
-      if (confirmed) {
-        this.clientRegistryService.deleteClient(client.id).subscribe(() => {
-          this.router.navigate(['/clients']);
-        });
-      }
+    this.translate.get(['CLIENTS.DELETE_TITLE', 'CLIENTS.DELETE_CONFIRM'], {name: client.clientName}).subscribe(t => {
+      this.modalService.confirm(t['CLIENTS.DELETE_TITLE'], t['CLIENTS.DELETE_CONFIRM']).subscribe(confirmed => {
+        if (confirmed) {
+          this.clientRegistryService.deleteClient(client.id).subscribe(() => {
+            this.router.navigate(['/clients']);
+          });
+        }
+      });
     });
   }
 }

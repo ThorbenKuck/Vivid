@@ -46,3 +46,7 @@
 .vivid-table tr:hover {
   background-color: var(--surface-elevated);
 }
+
+.token {
+  padding: var(--spacing-lg)
+}

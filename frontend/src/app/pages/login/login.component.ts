@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, LoadingIndicator],
+  imports: [CommonModule, LoadingIndicator, TranslateModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -19,7 +20,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -44,7 +46,7 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load auth config', err);
         this.loading.set(false);
-        this.error.set('Failed to load authentication configuration.');
+        this.translate.get('LOGIN.CONFIG_FAILED').subscribe(msg => this.error.set(msg));
       }
     });
   }
@@ -67,13 +69,13 @@ export class LoginComponent implements OnInit {
           },
           error: (err) => {
             console.error('Login callback failed', err);
-            this.error.set('Login failed. Please try again.');
+            this.translate.get('LOGIN.CALLBACK_FAILED').subscribe(msg => this.error.set(msg));
             this.loading.set(false);
             this.router.navigate(['/']);
           }
         });
       } else {
-        this.error.set('Auth config missing during callback.');
+        this.translate.get('LOGIN.CONFIG_MISSING').subscribe(msg => this.error.set(msg));
         this.loading.set(false);
       }
     });

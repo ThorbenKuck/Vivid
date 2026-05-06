@@ -7,7 +7,7 @@ import {WebFeatureManagementService} from '../../../services/web-feature-managem
 import {ClientRegistryService} from '../../../services/client-registry.service';
 import {VividClient} from '../../../dtos/VividClient';
 import {EnvironmentOverrideDto, FeatureDto, OverrideStrategy, MetadataValue, EnvironmentOverrideUpdateRequest} from '../../../dtos';
-import {TranslateModule} from '@ngx-translate/core';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {FormInputComponent} from '../../../shared/components/form-input/form-input.component';
 import {FeatureStateService} from '../../../services/feature-state.service';
 import {ChiplistComponent} from '../../../shared/components/chiplist/chiplist.component';
@@ -152,6 +152,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         private toastService: ToastService,
         private rulesEngine: RulesEngineService,
         private environmentService: EnvironmentService,
+        private translate: TranslateService
     ) {
         this.allClients$ = this.clientRegistry.getAllClients();
         this.environmentService.loadAll();
@@ -258,7 +259,8 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     addLink(targetFeature: FeatureDto) {
         const draft = this.state.getDraft();
         if (!draft || !draft.id || !targetFeature.id) return;
-        this.toastService.success("Linked " + targetFeature.name + " with " + draft.name)
+        this.translate.get('FEATURES.LINKED_MESSAGE', {target: targetFeature.name, source: draft.name})
+            .subscribe(msg => this.toastService.success(msg || `Linked ${targetFeature.name} with ${draft.name}`));
 
         this.api.addFeatureLink(draft.id, {
             targetFeatureId: targetFeature.id,
@@ -454,14 +456,14 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         ).subscribe({
             next: (it) => {
                 this.state.load(it);
-                this.toastService.success('Update successful!', 5000);
+                this.translate.get('FEATURES.UPDATE_SUCCESS').subscribe(msg => this.toastService.success(msg, 5000));
             },
             complete: () => {
                 this.waitingForBackend = false;
             },
             error: (err) => {
                 // Wichtig: Auch im Fehlerfall das Loading beenden
-                this.toastService.error('Update failed', 5000);
+                this.translate.get('FEATURES.UPDATE_FAILED').subscribe(msg => this.toastService.error(msg, 5000));
                 this.waitingForBackend = false;
                 console.error(err);
             }
@@ -470,7 +472,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
 
     revert(): void {
         this.state.revert();
-        this.toastService.success('Changes reverted', 5000);
+        this.translate.get('FEATURES.REVERTED').subscribe(msg => this.toastService.success(msg, 5000));
     }
 
     backToFeatures(): void {

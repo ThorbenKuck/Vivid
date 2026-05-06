@@ -24,26 +24,32 @@ Optional:
 
 ### 1) Start the Database (PostgreSQL)
 
-You can run PostgreSQL using the provided Docker Compose file.
+You can run PostgreSQL and KeyCloak (both required for Vivid) using the provided Docker Compose file.
 
 ```
 # from repository root
 docker compose -f backend/docker-compose.yaml up -d
 ```
 
-Defaults (configurable via env vars):
+Postgres:
 - Host: `localhost`
 - Port: `5332` (container 5432 mapped to 5332)
 - Database: `vivid`
 - Username: `postgres`
 - Password: `postgres`
 
+KeyCloak:
+- Host: `localhost`
+- Port `8989`
+- User: `admin`
+- Password: `admin`
+
 The backend reads these via Spring properties (see `backend/backend/src/main/resources/application.yml`) and supports overrides with these environment variables:
 - `DATABASE_URL` (default `jdbc:postgresql://localhost:5332/vivid`)
 - `DATABASE_USERNAME` (default `postgres`)
 - `DATABASE_PASSWORD` (default `postgres`)
 
-To stop and remove the database container:
+To stop and remove the container:
 ```
 docker compose -f backend/docker-compose.yaml down
 ```
@@ -115,7 +121,7 @@ backend/
   ├─ backend/                # Spring Boot Kotlin app (Maven)
   │  ├─ pom.xml
   │  └─ src/
-  ├─ docker-compose.yaml     # Local PostgreSQL
+  ├─ docker-compose.yaml     # Local PostgreSQL and KeyCloak
 frontend/
   ├─ angular.json
   ├─ package.json

@@ -2,7 +2,7 @@
     <div class="page-header flex items-center justify-between gap-md">
 
         <div class="flex items-center gap-md">
-            <button class="icon-btn-slim" (click)="back()" [title]="'common.back' ">
+            <button class="icon-btn-slim" (click)="back()" [title]="'COMMON.BACK' | translate">
                 <span class="material-symbols-rounded">arrow_back</span>
             </button>
         </div>
@@ -16,16 +16,16 @@
             @if (env.description; as desc) {
                 <div class="text-secondary">{{ desc }}</div>
             } @else {
-                <div class="no-description text-muted italic">No description provided</div>
+                <div class="no-description text-muted italic">{{ 'ENVIRONMENTS.NO_DESCRIPTION' | translate }}</div>
             }
-            <div class="text-xs text-muted">Key: {{ env.key }}</div>
+            <div class="text-xs text-muted">{{ 'COMMON.KEY' | translate }}: {{ env.key }}</div>
         </div>
     </card>
 
     <card class="mt-md">
         <div vivid-card-title class="flex items-center justify-between">
             <span class="material-symbols-rounded" style="color: var(--accent-danger)">rule_settings</span>
-            <span>Rules</span>
+            <span>{{ 'COMMON.RULES' | translate }}</span>
         </div>
 
         <div class="rules-list flex-col gap-md mt-md">
@@ -34,7 +34,7 @@
                     <div class="flex items-center justify-between mb-sm">
                         <div class="flex items-center gap-sm">
                             <badge variant="primary" [content]="rule.type"></badge>
-                            <span class="text-sm font-semibold" *ngIf="rule.type === 'MATCH_ENVIRONMENT'">Match Environment</span>
+                            <span class="text-sm font-semibold" *ngIf="rule.type === 'MATCH_ENVIRONMENT'">{{ 'COMMON.MATCH_ENVIRONMENT' | translate }}</span>
                         </div>
                         <button class="icon-btn-slim danger" (click)="removeRule($index)">
                             <span class="material-symbols-rounded">delete</span>
@@ -43,10 +43,10 @@
 
                     @if (rule.type === 'MATCH_ENVIRONMENT') {
                         <div class="form-group">
-                            <label class="text-xs text-muted">Source Environment</label>
+                            <label class="text-xs text-muted">{{ 'COMMON.SOURCE_ENVIRONMENT' | translate }}</label>
                             <select class="form-input" [ngModel]="rule.config.sourceEnvironmentId"
                                     (ngModelChange)="updateRuleConfig($index, 'sourceEnvironmentId', $event)">
-                                <option value="" disabled>Select Environment...</option>
+                                <option value="" disabled>{{ 'COMMON.SELECT_ENVIRONMENT' | translate }}</option>
                                 @for (e of availableEnvironments(); track e.id) {
                                     <option [value]="e.id">{{ e.name }}</option>
                                 }
@@ -55,17 +55,17 @@
                     }
                 </div>
             } @empty {
-                <div class="text-secondary text-center p-md italic">No rules configured for this environment.</div>
+                <div class="text-secondary text-center p-md italic">{{ 'ENVIRONMENTS.NO_RULES' | translate }}</div>
             }
 
 
             <div class="flex items-center gap-sm">
                 <select class="form-input text-xs" #ruleType>
-                    <option value="MATCH_ENVIRONMENT">Match Environment</option>
+                    <option value="MATCH_ENVIRONMENT">{{ 'COMMON.MATCH_ENVIRONMENT' | translate }}</option>
                 </select>
                 <button class="btn-slim primary" (click)="addRule(ruleType.value)">
                     <span class="material-symbols-rounded">add</span>
-                    <span>Add Rule</span>
+                    <span>{{ 'ENVIRONMENTS.ADD_RULE' | translate }}</span>
                 </button>
             </div>
         </div>
@@ -73,14 +73,14 @@
         <div vivid-card-actions>
             <button class="btn-slim primary" (click)="save()">
                 <span class="material-symbols-rounded">save</span>
-                <span>Save Changes</span>
+                <span>{{ 'COMMON.SAVE_CHANGES' | translate }}</span>
             </button>
         </div>
     </card>
 } @else {
     <div class="page-header flex items-center justify-between  gap-md">
         <div class="flex items-center gap-md">
-            <button class="icon-btn-slim" (click)="back()" [title]="'common.back' ">
+            <button class="icon-btn-slim" (click)="back()" [title]="'COMMON.BACK' | translate">
                 <span class="material-symbols-rounded">arrow_back</span>
             </button>
         </div>

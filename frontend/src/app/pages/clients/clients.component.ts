@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {ClientRegistryService} from '../../services/client-registry.service';
 import {VividClient} from '../../dtos/VividClient';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {FormInputComponent} from '../../shared/components/form-input/form-input.component';
 import {ContentHeaderComponent} from "../../shared/components/content-header/content-header.component";
 import {TableColumnComponent} from "../../shared/components/table/table-column.component";
@@ -22,6 +23,7 @@ import {HasPermissionDirective} from "../../shared/directives/has-permission.dir
     imports: [
         CommonModule,
         FormsModule,
+        TranslateModule,
         FormInputComponent,
         ContentHeaderComponent,
         TableColumnComponent,
@@ -40,6 +42,7 @@ export class ClientsComponent implements OnInit {
     q: string = '';
     private clientRegistryService = inject(ClientRegistryService);
     private modalService = inject(ModalService);
+    private translate = inject(TranslateService);
 
     constructor() {
         this.clients$ = this.clientRegistryService.getAllClients();
@@ -59,22 +62,26 @@ export class ClientsComponent implements OnInit {
     }
 
     deleteClient(client: VividClient) {
-        this.modalService.confirm("Delete Client", `Are you sure you want to delete the client "${client.clientName}"? This will also remove all its presences.`).subscribe(confirmed => {
-            if (confirmed) {
-                this.clientRegistryService.deleteClient(client.id).subscribe(() => {
-                    this.clients$ = this.clientRegistryService.getAllClients();
-                });
-            }
+        this.translate.get(['CLIENTS.DELETE_TITLE', 'CLIENTS.DELETE_CONFIRM'], {name: client.clientName}).subscribe(t => {
+            this.modalService.confirm(t['CLIENTS.DELETE_TITLE'], t['CLIENTS.DELETE_CONFIRM']).subscribe(confirmed => {
+                if (confirmed) {
+                    this.clientRegistryService.deleteClient(client.id).subscribe(() => {
+                        this.clients$ = this.clientRegistryService.getAllClients();
+                    });
+                }
+            });
         });
     }
 
     createClient() {
-        this.modalService.prompt("Create Client", "Enter the name of the new client:").subscribe(name => {
-            if (name) {
-                this.clientRegistryService.createClient(name).subscribe(() => {
-                    this.clients$ = this.clientRegistryService.getAllClients();
-                });
-            }
+        this.translate.get(['CLIENTS.CREATE_TITLE', 'CLIENTS.CREATE_PROMPT']).subscribe(t => {
+            this.modalService.prompt(t['CLIENTS.CREATE_TITLE'], t['CLIENTS.CREATE_PROMPT']).subscribe(name => {
+                if (name) {
+                    this.clientRegistryService.createClient(name).subscribe(() => {
+                        this.clients$ = this.clientRegistryService.getAllClients();
+                    });
+                }
+            });
         });
     }
 }

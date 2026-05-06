@@ -11,6 +11,7 @@ import {catchError, finalize, forkJoin, map, Observable, of, shareReplay, take} 
 import {ToastComponent} from './shared/components/toast/toast.component';
 import {PermissionService} from "./services/permission.service";
 import {ModalComponent} from "./shared/components/modal/modal.component";
+import {LanguageService} from "./services/language.service";
 
 @Component({
     selector: 'app-root',
@@ -24,6 +25,7 @@ export class AppComponent implements OnInit {
     showShell$: Observable<boolean>;
 
     constructor(
+        private languageService: LanguageService,
         private envs: EnvironmentService,
         protected loadingService: LoadingService,
         private permissionService: PermissionService,

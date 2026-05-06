@@ -1,5 +1,5 @@
 <content-header>
-    <h1 class="page-title text-lg">System Settings</h1>
+    <h1 class="page-title text-lg">{{ 'SETTINGS.TITLE' | translate }}</h1>
 </content-header>
 
 <div class="flex-col gap-lg">
@@ -7,21 +7,21 @@
     <card [collapsable]="true" [collapsed]="true">
         <h3 vivid-card-title>
             <span class="material-symbols-rounded">settings</span>
-            System Settings
+            {{ 'SETTINGS.TITLE' | translate }}
         </h3>
 
         @if (settings(); as settings) {
             <div class="settings-wrapper">
                 <div class="settings-row">
-                    <div class="settings-column">Require Client Token <span class="material-symbols-rounded" vividTooltip="Enabling this option requires clients to authenticate with a token when connecting to the server. All applications need to then use a generated client token or would not be able to access Vivid.">info</span></div>
-                    <div class="settings-column"><slide-toggle [(checked)]="settings.requireClientTokens" [label]="settings.requireClientTokens ? 'Enabled' : 'Disabled'" [disabled]="!permissionService.hasPermission('settings', 'write')"></slide-toggle></div>
+                    <div class="settings-column">{{ 'SETTINGS.REQUIRE_CLIENT_TOKEN' | translate }} <span class="material-symbols-rounded" [vividTooltip]="'SETTINGS.REQUIRE_CLIENT_TOKEN_TOOLTIP' | translate">info</span></div>
+                    <div class="settings-column"><slide-toggle [(checked)]="settings.requireClientTokens" [label]="(settings.requireClientTokens ? 'SETTINGS.ENABLED' : 'SETTINGS.DISABLED') | translate" [disabled]="!permissionService.hasPermission('settings', 'write')"></slide-toggle></div>
                 </div>
                 <div class="settings-row">
-                    <div class="settings-column">Allow Dynamic Client Registration <span class="material-symbols-rounded" vividTooltip="Disabling this option prevents clients from registering themselves dynamically. If disabled, you need to register clients before they can interact with vivid.">info</span></div>
-                    <div class="settings-column"><slide-toggle [(checked)]="settings.allowDynamicClientRegistration" [label]="settings.allowDynamicClientRegistration ? 'Enabled' : 'Disabled'" [disabled]="!permissionService.hasPermission('settings', 'write')"></slide-toggle></div>
+                    <div class="settings-column">{{ 'SETTINGS.ALLOW_DYNAMIC_REGISTRATION' | translate }} <span class="material-symbols-rounded" [vividTooltip]="'SETTINGS.ALLOW_DYNAMIC_REGISTRATION_TOOLTIP' | translate">info</span></div>
+                    <div class="settings-column"><slide-toggle [(checked)]="settings.allowDynamicClientRegistration" [label]="(settings.allowDynamicClientRegistration ? 'SETTINGS.ENABLED' : 'SETTINGS.DISABLED') | translate" [disabled]="!permissionService.hasPermission('settings', 'write')"></slide-toggle></div>
                 </div>
                 <div class="settings-row">
-                    <div class="settings-column">Online Threshold <span class="material-symbols-rounded" vividTooltip="How long a client is considered online before it is considered offline.">info</span></div>
+                    <div class="settings-column">{{ 'SETTINGS.ONLINE_THRESHOLD' | translate }} <span class="material-symbols-rounded" [vividTooltip]="'SETTINGS.ONLINE_THRESHOLD_TOOLTIP' | translate">info</span></div>
                     <div class="settings-column">
                         <duration-picker [(duration)]="settings.onlineThreshold" [disabled]="!permissionService.hasPermission('settings', 'write')"></duration-picker>
                     </div>
@@ -32,17 +32,16 @@
         }
 
         <div vivid-card-actions *hasPermission="['settings', 'write']">
-            <button class="btn-slim succe" (click)="saveSettings()" [disabled]="!settings">Save Settings</button>
+            <button class="btn-slim succe" (click)="saveSettings()" [disabled]="!settings">{{ 'SETTINGS.SAVE' | translate }}</button>
         </div>
     </card>
 
     <card [collapsable]="true" [collapsed]="true">
         <h3 vivid-card-title>
             <span class="material-symbols-rounded">hub</span>
-            Distribution Providers
+            {{ 'SETTINGS.DISTRIBUTION.TITLE' | translate }}
         </h3>
-        <h5 vivid-card-subtitle>These providers are responsible for pushing feature flag updates to connected
-            clients.</h5>
+        <h5 vivid-card-subtitle>{{ 'SETTINGS.DISTRIBUTION.SUBTITLE' | translate }}</h5>
 
         @if (providers$ | async; as providers) {
             @if (providers.length > 0) {
@@ -61,7 +60,7 @@
                 }
             } @else {
                 <div class="text-center p-md">
-                    No distribution providers active.
+                    {{ 'SETTINGS.DISTRIBUTION.EMPTY' | translate }}
                 </div>
             }
         } @else {

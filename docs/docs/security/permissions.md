@@ -8,6 +8,19 @@ Vivid looks for roles in the `realm_access.roles` claim of the incoming JWT.
 All Vivid-specific roles are expected to have a prefix (default: `vivid:`). This prefix is configurable in the backend properties.
 
 ## Global Roles & Resource Access
+
+Vivids roles are defined through the following syntax:
+
+```
+<prefix>:<resource>:<permission>
+```
+
+As already stated, the prefix is by default "vivid".
+Permission is either `read` or `write`.
+And resources describe what you'd like to grant permissions to.
+
+For example, `vivid:features:read` grants read access to the feature resource.
+
 The following table describes how roles map to permissions within the Vivid UI and API.
 
 | Role | Resource | Action | Impact |

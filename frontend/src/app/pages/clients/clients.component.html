@@ -1,9 +1,9 @@
 <content-header>
-    <h1 class="page-title">Clients Registry</h1>
+    <h1 class="page-title">{{ 'CLIENTS.TITLE' | translate }}</h1>
     <div class="search-bar">
         <app-form-input
                 icon="search"
-                [placeholder]="'common.search' "
+                [placeholder]="'COMMON.SEARCH' | translate"
                 [(ngModel)]="q">
         </app-form-input>
     </div>
@@ -12,16 +12,15 @@
 @if (clients$ | async; as clients) {
     @if (clients.content.length > 0) {
         <app-table [page]="clients" [rowIdKey]="'id'">
-            <table-column key="name" label="Name">
+            <table-column key="name" [label]="'COMMON.NAME' | translate">
                 <ng-template let-f>
                     <div class="name-column">
                         <div class="font-medium">{{ f.clientName }}</div>
-                        <div class="text-xs text-muted">{{ f.clientToken }}</div>
                     </div>
                 </ng-template>
             </table-column>
 
-            <table-column key="status" label="Presence">
+            <table-column key="status" [label]="'CLIENTS.PRESENCE' | translate">
                 <ng-template let-f>
                     <div class="flex gap-xs flex-wrap">
                         @for (presence of f.presences; track presence.environmentId) {
@@ -33,29 +32,35 @@
                             </badge>
                         }
                         @if (!f.presences || f.presences.length === 0) {
-                            <span class="text-xs text-muted italic">No presence recorded</span>
+                            <span class="text-xs text-muted italic">{{ 'CLIENTS.NO_PRESENCE' | translate }}</span>
                         }
                     </div>
                 </ng-template>
             </table-column>
 
-            <table-column key="actions" label="Actions" width="120px">
+            <table-column key="actions" [label]="'COMMON.ACTIONS' | translate" width="120px">
                 <ng-template let-f>
                     <div class="flex gap-sm">
-                        <button class="btn btn-icon" [routerLink]="['/clients', f.id]" title="Open Details">
+                        <button class="btn btn-icon" [routerLink]="['/clients', f.id]" [title]="'CLIENTS.OPEN_DETAILS' | translate">
+                            <span>{{ 'COMMON.OPEN' | translate }}</span>
                             <span class="material-symbols-rounded">open_in_new</span>
                         </button>
                     </div>
                 </ng-template>
             </table-column>
+
+
+            <ng-template #expandedRowTemplate let-f>
+                <div class="text-xs text-muted token"><span class="text-bold">Token: </span>{{ f.clientToken }}</div>
+            </ng-template>
         </app-table>
     } @else {
-        <div class="empty-state">No clients yet</div>
+        <div class="empty-state">{{ 'CLIENTS.EMPTY' | translate }}</div>
     }
 } @else {
     <div class="loading-state flex-col items-center justify-center py-lg">
         <app-loading-indicator></app-loading-indicator>
-        <p class="text-secondary">{{ 'common.loading' }}</p>
+        <p class="text-secondary">{{ 'COMMON.LOADING' | translate }}</p>
     </div>
 }
 

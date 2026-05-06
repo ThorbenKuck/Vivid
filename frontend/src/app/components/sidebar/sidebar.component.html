@@ -3,25 +3,25 @@
     <a routerLink="/features" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">stars</span>
         @if (!collapsed) {
-            <span class="label"> Features</span>
+            <span class="label"> {{ 'NAV.FEATURES' | translate }}</span>
         }
     </a>
     <a *hasPermission="['environments', 'read']" routerLink="/environments" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">public</span>
         @if(!collapsed) {
-            <span class="label"> Environments</span>
+            <span class="label"> {{ 'NAV.ENVIRONMENTS' | translate }}</span>
         }
     </a>
     <a *hasPermission="['clients', 'read']" routerLink="/clients" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">devices</span>
         @if(!collapsed) {
-            <span class="label"> Clients</span>
+            <span class="label"> {{ 'NAV.CLIENTS' | translate }}</span>
         }
     </a>
     <a *hasPermission="['settings', 'read']" routerLink="/settings" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">settings</span>
         @if(!collapsed) {
-            <span class="label"> Settings</span>
+            <span class="label"> {{ 'NAV.SETTINGS' | translate }}</span>
         }
     </a>
   </div>
@@ -37,8 +37,17 @@
         </select>
       </div>
     </div>
+
+    <div class="language-selector" *ngIf="!collapsed">
+      <div class="select-wrapper">
+        <span class="material-symbols-rounded select-icon">language</span>
+        <select [ngModel]="currentLang" (ngModelChange)="setLanguage($event)">
+          <option *ngFor="let lang of languages" [value]="lang">{{ lang.toUpperCase() }}</option>
+        </select>
+      </div>
+    </div>
     
-    <button class="icon-only-theme" *ngIf="collapsed" (click)="toggleTheme()" title="Change Theme">
+    <button class="icon-only-theme" *ngIf="collapsed" (click)="toggleTheme()" [title]="'NAV.CHANGE_THEME' | translate">
       <span class="material-symbols-rounded">
         {{ current === 'dark' ? 'dark_mode' : 'light_mode' }}
       </span>

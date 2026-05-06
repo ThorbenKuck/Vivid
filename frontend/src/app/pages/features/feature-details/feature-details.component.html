@@ -1,21 +1,21 @@
-<div class="page-header flex items-center justify-between gap-md">
-    <div class="flex items-center gap-md">
-        <button class="icon-btn-slim" (click)="backToFeatures()" [title]="'common.back' ">
-            <span class="material-symbols-rounded">arrow_back</span>
-        </button>
-        <h1 class="page-title text-lg">Details</h1>
-        <badge *ngIf="hasAnyViolation$ | async" variant="danger" content="!" vividTooltip="Rule violations detected in environments"></badge>
-    </div>
-</div>
-
 @if (feature$ | async; as f) {
+    <div class="page-header flex items-center justify-between gap-md">
+        <div class="flex items-center gap-md">
+            <button class="icon-btn-slim" (click)="backToFeatures()" [title]="'COMMON.BACK' | translate">
+                <span class="material-symbols-rounded">arrow_back</span>
+            </button>
+            <h1 class="page-title text-lg">{{f.name}}</h1>
+            <badge *ngIf="hasAnyViolation$ | async" [variant]="'danger'" content="!" [vividTooltip]="'Rule violations detected in environments'"></badge>
+        </div>
+    </div>
+
     <div class="master-switch-card card flex items-center justify-between p-md configuration-section"
          [class.enabled]="f.enabled">
         <div>
             <env-status [active]="f.enabled"></env-status>
-            Status
+            {{ 'COMMON.STATUS' | translate }}
         </div>
-        <slide-toggle [checked]="f.enabled" [label]="f.enabled ? 'Enabled' : 'Disabled'"
+        <slide-toggle [checked]="f.enabled" [label]="(f.enabled ? 'COMMON.ENABLED' : 'COMMON.DISABLED') | translate"
                       (onToggle)="updateField('enabled', $event)"
                       [disabled]="!canWriteFeatures"></slide-toggle>
     </div>
@@ -24,46 +24,46 @@
         <expansion-panel>
             <app-header>
                 <span class="material-symbols-rounded" style="color: var(--accent-mint)">info</span>
-                Details
+                {{ 'FEATURES.DETAILS' | translate }}
             </app-header>
 
             <app-content>
                 <div class="form-group" [class.dirty]="state.isFieldDirty('name') | async">
                     <label class="text-xs text-muted flex items-center gap-xs">
-                        {{ 'common.name' }}
+                        {{ 'COMMON.NAME' | translate }}
                         <span *ngIf="state.isFieldDirty('name') | async"
                               class="material-symbols-rounded text-xs dirty-indicator">circle</span>
                     </label>
                     <app-form-input [value]="f.name" (change)="updateField('name', $event)"
-                                    [placeholder]="'common.name'"
+                                    [placeholder]="'COMMON.NAME' | translate"
                                     [disabled]="!canWriteFeatures"></app-form-input>
                 </div>
 
                 <div class="form-group" [class.dirty]="state.isFieldDirty('key') | async">
                     <label class="text-xs text-muted flex items-center gap-xs">
-                        {{ 'common.key' }}
+                        {{ 'COMMON.KEY' | translate }}
                         <span *ngIf="state.isFieldDirty('key') | async"
                               class="material-symbols-rounded text-xs dirty-indicator">circle</span>
                     </label>
                     <app-form-input [value]="f.key" (change)="updateField('name', $event)"
-                                    [placeholder]="'common.name' "
+                                    [placeholder]="'COMMON.NAME' | translate"
                                     [disabled]="true"></app-form-input>
                 </div>
 
                 <div class="form-group" [class.dirty]="state.isFieldDirty('description') | async">
                     <label class="text-xs text-muted flex items-center gap-xs">
-                        {{ 'common.description' }}
+                        {{ 'COMMON.DESCRIPTION' | translate }}
                         <span *ngIf="state.isFieldDirty('description') | async"
                               class="material-symbols-rounded text-xs dirty-indicator">circle</span>
                     </label>
                     <textarea rows="3" [value]="f.description" (change)="updateField('description', $event)"
-                              [placeholder]="'common.description' "
+                              [placeholder]="'COMMON.DESCRIPTION' | translate"
                               [disabled]="!canWriteFeatures"></textarea>
                 </div>
 
                 <div class="form-group" [class.dirty]="state.isFieldDirty('tags') | async">
                     <label class="text-xs text-muted flex items-center gap-xs">
-                        {{ 'features.tags' }}
+                        {{ 'FEATURES.TAGS' | translate }}
                         <span *ngIf="state.isFieldDirty('tags') | async"
                               class="material-symbols-rounded text-xs dirty-indicator">circle</span>
                     </label>
@@ -76,8 +76,7 @@
         <expansion-panel>
             <app-header>
                 <badge variant="primary" [content]="f.notes?.length || 0">
-                    <span class="material-symbols-rounded" style="color: var(--accent-mint)">chat_bubble</span> Notes &
-                    Comments
+                    <span class="material-symbols-rounded" style="color: var(--accent-mint)">chat_bubble</span> {{ 'FEATURES.NOTES' | translate }}
                 </badge>
             </app-header>
             <app-content>
@@ -93,14 +92,14 @@
                     </div>
                 </div>
                 <ng-template #noNotes>
-                    <div class="text-xs text-muted italic p-sm">No notes yet. Be the first to add one!</div>
+                    <div class="text-xs text-muted italic p-sm">{{ 'FEATURES.NO_NOTES' | translate }}</div>
                 </ng-template>
 
                 <div class="add-note-container flex-col gap-sm mt-md">
         <textarea
                 class="note-textarea text-xs"
                 rows="2"
-                placeholder="Add a note..."
+                [placeholder]="'FEATURES.ADD_NOTE' | translate"
                 [(ngModel)]="newNoteContent"
                 (focus)="expandNoteArea = true"
                 [style.height]="expandNoteArea ? '80px' : '40px'"
@@ -111,7 +110,7 @@
                                 [disabled]="!newNoteContent.trim() || isPostingNote"
                                 (click)="addNote()"
                         >
-                            {{ isPostingNote ? 'Posting...' : 'Post Note' }}
+                            {{ (isPostingNote ? 'FEATURES.POSTING_NOTE' : 'FEATURES.POST_NOTE') | translate }}
                         </button>
                     </div>
                 </div>
@@ -120,8 +119,7 @@
         <expansion-panel>
             <app-header>
                 <badge variant="primary" [content]="f.outgoingLinks.length">
-                    <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span> Related
-                    Features
+                    <span class="material-symbols-rounded" style="color: var(--accent-lavender)">link</span> {{ 'FEATURES.RELATED' | translate }}
                 </badge>
             </app-header>
             <app-content>
@@ -130,7 +128,7 @@
                         <input
                                 type="text"
                                 class="form-input text-xs flex-1"
-                                placeholder="Search features to link..."
+                                [placeholder]="'FEATURES.SEARCH_LINK' | translate"
                                 [(ngModel)]="featureSearchQuery"
                                 (input)="onFeatureSearch()"
                                 cdkOverlayOrigin
@@ -155,7 +153,7 @@
                             </li>
                             <li *ngIf="featureOptions.length === 0 && !isSearching"
                                 class="suggestion-item text-xs p-xs text-muted">
-                                No features found
+                                {{ 'FEATURES.NO_RELATED_FOUND' | translate }}
                             </li>
                         </ul>
                     </ng-template>
@@ -176,7 +174,7 @@
         <expansion-panel>
             <app-header>
                 <badge [variant]="'primary'" [content]="(f.flags | keyvalue).length">
-                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">flag_2</span> Flags
+                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">flag_2</span> {{ 'FEATURES.FLAGS' | translate }}
                 </badge>
             </app-header>
             <app-content>
@@ -185,7 +183,7 @@
                     <span class="font-semibold flex-1">{{ flag.key }}</span>
                     <div class="flex items-center gap-sm">
                         <slide-toggle [checked]="flag.value" (onToggle)="toggleFlag(null, f.flags, flag.key, $event)"
-                                      [label]="flag.value ? 'ON' : 'OFF'"
+                                      [label]="(flag.value ? 'COMMON.ON' : 'COMMON.OFF') | translate"
                                       [disabled]="!canWriteFeatures"></slide-toggle>
                         <button class="icon-btn-slim danger" (click)="removeFlag(null, f.flags, flag.key)"
                                 *hasPermission="['features', 'write']">
@@ -195,10 +193,10 @@
                 </div>
                 <div class="add-flag-row flex items-center gap-sm mt-sm" *hasPermission="['features', 'write']">
                     <input type="text" #newGlobalFlagKey class="form-input text-xs flex-1"
-                           placeholder="New global flag key..."/>
+                           [placeholder]="'FEATURES.NEW_GLOBAL_FLAG' | translate"/>
                     <button class="btn-slim primary"
                             (click)="addFlag(null, f.flags, newGlobalFlagKey.value); newGlobalFlagKey.value = ''">
-                        <span class="material-symbols-rounded">add</span> Add Flag
+                        <span class="material-symbols-rounded">add</span> {{ 'FEATURES.ADD_FLAG' | translate }}
                     </button>
                 </div>
 
@@ -207,7 +205,7 @@
         <expansion-panel>
             <app-header>
                 <badge [variant]="'primary'" [content]="(f.metadata | keyvalue).length">
-                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">dataset</span> Metadata
+                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">dataset</span> {{ 'FEATURES.METADATA' | translate }}
                 </badge>
             </app-header>
             <app-content>
@@ -219,16 +217,16 @@
         <expansion-panel>
             <app-header>
                 <badge [variant]="'primary'" [content]="(usagePage$ | async)?.totalCount || 0">
-                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">monitoring</span> Usage
+                    <span class="material-symbols-rounded" style="color: var(--accent-sky)">monitoring</span> {{ 'FEATURES.USAGE' | translate }}
                 </badge>
             </app-header>
             <app-content>
                 @if (usagePage$ | async; as usagePage) {
                     @if (usagePage.totalCount == 0) {
-                        <div>No usage data available</div>
+                        <div>{{ 'FEATURES.NO_USAGE' | translate }}</div>
                     } @else {
                         <app-table [page]="usagePage" [rowIdKey]="'appName'">
-                            <table-column key="appName" label="Client">
+                            <table-column key="appName" [label]="'CLIENTS.TITLE' | translate">
                                 <ng-template let-row>
                                     <span class="text-xs font-semibold">{{ row.appName }}</span>
                                 </ng-template>
@@ -250,7 +248,7 @@
         </expansion-panel>
         <expansion-panel>
             <app-header><span class="material-symbols-rounded" style="color: var(--accent-danger)">rule_settings</span>
-                Environment Overrides
+                {{ 'FEATURES.ENV_OVERRIDES' | translate }}
             </app-header>
             <app-content>
                 @if (f.overrides && f.overrides.length === 0) {
@@ -283,11 +281,11 @@
                                 </app-tab-header>
 
                                 <div class="mb-md card p-sm bg-tertiary environment-behaviour">
-                                    <span class="text-muted">Environment Behaviour</span>
+                                    <span class="text-muted">{{ 'FEATURES.ENV_BEHAVIOUR' | translate }}</span>
                                     <button-toggle
                                             [options]="[
-                            {label: 'Extend', value: 'EXTEND', tooltip: 'Extend the default configuration with environment specific settings'},
-                             {label: 'Override', value: 'OVERRIDE', tooltip: 'Replace the default configuration with environment specific settings'}
+                            {label: ('FEATURES.STRATEGY.EXTEND' | translate), value: 'EXTEND', tooltip: ('FEATURES.STRATEGY.EXTEND_TOOLTIP' | translate)},
+                             {label: ('FEATURES.STRATEGY.OVERRIDE' | translate), value: 'OVERRIDE', tooltip: ('FEATURES.STRATEGY.OVERRIDE_TOOLTIP' | translate)}
                              ]"
                                             (valueChange)="updateOverrideField(override.environmentId, 'strategy', $event)"
                                             [value]="override.strategy"
@@ -303,11 +301,11 @@
                               {{ resolved.enabled ? 'toggle_on' : 'toggle_off' }}
                             </span>
                                         <div class="flex-col">
-                                            <span class="text-sm font-semibold">Environment Status</span>
+                                            <span class="text-sm font-semibold">{{ 'FEATURES.ENV_STATUS' | translate }}</span>
                                             <span class="text-xs text-muted">
-                                {{ override.enabled !== undefined && override.enabled !== null ? 'Overridden' : 'Inherited' }}
+                                {{ override.enabled !== undefined && override.enabled !== null ? ('COMMON.OVERRIDDEN' | translate) : ('COMMON.INHERITED' | translate) }}
                                                 :
-                                                {{ resolved.enabled ? 'Active' : 'Disabled' }}
+                                                {{ (resolved.enabled ? 'COMMON.ACTIVE' : 'COMMON.DISABLED') | translate }}
                             </span>
                                         </div>
                                     </div>
@@ -315,15 +313,14 @@
                                         @if (override.enabled !== undefined && override.enabled !== null) {
                                             <button class="btn-slim danger text-xxs"
                                                     (click)="removeOverride(override.environmentId, 'enabled')"
-                                                    *hasPermission="['features', 'write']">Clear
-                                                Override
+                                                    *hasPermission="['features', 'write']">{{ 'COMMON.CLEAR_OVERRIDE' | translate }}
                                             </button>
                                         }
                                         <button class="btn-toggle"
                                                 [class.active]="resolved.enabled"
                                                 (click)="updateOverrideField(override.environmentId, 'enabled', !resolved.enabled)"
                                                 [disabled]="!canWriteFeatures || !writePermission">
-                                            {{ resolved.enabled ? 'Enabled' : 'Disabled' }}
+                                            {{ (resolved.enabled ? 'COMMON.ENABLED' : 'COMMON.DISABLED') | translate }}
                                         </button>
                                     </div>
                                 </div>
@@ -332,7 +329,7 @@
                                     <expansion-panel>
                                         <app-header><span class="material-symbols-rounded"
                                                           style="color: var(--accent-sky)">settings</span>
-                                            Feature Flags
+                                            {{ 'FEATURES.FLAGS' | translate }}
                                         </app-header>
                                         <app-content>
                                             <div class="flags-manager flex-col gap-sm">
@@ -342,13 +339,13 @@
                                         {{ flag.key }}
                                         @if (isFlagOverridden(f, override.environmentId, flag.key)) {
                                             <span class="badge text-xxs"
-                                                  style="background: var(--color-teriary); color: var(--accent-mint)">Overridden</span>
+                                                  style="background: var(--color-teriary); color: var(--accent-mint)">{{ 'COMMON.OVERRIDDEN' | translate }}</span>
                                         } @else {
-                                            <span class="text-xxs text-muted">(Inherited)</span>
+                                            <span class="text-xxs text-muted">({{ 'COMMON.INHERITED' | translate }})</span>
                                         }
                                     </span>
                                                     <div class="flex items-center gap-sm">
-                                                        <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
+                                                        <span class="text-xs text-muted">{{ (flag.value ? 'COMMON.ON' : 'COMMON.OFF') | translate }}</span>
                                                         <button class="icon-btn-slim"
                                                                 (click)="toggleFlag(override.environmentId, override.flags, flag.key, !flag.value)"
                                                                 [disabled]="!canWriteFeatures || !writePermission">
@@ -371,11 +368,11 @@
                                                 <div class="add-flag-row flex items-center gap-sm mt-sm"
                                                      *hasPermission="['features', 'write']">
                                                     <input type="text" #newEnvFlagKey class="form-input text-xs flex-1"
-                                                           placeholder="Override or add flag key..."/>
+                                                           [placeholder]="'FEATURES.OVERRIDE_OR_ADD_FLAG' | translate"/>
                                                     <button class="btn-slim primary"
                                                             (click)="addFlag(override.environmentId, override.flags, newEnvFlagKey.value); newEnvFlagKey.value = ''">
                                                         <span class="material-symbols-rounded">add</span>
-                                                        Override Flag
+                                                        {{ 'FEATURES.OVERRIDE_FLAG' | translate }}
                                                     </button>
                                                 </div>
                                             </div>
@@ -384,7 +381,7 @@
 
                                     <expansion-panel>
                                         <app-header><span class="material-symbols-rounded"
-                                                          style="color: var(--accent-lavender)">database</span> Metadata
+                                                          style="color: var(--accent-lavender)">database</span> {{ 'FEATURES.METADATA' | translate }}
                                         </app-header>
                                         <app-content>
                                             <app-metadata-editor [metadata]="resolved.metadata"
@@ -398,16 +395,14 @@
 
                                     <expansion-panel>
                                         <app-header><span class="material-symbols-rounded"
-                                                          style="color: var(--accent-lavender)">content_copy</span> Copy
-                                            From
+                                                          style="color: var(--accent-lavender)">content_copy</span> {{ 'COMMON.COPY_FROM' | translate }}
                                         </app-header>
                                         <app-content>
                                             <div class="form-group">
-                                                <label class="text-xs text-muted">Select environment to copy overrides
-                                                    from:</label>
+                                                <label class="text-xs text-muted">{{ 'FEATURES.COPY_ENV_TOOLTIP' | translate }}</label>
                                                 <div class="flex items-center gap-sm mt-xs">
                                                     <select #copySource class="form-input text-xs flex-1">
-                                                        <option value="" disabled selected>Choose environment...
+                                                        <option value="" disabled selected>{{ 'COMMON.CHOOSE_ENVIRONMENT' | translate }}
                                                         </option>
                                                         <ng-container *ngFor="let other of f.overrides">
                                                             <option *ngIf="other.environmentId !== override.environmentId"
@@ -419,7 +414,7 @@
                                                     <button class="btn-slim"
                                                             (click)="copyFrom(override.environmentId, copySource.value)"
                                                             [disabled]="!canWriteFeatures || !writePermission">
-                                                        Copy Overrides
+                                                        {{ 'COMMON.COPY_OVERRIDES' | translate }}
                                                     </button>
                                                 </div>
                                             </div>
@@ -436,7 +431,7 @@
 } @else {
     <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
         <app-loading-indicator></app-loading-indicator>
-        <p class="text-secondary">{{ 'common.loading' }}</p>
+        <p class="text-secondary">{{ 'COMMON.LOADING' | translate }}</p>
     </div>
 }
 
@@ -444,10 +439,10 @@
     <div class="action-bar-content flex items-center gap-md card shadow-slim p-sm draggable-handle"
          (mousedown)="startDragging($event, actionBar)">
         <span class="material-symbols-rounded drag-icon text-muted">drag_indicator</span>
-        <span class="text-sm font-semibold">Unsaved Changes</span>
+        <span class="text-sm font-semibold">{{ 'COMMON.UNSAVED_CHANGES' | translate }}</span>
         <div class="flex gap-sm" *hasPermission="['features', 'write']">
-            <button class="btn-slim" (click)="revert()">{{ 'common.revert' }}</button>
-            <button class="btn-slim primary" (click)="save()">{{ 'common.save' }}</button>
+            <button class="btn-slim" (click)="revert()">{{ 'COMMON.REVERT' | translate }}</button>
+            <button class="btn-slim primary" (click)="save()">{{ 'COMMON.SAVE' | translate }}</button>
         </div>
     </div>
 </div>
