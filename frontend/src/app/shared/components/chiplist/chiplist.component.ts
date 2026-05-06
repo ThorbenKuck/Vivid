@@ -7,16 +7,17 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   template: `
-    <div class="chiplist-wrapper">
+    <div class="chiplist-wrapper" [class.is-disabled]="disabled">
       <div class="chiplist-container flex flex-wrap gap-xs">
         <div *ngFor="let tag of tags; let i = index" class="chip flex items-center gap-xs">
           <span class="tag-text text-xs">{{ tag }}</span>
-          <button class="remove-btn" (click)="removeTag(i)">
+          <button class="remove-btn" (click)="removeTag(i)" *ngIf="!disabled">
             <span class="material-symbols-rounded">close</span>
           </button>
         </div>
         <input 
           #tagInput
+          *ngIf="!disabled"
           type="text" 
           class="tag-input text-xs" 
           [placeholder]="placeholder" 
@@ -113,6 +114,7 @@ export class ChiplistComponent {
   @Input() tags: string[] = [];
   @Input() options: string[] = [];
   @Input() placeholder = 'Add tag...';
+  @Input() disabled = false;
   @Output() tagsChange = new EventEmitter<string[]>();
 
   @ViewChild('tagInput') tagInput!: ElementRef<HTMLInputElement>;

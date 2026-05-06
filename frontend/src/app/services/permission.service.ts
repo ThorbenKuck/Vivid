@@ -16,7 +16,15 @@ export class PermissionService {
 
   fetchPermissions(force = false, informLoadingService: boolean = true): Observable<PermissionSetDto> {
     if (this.loading && !force) {
-      return of(this.permissions() || { admin: false, environments: 'none', environment: { admin: false, all: 'none', specific: {} }, resolved: false });
+      return of(this.permissions() || {
+        admin: false,
+        environments: 'none',
+        environment: { admin: false, all: 'none', specific: {} },
+        clients: 'none',
+        settings: 'none',
+        features: 'none',
+        resolved: false
+      });
     }
 
     if (informLoadingService) {
@@ -58,6 +66,9 @@ export class PermissionService {
     let level: 'none' | 'read' | 'write' = 'none';
     switch (resource) {
       case 'environments': level = perms.environments; break;
+      case 'clients': level = perms.clients; break;
+      case 'settings': level = perms.settings; break;
+      case 'features': level = perms.features; break;
     }
 
     return this.checkAccess(level, action);

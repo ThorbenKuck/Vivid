@@ -27,11 +27,7 @@
 .no-description {
     line-height: 1.5;
 }
-.icon-btn-slim {
-    background: transparent;
-    color: var(--text-muted);
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: none;
+
+card {
+    margin-top: var(--spacing-lg);
 }

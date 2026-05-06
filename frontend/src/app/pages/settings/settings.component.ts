@@ -14,11 +14,13 @@ import {ToastService} from "../../services/toast.service";
 
 import {DurationPickerComponent} from "../../shared/components/duration-picker/duration-picker.component";
 import {DurationPipe} from "../../shared/pipes/duration.pipe";
+import {PermissionService} from "../../services/permission.service";
+import {HasPermissionDirective} from "../../shared/directives/has-permission.directive";
 
 @Component({
     selector: 'app-settings',
     standalone: true,
-    imports: [CommonModule, LoadingIndicator, ContentHeaderComponent, BadgeComponent, CardComponent, TooltipDirective, SlideToggleComponent, DurationPickerComponent, DurationPipe],
+    imports: [CommonModule, LoadingIndicator, ContentHeaderComponent, BadgeComponent, CardComponent, TooltipDirective, SlideToggleComponent, DurationPickerComponent, DurationPipe, HasPermissionDirective],
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.css']
 })
@@ -26,7 +28,11 @@ export class SettingsComponent implements OnInit {
     providers$: Observable<DistributionProvider[]>;
     settings = signal<ApplicationSettings | null>(null);
 
-    constructor(private settingsService: SettingsService, private toastService: ToastService) {
+    constructor(
+        private settingsService: SettingsService,
+        private toastService: ToastService,
+        public permissionService: PermissionService
+    ) {
         this.providers$ = this.settingsService.getDistributionProviders();
         this.settingsService.getApplicationSettings().subscribe({
             next: (settings) => {

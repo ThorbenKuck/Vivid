@@ -14,6 +14,7 @@ import {BadgeComponent} from "../../shared/components/badge/badge.component";
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
 import {RouterLink} from "@angular/router";
 import {ModalService} from "../../services/modal.service";
+import {HasPermissionDirective} from "../../shared/directives/has-permission.directive";
 
 @Component({
     selector: 'app-clients',
@@ -29,6 +30,7 @@ import {ModalService} from "../../services/modal.service";
         BadgeComponent,
         LoadingIndicator,
         RouterLink,
+        HasPermissionDirective,
     ],
     templateUrl: './clients.component.html',
     styleUrls: ['./clients.component.css']

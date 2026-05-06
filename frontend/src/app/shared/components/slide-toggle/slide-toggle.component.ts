@@ -15,10 +15,13 @@ export class SlideToggleComponent {
     // Der Status des Toggles (An oder Aus)
     checked = model<boolean>(false);
 
+    disabled = input<boolean>(false);
+
     // Event, das gefeuert wird, wenn der User klickt
     onToggle = output<boolean>();
 
     toggle(): void {
+        if (this.disabled()) return;
         const newState = !this.checked();
         this.checked.set(newState);
         this.onToggle.emit(newState);

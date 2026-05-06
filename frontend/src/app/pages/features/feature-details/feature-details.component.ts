@@ -157,6 +157,10 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
         this.environmentService.loadAll();
     }
 
+    get canWriteFeatures(): boolean {
+        return this.permissions.hasPermission('features', 'write');
+    }
+
     ngOnInit(): void {
         this.api.getAllTags().subscribe(tags => this.tagsOptions = tags);
 

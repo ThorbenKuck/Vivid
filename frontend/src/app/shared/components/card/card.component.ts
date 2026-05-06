@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, signal} from '@angular/core';
 
 @Component({
   selector: 'card',
@@ -9,6 +9,14 @@ import {Component, input} from '@angular/core';
 })
 export class CardComponent {
 
-  interactive = input<boolean>(false);
+  hoverEffect = input<boolean>(false);
+  collapsable = input<boolean>(false);
+  collapsed = input<boolean>(false);
+  _collapsed = signal<boolean>(this.collapsed());
 
+  toggleCollapsed() {
+    if (this.collapsable()) {
+      this._collapsed.set(!this._collapsed());
+    }
+  }
 }

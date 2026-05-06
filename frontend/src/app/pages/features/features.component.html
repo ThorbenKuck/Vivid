@@ -11,7 +11,7 @@
 </content-header>
 
 @if ((environments$ | async)?.length !== 0) {
-    <button class="fab" *hasPermission="['environments', 'write']" (click)="toggleAdd()" [title]="'common.add'">
+    <button class="fab" *hasPermission="['features', 'write']" (click)="toggleAdd()" [title]="'common.add'">
         <span class="material-symbols-rounded">add</span>
     </button>
 }

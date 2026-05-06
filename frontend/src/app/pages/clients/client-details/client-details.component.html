@@ -1,28 +1,28 @@
 @if (client$ | async; as client) {
-    <content-header>
-        <div class="flex items-center gap-sm">
-            <button class="btn btn-icon" routerLink="/clients">
+    <div class="page-header flex items-center justify-between gap-md">
+        <div class="flex items-center gap-md">
+            <button class="icon-btn-slim" routerLink="/clients" [title]="'common.back' ">
                 <span class="material-symbols-rounded">arrow_back</span>
             </button>
-            <h1 class="page-title">{{ client.clientName }}</h1>
         </div>
-    </content-header>
+        <h1 class="page-title text-lg">{{ client.clientName }}</h1>
+    </div>
 
     <div class="page-content flex-col gap-lg">
         <!-- Danger Zone -->
-        <card title="Management (Danger Zone)">
+        <card [collapsable]="true">
             <h3 vivid-card-title><span class="material-symbols-rounded">settings</span> Client Management</h3>
             <div class="flex-col gap-md">
                 <div class="flex gap-md items-end">
                     <div class="form-group flex-1">
                         <label class="text-xs text-muted">Application Name</label>
-                        <app-form-input #nameInput [value]="client.clientName"></app-form-input>
+                        <app-form-input #nameInput [value]="client.clientName" [disabled]="!permissionService.hasPermission('clients', 'write')"></app-form-input>
                     </div>
                 </div>
                 <div class="flex gap-md items-end">
                     <div class="form-group flex-1">
                         <label class="text-xs text-muted">Client Token</label>
-                        <app-form-input #tokenInput [value]="client.clientToken"></app-form-input>
+                        <app-form-input #tokenInput [value]="client.clientToken || ''" [disabled]="!permissionService.hasPermission('clients', 'write')"></app-form-input>
                     </div>
                 </div>
                 <p class="text-xs text-error font-medium">
@@ -30,7 +30,7 @@
                 </p>
             </div>
 
-            <div vivid-card-actions>
+            <div vivid-card-actions *hasPermission="['clients', 'write']">
                 <button class="btn btn-primary h-[36px]" (click)="updateClient(client, nameInput.value, tokenInput.value)">
                     Save Changes
                 </button>
@@ -38,7 +38,7 @@
         </card>
 
         <!-- Environment Presence -->
-        <card title="Environment Presence">
+        <card title="Environment Presence" [collapsable]="true">
             <h3 vivid-card-title><span class="material-symbols-rounded">lan</span>Environment Details</h3>
             <app-table [page]="toPage(client.presences)" [rowIdKey]="'environmentId'">
                 <table-column key="status" label="Status">
@@ -68,7 +68,7 @@
         </card>
 
         <!-- Feature Usage -->
-        <card title="Feature Usage">
+        <card title="Feature Usage" [collapsable]="true">
             <h3 vivid-card-title><span class="material-symbols-rounded">analytics</span>Used Features</h3>
             @if (client.featureUsage && client.featureUsage.length > 0) {
                 <app-table [page]="toPage(client.featureUsage)" [rowIdKey]="'featureKey'">
@@ -95,7 +95,7 @@
             }
         </card>
 
-        <card>
+        <card *hasPermission="['clients', 'write']" [collapsable]="true">
             <h3 vivid-card-title><span class="material-symbols-rounded">emergency_home</span>Danger Zone</h3>
 
             You can delete this client all associated data, including its presence in environments and feature usage records. This action cannot be undone.

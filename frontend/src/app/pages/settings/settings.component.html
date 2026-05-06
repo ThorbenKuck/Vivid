@@ -4,7 +4,7 @@
 
 <div class="flex-col gap-lg">
 
-    <card>
+    <card [collapsable]="true" [collapsed]="true">
         <h3 vivid-card-title>
             <span class="material-symbols-rounded">settings</span>
             System Settings
@@ -14,16 +14,16 @@
             <div class="settings-wrapper">
                 <div class="settings-row">
                     <div class="settings-column">Require Client Token <span class="material-symbols-rounded" vividTooltip="Enabling this option requires clients to authenticate with a token when connecting to the server. All applications need to then use a generated client token or would not be able to access Vivid.">info</span></div>
-                    <div class="settings-column"><slide-toggle [(checked)]="settings.requireClientTokens" [label]="settings.requireClientTokens ? 'Enabled' : 'Disabled'"></slide-toggle></div>
+                    <div class="settings-column"><slide-toggle [(checked)]="settings.requireClientTokens" [label]="settings.requireClientTokens ? 'Enabled' : 'Disabled'" [disabled]="!permissionService.hasPermission('settings', 'write')"></slide-toggle></div>
                 </div>
                 <div class="settings-row">
                     <div class="settings-column">Allow Dynamic Client Registration <span class="material-symbols-rounded" vividTooltip="Disabling this option prevents clients from registering themselves dynamically. If disabled, you need to register clients before they can interact with vivid.">info</span></div>
-                    <div class="settings-column"><slide-toggle [(checked)]="settings.allowDynamicClientRegistration" [label]="settings.allowDynamicClientRegistration ? 'Enabled' : 'Disabled'"></slide-toggle></div>
+                    <div class="settings-column"><slide-toggle [(checked)]="settings.allowDynamicClientRegistration" [label]="settings.allowDynamicClientRegistration ? 'Enabled' : 'Disabled'" [disabled]="!permissionService.hasPermission('settings', 'write')"></slide-toggle></div>
                 </div>
                 <div class="settings-row">
                     <div class="settings-column">Online Threshold <span class="material-symbols-rounded" vividTooltip="How long a client is considered online before it is considered offline.">info</span></div>
                     <div class="settings-column">
-                        <duration-picker [(duration)]="settings.onlineThreshold"></duration-picker>
+                        <duration-picker [(duration)]="settings.onlineThreshold" [disabled]="!permissionService.hasPermission('settings', 'write')"></duration-picker>
                     </div>
                 </div>
             </div>
@@ -31,12 +31,12 @@
             <app-loading-indicator></app-loading-indicator>
         }
 
-        <div vivid-card-actions>
+        <div vivid-card-actions *hasPermission="['settings', 'write']">
             <button class="btn-slim succe" (click)="saveSettings()" [disabled]="!settings">Save Settings</button>
         </div>
     </card>
 
-    <card>
+    <card [collapsable]="true" [collapsed]="true">
         <h3 vivid-card-title>
             <span class="material-symbols-rounded">hub</span>
             Distribution Providers

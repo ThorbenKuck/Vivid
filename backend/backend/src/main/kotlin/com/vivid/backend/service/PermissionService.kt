@@ -17,7 +17,10 @@ class PermissionService(
     private val superUserPermissions = PermissionSetDto(
         admin = true,
         environments = "write",
-        environment = EnvironmentPermissionsDto(admin = true, all = "write")
+        environment = EnvironmentPermissionsDto(admin = true, all = "write"),
+        clients = "write",
+        settings = "write",
+        features = "write"
     )
 
     fun filterVisibleEnvironments(environments: List<EnvironmentEntity>): List<EnvironmentEntity> {
@@ -78,14 +81,19 @@ class PermissionService(
                 admin = envAdmin,
                 all = if (envAllWrite) "write" else if (envAllRead) "read" else "none",
                 specific = specificEnv
-            )
+            ),
+            clients = getAccessLevel(roles, "clients"),
+            settings = getAccessLevel(roles, "settings"),
+            features = getAccessLevel(roles, "features")
         )
     }
 
     private fun getAccessLevel(roles: Collection<String>, resource: String): String {
         return when {
             roles.contains("${properties.rolePrefix}$resource:write") -> "write"
-            roles.contains("$resource:read") -> "read"
+            roles.contains("${properties.rolePrefix}$resource:read") -> "read"
+            roles.contains("${properties.rolePrefix}all:read") -> "read"
+            roles.contains("${properties.rolePrefix}all:write") -> "write"
             else -> properties.defaultVisibility[resource] ?: "none"
         }
     }
@@ -102,6 +110,9 @@ class PermissionService(
 
         val level = when (resource) {
             "environments" -> perms.environments
+            "clients" -> perms.clients
+            "settings" -> perms.settings
+            "features" -> perms.features
             else -> "none"
         }
 

@@ -1,6 +1,6 @@
-<div class="vivid-card" [class.interactive]="interactive()">
+<div class="vivid-card" [class.hover]="hoverEffect()">
 
-    <div class="card-header">
+    <div class="card-header" (click)="toggleCollapsed()" [class.pointer]="collapsable()">
         <div class="title-wrapper">
             <ng-content select="[vivid-card-title]"></ng-content>
             <ng-content select="[vivid-card-subtitle]"></ng-content>
@@ -8,13 +8,18 @@
         <div class="header-actions">
             <ng-content select="[vivid-card-header-actions]"></ng-content>
         </div>
+
+        @if (collapsable()) {
+            <span class="toggle material-symbols-rounded transition"
+                  [class.collapsed]="_collapsed()">expand_more</span>
+        }
     </div>
 
-    <div class="card-content">
+    <div class="card-content" [class.collapsed]="_collapsed()">
         <ng-content></ng-content>
     </div>
 
-    <div class="card-footer">
+    <div class="card-footer" [class.collapsed]="_collapsed()">
         <ng-content select="[vivid-card-actions]"></ng-content>
     </div>
 </div>

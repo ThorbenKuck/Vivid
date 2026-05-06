@@ -16,7 +16,8 @@
             Status
         </div>
         <slide-toggle [checked]="f.enabled" [label]="f.enabled ? 'Enabled' : 'Disabled'"
-                      (onToggle)="updateField('enabled', $event)"></slide-toggle>
+                      (onToggle)="updateField('enabled', $event)"
+                      [disabled]="!canWriteFeatures"></slide-toggle>
     </div>
 
     <accordion [multi]="true">
@@ -34,7 +35,8 @@
                               class="material-symbols-rounded text-xs dirty-indicator">circle</span>
                     </label>
                     <app-form-input [value]="f.name" (change)="updateField('name', $event)"
-                                    [placeholder]="'common.name'"></app-form-input>
+                                    [placeholder]="'common.name'"
+                                    [disabled]="!canWriteFeatures"></app-form-input>
                 </div>
 
                 <div class="form-group" [class.dirty]="state.isFieldDirty('key') | async">
@@ -56,7 +58,7 @@
                     </label>
                     <textarea rows="3" [value]="f.description" (change)="updateField('description', $event)"
                               [placeholder]="'common.description' "
-                              [disabled]="!permissions.hasPermission('environments', 'write')"></textarea>
+                              [disabled]="!canWriteFeatures"></textarea>
                 </div>
 
                 <div class="form-group" [class.dirty]="state.isFieldDirty('tags') | async">
@@ -66,7 +68,8 @@
                               class="material-symbols-rounded text-xs dirty-indicator">circle</span>
                     </label>
                     <app-chiplist [tags]="f.tags" [options]="tagsOptions"
-                                  (tagsChange)="updateField('tags', $event)"></app-chiplist>
+                                  (tagsChange)="updateField('tags', $event)"
+                                  [disabled]="!canWriteFeatures"></app-chiplist>
                 </div>
             </app-content>
         </expansion-panel>
@@ -122,7 +125,7 @@
                 </badge>
             </app-header>
             <app-content>
-                <div class="search-container relative" *hasPermission="['environments', 'write']">
+                <div class="search-container relative" *hasPermission="['features', 'write']">
                     <div class="flex items-center gap-sm relative">
                         <input
                                 type="text"
@@ -163,7 +166,7 @@
                          class="chip flex items-center gap-xs">
                         <span class="text-xs">{{ link.targetFeatureName || link.targetFeatureId }}</span>
                         <button class="remove-btn" (click)="removeLink(link.id!)"
-                                *hasPermission="['environments', 'write']">
+                                *hasPermission="['features', 'write']">
                             <span class="material-symbols-rounded">close</span>
                         </button>
                     </div>
@@ -182,13 +185,15 @@
                     <span class="font-semibold flex-1">{{ flag.key }}</span>
                     <div class="flex items-center gap-sm">
                         <slide-toggle [checked]="flag.value" (onToggle)="toggleFlag(null, f.flags, flag.key, $event)"
-                                      [label]="flag.value ? 'ON' : 'OFF'"></slide-toggle>
-                        <button class="icon-btn-slim danger" (click)="removeFlag(null, f.flags, flag.key)">
+                                      [label]="flag.value ? 'ON' : 'OFF'"
+                                      [disabled]="!canWriteFeatures"></slide-toggle>
+                        <button class="icon-btn-slim danger" (click)="removeFlag(null, f.flags, flag.key)"
+                                *hasPermission="['features', 'write']">
                             <span class="material-symbols-rounded">delete</span>
                         </button>
                     </div>
                 </div>
-                <div class="add-flag-row flex items-center gap-sm mt-sm">
+                <div class="add-flag-row flex items-center gap-sm mt-sm" *hasPermission="['features', 'write']">
                     <input type="text" #newGlobalFlagKey class="form-input text-xs flex-1"
                            placeholder="New global flag key..."/>
                     <button class="btn-slim primary"
@@ -207,7 +212,8 @@
             </app-header>
             <app-content>
                 <app-metadata-editor [metadata]="f.metadata"
-                                     (metadataChange)="updateMetadata(null, $event)"></app-metadata-editor>
+                                     (metadataChange)="updateMetadata(null, $event)"
+                                     [disabled]="!canWriteFeatures"></app-metadata-editor>
             </app-content>
         </expansion-panel>
         <expansion-panel>
@@ -285,6 +291,7 @@
                              ]"
                                             (valueChange)="updateOverrideField(override.environmentId, 'strategy', $event)"
                                             [value]="override.strategy"
+                                            [disabled]="!canWriteFeatures || !writePermission"
                                     ></button-toggle>
                                 </div>
 
@@ -307,14 +314,15 @@
                                     <div class="flex items-center gap-sm">
                                         @if (override.enabled !== undefined && override.enabled !== null) {
                                             <button class="btn-slim danger text-xxs"
-                                                    (click)="removeOverride(override.environmentId, 'enabled')">Clear
+                                                    (click)="removeOverride(override.environmentId, 'enabled')"
+                                                    *hasPermission="['features', 'write']">Clear
                                                 Override
                                             </button>
                                         }
                                         <button class="btn-toggle"
                                                 [class.active]="resolved.enabled"
                                                 (click)="updateOverrideField(override.environmentId, 'enabled', !resolved.enabled)"
-                                                [disabled]="!writePermission">
+                                                [disabled]="!canWriteFeatures || !writePermission">
                                             {{ resolved.enabled ? 'Enabled' : 'Disabled' }}
                                         </button>
                                     </div>
@@ -343,7 +351,7 @@
                                                         <span class="text-xs text-muted">{{ flag.value ? 'ON' : 'OFF' }}</span>
                                                         <button class="icon-btn-slim"
                                                                 (click)="toggleFlag(override.environmentId, override.flags, flag.key, !flag.value)"
-                                                                [disabled]="!writePermission">
+                                                                [disabled]="!canWriteFeatures || !writePermission">
                                             <span class="material-symbols-rounded"
                                                   [style.color]="flag.value ? 'var(--accent-mint)' : 'var(--text-muted)'">
                                               {{ flag.value ? 'toggle_on' : 'toggle_off' }}
@@ -353,7 +361,7 @@
                                                             <button class="icon-btn-slim danger"
                                                                     [vividTooltip]="'Reset to default value'"
                                                                     (click)="removeOverride(override.environmentId, 'flag', flag.key)"
-                                                                    *hasEnvPermission="[override.environmentName, 'write']">
+                                                                    *hasPermission="['features', 'write']">
                                                                 <span class="material-symbols-rounded">undo</span>
                                                             </button>
                                                         }
@@ -361,7 +369,7 @@
                                                 </div>
 
                                                 <div class="add-flag-row flex items-center gap-sm mt-sm"
-                                                     *hasEnvPermission="[override.environmentName, 'write']">
+                                                     *hasPermission="['features', 'write']">
                                                     <input type="text" #newEnvFlagKey class="form-input text-xs flex-1"
                                                            placeholder="Override or add flag key..."/>
                                                     <button class="btn-slim primary"
@@ -383,7 +391,7 @@
                                                                  [override]="override"
                                                                  (metadataChange)="updateMetadata(override.environmentId, $event)"
                                                                  (overrideRemoved)="removeOverride(override.environmentId, 'metadata', $event)"
-                                                                 [disabled]="!writePermission">
+                                                                 [disabled]="!canWriteFeatures || !writePermission">
                                             </app-metadata-editor>
                                         </app-content>
                                     </expansion-panel>
@@ -409,7 +417,8 @@
                                                         </ng-container>
                                                     </select>
                                                     <button class="btn-slim"
-                                                            (click)="copyFrom(override.environmentId, copySource.value)">
+                                                            (click)="copyFrom(override.environmentId, copySource.value)"
+                                                            [disabled]="!canWriteFeatures || !writePermission">
                                                         Copy Overrides
                                                     </button>
                                                 </div>
@@ -436,7 +445,7 @@
          (mousedown)="startDragging($event, actionBar)">
         <span class="material-symbols-rounded drag-icon text-muted">drag_indicator</span>
         <span class="text-sm font-semibold">Unsaved Changes</span>
-        <div class="flex gap-sm">
+        <div class="flex gap-sm" *hasPermission="['features', 'write']">
             <button class="btn-slim" (click)="revert()">{{ 'common.revert' }}</button>
             <button class="btn-slim primary" (click)="save()">{{ 'common.save' }}</button>
         </div>

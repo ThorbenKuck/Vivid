@@ -16,6 +16,8 @@ import {FormInputComponent} from "../../../shared/components/form-input/form-inp
 import {ModalService} from "../../../services/modal.service";
 import {Page, pageOf} from "../../../shared/components/table/datastructure";
 import {LoadingIndicator} from "../../../shared/components/loading-indicator/loading-indicator";
+import {HasPermissionDirective} from "../../../shared/directives/has-permission.directive";
+import {PermissionService} from "../../../services/permission.service";
 
 @Component({
   selector: 'app-client-details',
@@ -23,7 +25,6 @@ import {LoadingIndicator} from "../../../shared/components/loading-indicator/loa
   imports: [
     CommonModule,
     RouterLink,
-    ContentHeaderComponent,
     CardComponent,
     TableComponent,
     TableColumnComponent,
@@ -33,6 +34,7 @@ import {LoadingIndicator} from "../../../shared/components/loading-indicator/loa
     FormsModule,
     FormInputComponent,
     LoadingIndicator,
+    HasPermissionDirective,
   ],
   templateUrl: './client-details.component.html',
   styleUrls: ['./client-details.component.css']
@@ -42,6 +44,7 @@ export class ClientDetailsComponent implements OnInit {
   private router = inject(Router);
   private clientRegistryService = inject(ClientRegistryService);
   private modalService = inject(ModalService);
+  protected permissionService = inject(PermissionService);
 
   client$!: Observable<VividClient>;
 

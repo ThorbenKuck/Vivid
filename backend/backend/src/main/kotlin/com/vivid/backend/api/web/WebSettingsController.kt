@@ -6,6 +6,7 @@ import com.vivid.backend.api.web.dto.toDto
 import com.vivid.backend.service.FeatureDistributionProvider
 import com.vivid.backend.service.SettingsService
 import org.springframework.context.ApplicationContext
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -21,6 +22,7 @@ class WebSettingsController(
 ) {
 
     @GetMapping("/distribution")
+    @PreAuthorize("@permissionService.hasPermission('settings', 'read')")
     fun getDistributionProviders(): List<DistributionProviderDto> {
         val providers = applicationContext.getBeansOfType(FeatureDistributionProvider::class.java)
         return providers.map { (name, provider) ->
@@ -33,11 +35,13 @@ class WebSettingsController(
     }
 
     @GetMapping
+    @PreAuthorize("@permissionService.hasPermission('settings', 'read')")
     fun getSettings(): SettingsDto {
         return settingsService.getSettings().toDto()
     }
 
     @PutMapping
+    @PreAuthorize("@permissionService.hasPermission('settings', 'write')")
     fun setSettings(@RequestBody settingsDto: SettingsDto): SettingsDto {
         return settingsService.updateSettings {
             it.requireClientTokens = settingsDto.requireClientTokens

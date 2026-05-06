@@ -1,5 +1,5 @@
-<label class="slide-toggle-container" (click)="$event.preventDefault(); toggle()">
-    <div class="switch" [class.is-checked]="checked()">
+<label class="slide-toggle-container" [class.is-disabled]="disabled()" (click)="$event.preventDefault(); toggle()">
+    <div class="switch" [class.is-checked]="checked()" [class.is-disabled]="disabled()">
         <div class="handle"></div>
     </div>
     @if (label()) {

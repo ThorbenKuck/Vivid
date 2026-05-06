@@ -20,6 +20,8 @@ export class DurationPickerComponent {
         }
     }
 
+    @Input() disabled: boolean = false;
+
     get duration(): string {
         return this._duration;
     }

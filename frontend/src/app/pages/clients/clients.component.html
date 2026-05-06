@@ -59,6 +59,6 @@
     </div>
 }
 
-<button (click)="createClient()" class="fab">
+<button *hasPermission="['clients', 'write']" (click)="createClient()" class="fab">
     <span class="material-symbols-rounded">add</span>
 </button>

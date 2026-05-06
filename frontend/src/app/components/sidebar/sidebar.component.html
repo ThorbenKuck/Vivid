@@ -12,13 +12,13 @@
             <span class="label"> Environments</span>
         }
     </a>
-    <a routerLink="/clients" routerLinkActive="active" class="nav-item">
+    <a *hasPermission="['clients', 'read']" routerLink="/clients" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">devices</span>
         @if(!collapsed) {
             <span class="label"> Clients</span>
         }
     </a>
-    <a routerLink="/settings" routerLinkActive="active" class="nav-item">
+    <a *hasPermission="['settings', 'read']" routerLink="/settings" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">settings</span>
         @if(!collapsed) {
             <span class="label"> Settings</span>

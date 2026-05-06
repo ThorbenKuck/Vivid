@@ -14,12 +14,13 @@ import java.util.*
 @RestController
 @RequestMapping("/api/web/environments")
 @Tag(name = "Web Environments", description = "Manage environments")
-class EnvironmentController(
+class WebEnvironmentController(
     private val environmentService: EnvironmentService,
 ) {
 
     @GetMapping
     @Operation(summary = "List/search environments (paginated)")
+    @PreAuthorize("@permissionService.hasPermission('environments', 'read')")
     fun list(
         @RequestParam(required = false) q: String?,
         pageable: Pageable
@@ -29,6 +30,7 @@ class EnvironmentController(
 
     @GetMapping("/all")
     @Operation(summary = "Get all environments (non-paginated)")
+    @PreAuthorize("@permissionService.hasPermission('environments', 'read')")
     fun all(): List<EnvironmentDto> {
         return environmentService.getAll().map { it.toDto() }
     }

@@ -12,10 +12,10 @@ import java.util.UUID
 @SpringBootApplication
 @EnableAsync
 @EnableConfigurationProperties(PermissionProperties::class, ApiSecurityProperties::class, ClientProperties::class)
-class BackendApplication
+class VividApplication
 
 fun main(args: Array<String>) {
-    runApplication<BackendApplication>(*args)
+    runApplication<VividApplication>(*args)
 }
 
 fun String.asKey(): String {

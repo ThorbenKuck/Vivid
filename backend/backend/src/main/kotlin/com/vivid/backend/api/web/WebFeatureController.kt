@@ -24,6 +24,7 @@ class WebFeatureController(
 
     @GetMapping
     @Operation(summary = "Get all features with optional search")
+    @PreAuthorize("@permissionService.hasPermission('features', 'read')")
     fun getAllFeatures(
         @RequestParam(required = false) q: String?,
         pageable: Pageable
@@ -34,6 +35,7 @@ class WebFeatureController(
 
     @GetMapping("/{id}")
     @Operation(summary = "Get feature by ID")
+    @PreAuthorize("@permissionService.hasPermission('features', 'read')")
     fun getFeatureById(
         @PathVariable id: UUID
     ): FeatureDto {
@@ -45,6 +47,7 @@ class WebFeatureController(
 
     @GetMapping("/number/{runningNumber}")
     @Operation(summary = "Get feature by running number")
+    @PreAuthorize("@permissionService.hasPermission('features', 'read')")
     fun getFeatureByRunningNumber(
         @PathVariable runningNumber: Long
     ): FeatureDto {
@@ -57,6 +60,7 @@ class WebFeatureController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new feature")
+    @PreAuthorize("@permissionService.hasPermission('features', 'write')")
     fun createFeature(
         @RequestBody request: FeatureCreateRequest
     ): FeatureDto {
@@ -67,6 +71,7 @@ class WebFeatureController(
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing feature (name, description, tags, global settings, overrides)")
+    @PreAuthorize("@permissionService.hasPermission('features', 'write')")
     fun updateFeature(
         @PathVariable id: UUID,
         @RequestBody request: FeatureUpdateRequest
@@ -85,27 +90,29 @@ class WebFeatureController(
         return feature.toDto(allEnvironments, usage)
     }
 
-    @PutMapping("/{id}/environments/{environment}")
+    @PutMapping("/{id}/environments/{envId}")
     @Operation(summary = "Upsert environment-specific override for a feature")
-    @PreAuthorize("@permissionService.hasEnvPermission(#environment, 'write')")
+    @PreAuthorize("@permissionService.hasEnvPermission(#envId, 'write')")
     fun upsertEnvironmentOverride(
         @PathVariable id: UUID,
-        @PathVariable environment: String,
+        @PathVariable envId: String,
         @RequestBody request: EnvironmentOverrideUpdateRequest
     ): FeatureDto {
         val allEnvironments = permissionService.filterVisibleEnvironments(environmentService.getAll())
-        val feature = featureService.upsertEnvironmentOverride(id, environment, request)
+        val feature = featureService.upsertEnvironmentOverride(id, envId, request)
         val usage = featureUsageService.getUsageForFeature(feature.id)
         return feature.toDto(allEnvironments, usage)
     }
 
     @GetMapping("/tags")
     @Operation(summary = "Get all distinct tags for autocomplete")
+    @PreAuthorize("@permissionService.hasPermission('features', 'read')")
     fun getAllTags(): Set<String> = featureService.getAllTags()
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a feature")
+    @PreAuthorize("@permissionService.hasPermission('features', 'write')")
     fun deleteFeature(
         @PathVariable id: UUID
     ) {
@@ -115,6 +122,7 @@ class WebFeatureController(
     @PostMapping("/{id}/links")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a link to another feature")
+    @PreAuthorize("@permissionService.hasPermission('features', 'write')")
     fun addFeatureLink(
         @PathVariable id: UUID,
         @RequestBody request: FeatureLinkCreateRequest
@@ -127,6 +135,7 @@ class WebFeatureController(
 
     @DeleteMapping("/{id}/links/{linkId}")
     @Operation(summary = "Remove a link from a feature")
+    @PreAuthorize("@permissionService.hasPermission('features', 'write')")
     fun removeFeatureLink(
         @PathVariable id: UUID,
         @PathVariable linkId: UUID
@@ -140,6 +149,7 @@ class WebFeatureController(
     @PostMapping("/{id}/notes")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a note to a feature")
+    @PreAuthorize("@permissionService.hasPermission('features', 'write')")
     fun addNote(
         @PathVariable id: UUID,
         @RequestBody request: NoteCreateRequest,

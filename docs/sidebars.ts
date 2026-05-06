@@ -18,6 +18,11 @@ const sidebars: SidebarsConfig = {
     'getting-started',
     'core-concepts',
     'sdks',
+    {
+      type: 'category',
+      label: 'Security',
+      items: ['security/permissions'],
+    },
   ],
 };
 

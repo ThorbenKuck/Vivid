@@ -39,10 +39,11 @@
   --border-width: 1px;
   --border-color: rgba(255, 255, 255, 0.05);
   --border-thin: var(--border-width) solid var(--border-color);
-  
-  --shadow-slim: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.2);
-  
+
+  --shadow-color: 38, 50, 56;
+  --shadow-slim: 0 4px 12px rgb(var(--shadow-color) / 0.5);
+  --shadow-hover: 0 8px 24px rgb(var(--shadow-color) / 1);
+
   --header-height: 60px;
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 68px;
@@ -61,8 +62,7 @@
   --text-secondary: #607D8B;
   --text-muted: #90A4AE;
   --border-color: rgba(0, 0, 0, 0.06);
-  --shadow-slim: 0 4px 12px rgba(38, 50, 56, 0.05);
-  --shadow-hover: 0 8px 24px rgba(38, 50, 56, 1);
+  --shadow-color: 38, 50, 56;
 
 
   --color-primary: #A5D6A7;
@@ -322,4 +322,17 @@ main {
   border: var(--border-thin);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
+}
+
+.page-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.icon-btn-slim {
+  background: transparent;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
 }
