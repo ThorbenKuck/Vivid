@@ -1,0 +1,25 @@
+<div class="login-container">
+    <div class="login-card">
+        <div class="vivid-logo">Vivid</div>
+        <div class="vivid-tagline">Feature Management for Modern Teams</div>
+
+        <app-loading-indicator *ngIf="loading()"></app-loading-indicator>
+
+        <div *ngIf="!loading() && !error()">
+            <div *ngIf="issuer()" class="auth-options">
+                <button (click)="onLogin()">
+                    <span class="icon">🔒</span>
+                    {{ 'LOGIN.LOGIN_WITH' | translate:{issuer: issuer()} }}
+                </button>
+            </div>
+            <ng-template #noProvider>
+                <p class="warning">{{ 'LOGIN.NO_AUTH_PROVIDER' | translate }}</p>
+            </ng-template>
+        </div>
+
+        <div *ngIf="error()" class="error-state">
+            <p class="error-message">{{ error() }}</p>
+            <button class="retry-button" (click)="loadConfig()">{{ 'COMMON.RETRY' | translate }}</button>
+        </div>
+    </div>
+</div>

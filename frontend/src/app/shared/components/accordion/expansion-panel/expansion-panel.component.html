@@ -1,0 +1,13 @@
+<div class="collapsible-wrapper" [class.expanded]="!_collapsed()">
+    <div class="header-container" (click)="toggle()" [class.collapsed]="_collapsed()">
+        <ng-content select="app-header"></ng-content>
+        @if (showToggle()) {
+            <span class="toggle material-symbols-rounded transition"
+                  [class.collapsed]="_collapsed()">expand_more</span>
+        }
+    </div>
+
+    <div class="content-container" [class.collapsed]="_collapsed()">
+        <ng-content select="app-content"></ng-content>
+    </div>
+</div>

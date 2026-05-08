@@ -1,0 +1,68 @@
+/* Wir nutzen :host, um sicherzustellen, dass die Komponente die volle Fläche deckt */
+:host {
+    display: block;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0; /* Modernes CSS für top/left/right/bottom: 0 */
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /* GPU Beschleunigung erzwingen, um CPU zu entlasten */
+    transform: translateZ(0);
+}
+
+.modal-wrapper {
+    background: var(--surface-color, #1a1a1a);
+    border: 1px solid var(--border-color, #333);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Der Rest deines Stylings... */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-wrapper {
+    background: var(--surface-color, #1a1a1a);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 12px;
+    min-width: 400px;
+    max-width: 500px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.title { margin-top: 0; color: var(--accent-mint); }
+.content { margin: 1.5rem 0; }
+.vivid-input {
+    width: 100%;
+    padding: 8px;
+    background: #000;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 4px;
+}
+
+footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

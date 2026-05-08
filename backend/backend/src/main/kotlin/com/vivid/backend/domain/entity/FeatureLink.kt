@@ -1,0 +1,22 @@
+package com.vivid.backend.domain.entity
+
+import com.vivid.backend.domain.entity.infrastructure.FeatureEntity
+import jakarta.persistence.*
+import java.util.*
+
+@Entity
+@Table(name = "feature_links")
+class FeatureLink(
+    id: UUID = UUID.randomUUID(),
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "source_feature_id", nullable = false)
+    var sourceFeature: FeatureEntity,
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "target_feature_id", nullable = false)
+    var targetFeature: FeatureEntity,
+
+    @Column(name = "link_type")
+    var type: String? = null
+): BaseUuidEntity(id)

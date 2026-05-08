@@ -1,0 +1,102 @@
+<content-header>
+    <h1 class="page-title text-lg">{{ 'FEATURES.TITLE' | translate }}</h1>
+    <div class="search-bar">
+        <app-form-input
+                icon="search"
+                [placeholder]="'COMMON.SEARCH' | translate"
+                [(ngModel)]="q"
+                (keyup.enter)="search()">
+        </app-form-input>
+    </div>
+</content-header>
+
+@if ((environments$ | async)?.length !== 0) {
+    <button class="fab" *hasPermission="['features', 'write']" (click)="toggleAdd()" [title]="'COMMON.ADD' | translate">
+        <span class="material-symbols-rounded">add</span>
+    </button>
+}
+
+<div class="modal-overlay" *ngIf="showAdd" (click)="toggleAdd()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+        <h2 class="modal-title">{{ 'FEATURES.ADD' | translate }}</h2>
+        <form [formGroup]="addForm" class="flex-col gap-md">
+            <div class="form-group">
+                <label class="text-xs text-muted">{{ 'COMMON.NAME' | translate }}</label>
+                <app-form-input formControlName="name" [placeholder]="'COMMON.NAME' | translate"></app-form-input>
+            </div>
+            <div class="form-group">
+                <label class="text-xs text-muted">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+                <textarea formControlName="description" [placeholder]="'COMMON.DESCRIPTION' | translate" rows="3"></textarea>
+            </div>
+        </form>
+        <div class="modal-actions flex justify-end gap-sm">
+            <button class="btn-slim" (click)="toggleAdd()">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button class="btn-slim primary" (click)="add()" [disabled]="addForm.invalid || !addForm.value.name">
+                {{ 'COMMON.CREATE' | translate }}
+            </button>
+        </div>
+    </div>
+</div>
+
+@if (featuresPage$ | async; as page) {
+    @let envs = environments$ | async;
+    @if (envs && envs.length > 0) {
+        <app-table [page]="page" (pageChange)="loadData($event)" [rowIdKey]="'runningNumber'">
+            <table-column key="id" label="#" width="40px" [center]="true">
+                <ng-template let-f>
+                    <span class="text-muted text-sm flex flex-1 justify-center text-bold">{{ f.runningNumber }}</span>
+                </ng-template>
+            </table-column>
+
+            <table-column key="name" [label]="'COMMON.NAME' | translate" width="1fr">
+                <ng-template let-f>
+                    <div class="ml-4">
+                        <div class="font-medium">{{ f.name }}</div>
+                        @if (f.tags?.length > 0) {
+                            <div class="feature-tags flex gap-xs">
+                                @for (t of f.tags; track t) {
+                                    <span class="tag-pill text-xs">{{ t }}</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </ng-template>
+            </table-column>
+
+            @for (env of envs; track env.id) {
+                <table-column [key]="env.id || env.name" [label]="env.name" width="60px" [center]="true">
+                    <ng-template let-f>
+                        <div class="flex flex-1 justify-center">
+                            @let active = isResolvedEnabled(f, env.id);
+                            <env-status [active]="active" [haloType]="active ? null : 'error'"></env-status>
+                        </div>
+                    </ng-template>
+                </table-column>
+            }
+
+            <table-column key="actions" [label]="'COMMON.ACTIONS' | translate" width="120px">
+                <ng-template let-f>
+                    <button class="btn-slim" (click)="$event.stopPropagation(); openDetails(f)">
+                        <span>{{ 'COMMON.OPEN' | translate }}</span>
+                        <span class="material-symbols-rounded">open_in_new</span>
+                    </button>
+                </ng-template>
+            </table-column>
+
+            <ng-template #expandedRowTemplate let-f>
+                @if (f.description; as desc) {
+                    <p class="feature-description">{{ desc }}</p>
+                } @else {
+                    <p class="missing-feature-description">{{ 'FEATURES.NO_DESCRIPTION' | translate }}</p>
+                }
+            </ng-template>
+        </app-table>
+    } @else {
+        {{ 'FEATURES.EMPTY' | translate }}
+    }
+} @else {
+    <div class="loading-state flex-col items-center justify-center card" style="min-height: 200px;">
+        <app-loading-indicator></app-loading-indicator>
+        <p class="text-secondary">{{ 'COMMON.LOADING' | translate }}</p>
+    </div>
+}

@@ -1,0 +1,33 @@
+.page-header { margin-bottom: var(--spacing-lg); }
+.page-title { font-weight: 700; letter-spacing: -0.3px; }
+.btn-slim { padding: 6px 12px; font-size: var(--font-size-xs); }
+
+.no-description {
+    color: var(--text-muted);
+    font-style: italic;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.form-group label {
+    margin-left: var(--spacing-sm);
+}
+
+.rule-item {
+    border: 1px solid var(--border-color);
+}
+
+.border-top {
+    border-top: 1px solid var(--border-color);
+}
+
+.no-description {
+    line-height: 1.5;
+}
+
+card {
+    margin-top: var(--spacing-lg);
+}

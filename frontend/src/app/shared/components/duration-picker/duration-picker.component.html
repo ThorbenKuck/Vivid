@@ -1,0 +1,22 @@
+<div class="duration-picker-container" [class.is-disabled]="disabled">
+    <div class="duration-input-group">
+        <input type="number"
+               [(ngModel)]="minutes"
+               (ngModelChange)="update()"
+               min="0"
+               [disabled]="disabled"
+               class="duration-input"
+               placeholder="0">
+        <span class="duration-unit">m</span>
+    </div>
+    <div class="duration-input-group">
+        <input type="number"
+               [(ngModel)]="seconds"
+               (ngModelChange)="update()"
+               min="0"
+               [disabled]="disabled"
+               class="duration-input"
+               placeholder="0">
+        <span class="duration-unit">s</span>
+    </div>
+</div>

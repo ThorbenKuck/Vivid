@@ -1,0 +1,135 @@
+:host {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.reorder-button {
+  margin-right: var(--spacing-sm);
+}
+
+.page-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.env-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.icon-btn-slim {
+  background: transparent;
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+}
+
+.environment-description {
+  padding: var(--spacing-lg);
+}
+
+.missing-environment-description {
+  flex-grow: 1;
+  text-align: center;
+  font-style: italic;
+  padding: var(--spacing-lg);
+}
+
+.icon-btn-slim:hover {
+  background: var(--surface-elevated);
+}
+
+.icon-btn-slim.danger {
+  color: var(--accent-danger);
+}
+
+.icon-btn-slim.danger:hover {
+  background: rgba(239, 154, 154, 0.1);
+}
+
+.expand-icon {
+  font-size: 18px;
+  transition: var(--transition);
+}
+
+.env-description {
+  line-height: 1.5;
+}
+
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-group label {
+  margin-left: var(--spacing-sm);
+}
+
+.btn-slim {
+  padding: 6px 12px;
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 600px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  .search-bar {
+    width: 100%;
+    flex: none;
+  }
+  .fab {
+    bottom: 4rem;
+    right: 1.5rem;
+  }
+}
+
+.reorder-list {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.reorder-item {
+  padding: var(--spacing-md);
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  cursor: grab;
+}
+
+.reorder-item:active {
+  cursor: grabbing;
+}
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  background: var(--surface-elevated);
+  opacity: 0.8;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.reorder-list.cdk-drop-list-dragging .reorder-item:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.drag-handle {
+  color: var(--text-muted);
+  cursor: grab;
+}

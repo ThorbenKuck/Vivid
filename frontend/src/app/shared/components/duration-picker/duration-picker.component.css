@@ -1,0 +1,42 @@
+.duration-picker-container {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.duration-input-group {
+    display: flex;
+    align-items: center;
+    background: var(--surface-elevated);
+    border: var(--border-thin);
+    border-radius: var(--radius-md);
+    padding: 0 var(--spacing-sm);
+    transition: var(--transition);
+}
+
+.duration-input-group:focus-within {
+    border-color: var(--accent-primary);
+    background: var(--surface-color);
+}
+
+.duration-input {
+    width: 60px;
+    border: none !important;
+    background: transparent !important;
+    padding: 8px 4px 8px 8px !important;
+    text-align: right;
+    -moz-appearance: textfield;
+    color: var(--text-primary);
+}
+
+.duration-input::-webkit-outer-spin-button,
+.duration-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.duration-unit {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    padding-right: 4px;
+}

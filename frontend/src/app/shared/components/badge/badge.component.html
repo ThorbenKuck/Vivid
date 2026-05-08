@@ -1,0 +1,7 @@
+<ng-content></ng-content>
+
+@if (content()) {
+    <span [class]="badgeClass()" [class.is-overlap]="overlap()">
+    {{ content() }}
+  </span>
+}

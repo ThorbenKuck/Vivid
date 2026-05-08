@@ -1,0 +1,52 @@
+:host {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.slide-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Der Hintergrund des Schalters */
+.switch {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    background-color: var(--surface-elevated, #333);
+    border-radius: 20px;
+    transition: background-color 0.2s ease;
+    border: 1px solid var(--border-color, #444);
+}
+
+/* Der "Knopf" (Handle) im Schalter */
+.handle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background-color: var(--text-muted, #888);
+    border-radius: 50%;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+}
+
+/* Zustand: Checked */
+.switch.is-checked {
+    background-color: rgba(46, 204, 113, 0.2); /* Dezentes Mint-Glühen */
+    border-color: var(--accent-mint, #2ecc71);
+}
+
+.switch.is-checked .handle {
+    transform: translateX(20px); /* Schiebt den Knopf nach rechts */
+    background-color: var(--accent-mint, #2ecc71);
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    color: var(--text-primary, #fff);
+}

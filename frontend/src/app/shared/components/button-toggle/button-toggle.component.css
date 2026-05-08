@@ -1,0 +1,45 @@
+:host {
+    display: inline-block;
+    width: fit-content;
+}
+
+.toggle-container {
+    display: flex;
+    background: var(--surface-color, #1a1a1a);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.toggle-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted, #888);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.toggle-button:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary, #fff);
+}
+
+.toggle-button.active {
+    background: var(--surface-elevated, #333);
+    color: var(--accent-mint, #2ecc71);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.icon {
+    font-size: 1.2rem;
+}

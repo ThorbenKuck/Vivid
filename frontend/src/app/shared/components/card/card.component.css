@@ -1,0 +1,108 @@
+:host {
+    display: block;
+}
+
+.vivid-card {
+    background: var(--surface-color); /* Deine Surface Color */
+    border: 1px solid #333;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.hover:hover {
+    cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-slim);
+}
+
+/* --- HEADER --- */
+.card-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--surface-elevated);
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Wenn der Header leer ist (kein Title/Subtitle), wird er ausgeblendet */
+.card-header:empty {
+    display: none;
+}
+
+/* --- CONTENT --- */
+.card-content {
+    padding: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+/* --- FOOTER --- */
+.card-footer {
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--surface-elevated);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.card-footer:empty {
+    display: none;
+}
+
+/* Styling für die projizierten Elemente */
+/* Nutze ::ng-deep, um die projizierten Inhalte zu erreichen */
+:host ::ng-deep [vivid-card-title] {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+:host ::ng-deep [vivid-card-subtitle] {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Collapsable */
+.toggle {
+    flex-grow: 0;
+    rotate: 180deg;
+}
+
+.toggle.collapsed {
+    rotate: 0deg;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.card-content, .card-footer {
+    overflow: hidden;
+    /* Transition für das Aufklappen */
+    transition: max-height 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity ease,
+    padding 0.1s ease;
+    max-height: 1000px; /* Ein realistischerer Wert verbessert das Timing */
+    opacity: 1;
+    padding: var(--spacing-md);
+}
+
+.card-footer.collapsed {
+    display: none;
+}
+
+div.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    pointer-events: none;
+}

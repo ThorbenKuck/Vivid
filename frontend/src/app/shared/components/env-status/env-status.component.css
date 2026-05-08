@@ -1,0 +1,54 @@
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: var(--accent-danger); /* Grau wenn inaktiv */
+    position: relative;
+}
+
+.status-indicator.active {
+    background-color: var(--accent-mint, #2ecc71); /* Grün wenn aktiv */
+}
+
+/* Der pulsierende Ring */
+.status-indicator.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: inherit;
+    animation: pulse 2s infinite;
+    opacity: 0.6;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+
+.halo-primary {
+    box-shadow: 0 0 10px 6px var(--surface-color), 0 0 10px 6px var(--color-primary);
+}
+.halo-secondary {
+    box-shadow: 0 0 10px 6px var(--surface-color), 0 0 10px 6px var(--color-secondary);
+}
+.halo-success {
+    box-shadow: 0 0 10px 6px var(--surface-color), 0 0 10px 6px var(--color-success);
+}
+.halo-error {
+    box-shadow: 0 0 10px 6px var(--surface-color), 0 0 10px 6px var(--color-error);
+}
+.halo-warning {
+    box-shadow: 0 0 10px 6px var(--surface-color), 0 0 10px 6px var(--color-warning);
+}

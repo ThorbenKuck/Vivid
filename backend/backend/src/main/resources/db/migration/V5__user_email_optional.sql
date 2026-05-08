@@ -1,0 +1,1 @@
+alter table vivid_users alter column email drop not null;

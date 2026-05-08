@@ -1,0 +1,32 @@
+@if (!loadingService.isApplicationLoading()) {
+    @if (showShell$ | async) {
+        <header class="header">
+            <page-header [collapsed]="sidebarCollapsed" (toggleSidebar)="toggleSidebar()"></page-header>
+        </header>
+
+        @if (loadingService.isFetching()) {
+            <div class="global-loader">
+                <div class="loader-bar"></div>
+            </div>
+        }
+
+        <div class="layout-container">
+            <aside class="sidebar-aside" [class.show]="!sidebarCollapsed">
+                <app-sidebar [collapsed]="sidebarCollapsed"></app-sidebar>
+            </aside>
+
+            <main class="main-content" [class.pushed]="!sidebarCollapsed">
+                <div class="page-container">
+                    <router-outlet></router-outlet>
+                </div>
+            </main>
+        </div>
+    } @else {
+        <router-outlet></router-outlet>
+    }
+} @else {
+    <app-loading-indicator></app-loading-indicator>
+}
+
+<modal></modal>
+<app-toast></app-toast>

@@ -1,0 +1,56 @@
+<nav class="sidebar-nav">
+  <div class="nav-links">
+    <a routerLink="/features" routerLinkActive="active" class="nav-item">
+      <span class="material-symbols-rounded">stars</span>
+        @if (!collapsed) {
+            <span class="label"> {{ 'NAV.FEATURES' | translate }}</span>
+        }
+    </a>
+    <a *hasPermission="['environments', 'read']" routerLink="/environments" routerLinkActive="active" class="nav-item">
+      <span class="material-symbols-rounded">public</span>
+        @if(!collapsed) {
+            <span class="label"> {{ 'NAV.ENVIRONMENTS' | translate }}</span>
+        }
+    </a>
+    <a *hasPermission="['clients', 'read']" routerLink="/clients" routerLinkActive="active" class="nav-item">
+      <span class="material-symbols-rounded">devices</span>
+        @if(!collapsed) {
+            <span class="label"> {{ 'NAV.CLIENTS' | translate }}</span>
+        }
+    </a>
+    <a *hasPermission="['settings', 'read']" routerLink="/settings" routerLinkActive="active" class="nav-item">
+      <span class="material-symbols-rounded">settings</span>
+        @if(!collapsed) {
+            <span class="label"> {{ 'NAV.SETTINGS' | translate }}</span>
+        }
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="theme-selector" *ngIf="!collapsed">
+      <div class="select-wrapper">
+        <span class="material-symbols-rounded select-icon">
+          {{ current === 'dark' ? 'dark_mode' : 'light_mode' }}
+        </span>
+        <select [ngModel]="current" (ngModelChange)="setTheme($event)">
+          <option *ngFor="let t of themes" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="language-selector" *ngIf="!collapsed">
+      <div class="select-wrapper">
+        <span class="material-symbols-rounded select-icon">language</span>
+        <select [ngModel]="currentLang" (ngModelChange)="setLanguage($event)">
+          <option *ngFor="let lang of languages" [value]="lang">{{ lang.toUpperCase() }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <button class="icon-only-theme" *ngIf="collapsed" (click)="toggleTheme()" [title]="'NAV.CHANGE_THEME' | translate">
+      <span class="material-symbols-rounded">
+        {{ current === 'dark' ? 'dark_mode' : 'light_mode' }}
+      </span>
+    </button>
+  </div>
+</nav>
