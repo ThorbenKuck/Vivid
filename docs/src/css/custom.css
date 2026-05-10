@@ -29,6 +29,26 @@
     --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+.feature-container {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+
+    .feature-card {
+        border-radius: 1rem;
+        border: 1px solid black;
+        padding: 1rem;
+        transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: scale(1.02);
+        /*filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.2));*/
+        box-shadow: 0 0 1rem rgba(46, 204, 113, 0.2);
+        border-color: var(--border-color);
+    }
+}
+
 .highlight-container {
     display: flex;
     flex-direction: column;
@@ -68,7 +88,7 @@
             border-color: var(--border-color);
 
             .image img {
-                filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.2)); /* Dein Mint-Glow */
+                filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.2));
                 transform: scale(1.02);
             }
         }
