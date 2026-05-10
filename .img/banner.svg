@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 100" width="220" height="100">
     <defs>
         <style>
-            .vivid-letter { fill: #ffffff; }
+            .vivid-letter { fill: #B3E5FC; }
             .vivid-dot {
                 fill: #2ecc71;
                 transition: filter 0.3s ease;
