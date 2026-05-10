@@ -60,7 +60,7 @@
                         title="Previous">
                     <span class="material-symbols-rounded">chevron_left</span>
                 </button>
-                <span class="text-sm font-medium">Seite {{ currentPage() }} / {{ page().totalPages || 1 }}</span>
+                <span class="text-sm font-medium">{{ "COMMON.PAGE" | translate }} {{ currentPage() }} / {{ page().totalPages || 1 }}</span>
                 <button
                         class="icon-btn"
                         [disabled]="page().last"

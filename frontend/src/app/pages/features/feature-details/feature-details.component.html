@@ -235,8 +235,9 @@
                                 <table-column [key]="ovr.environmentId"
                                               [label]="ovr.environmentName">
                                     <ng-template let-row>
-                                <span class="text-xs" [class.text-muted]="!row[ovr.environmentId]">
-                                    {{ row[ovr.environmentId] ? (row[ovr.environmentId] | timeAgo) : '-' }}
+                                        @let timestamp = row[ovr.environmentId];
+                                <span class="text-xs" [class.text-muted]="!timestamp" [vividTooltip]="timestamp">
+                                    {{ timestamp ? (timestamp | timeAgo) : '-' }}
                                 </span>
                                     </ng-template>
                                 </table-column>

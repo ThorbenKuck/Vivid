@@ -11,7 +11,7 @@ import java.time.Duration
  */
 @ConfigurationProperties("spring.vivid.rest.polling")
 data class VividPollingProperties(
-    val enabled: Boolean = true,
+    val enabled: Boolean = false,
     val interval: Duration = Duration.ofMinutes(60),
     val pollType: PollType = PollType.REFRESH,
 ) {

@@ -6,18 +6,18 @@
             <span class="label"> {{ 'NAV.FEATURES' | translate }}</span>
         }
     </a>
-    <a *hasPermission="['environments', 'read']" routerLink="/environments" routerLinkActive="active" class="nav-item">
-      <span class="material-symbols-rounded">public</span>
-        @if(!collapsed) {
-            <span class="label"> {{ 'NAV.ENVIRONMENTS' | translate }}</span>
-        }
-    </a>
     <a *hasPermission="['clients', 'read']" routerLink="/clients" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">devices</span>
         @if(!collapsed) {
             <span class="label"> {{ 'NAV.CLIENTS' | translate }}</span>
         }
     </a>
+      <a *hasPermission="['environments', 'read']" routerLink="/environments" routerLinkActive="active" class="nav-item">
+          <span class="material-symbols-rounded">public</span>
+          @if(!collapsed) {
+              <span class="label"> {{ 'NAV.ENVIRONMENTS' | translate }}</span>
+          }
+      </a>
     <a *hasPermission="['settings', 'read']" routerLink="/settings" routerLinkActive="active" class="nav-item">
       <span class="material-symbols-rounded">settings</span>
         @if(!collapsed) {

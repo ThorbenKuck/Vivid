@@ -2,7 +2,7 @@ package com.vivid.sdk.spring.jdbc
 
 import com.vivid.sdk.FeatureCache
 import com.vivid.sdk.Subscription
-import com.vivid.sdk.api.Feature
+import com.vivid.clients.api.Feature
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.support.TransactionTemplate
 import tools.jackson.databind.ObjectMapper

@@ -21,7 +21,7 @@ import {LanguageService} from "./services/language.service";
     styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-    sidebarCollapsed = false;
+    sidebarCollapsed = true;
     showShell$: Observable<boolean>;
 
     constructor(

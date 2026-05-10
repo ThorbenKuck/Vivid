@@ -1,7 +1,7 @@
 package com.vivid.sdk.spring.rest
 
 import com.vivid.sdk.HeartbeatApi
-import com.vivid.sdk.api.Heartbeat
+import com.vivid.clients.api.Heartbeat
 import com.vivid.sdk.spring.VividProperties
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
@@ -31,11 +31,11 @@ class VividHeartbeat(
     override fun sendHeartbeat() {
         sendHeartbeat(
             Heartbeat(
-                clientToken = vividProperties.clientToken,
-                applicationName = vividProperties.applicationName,
-                environment = vividProperties.environment,
-                technologies = vividProperties.streams,
-                clientVersion = null, // TODO: Fetch from API using Manifest entries (Implementation-Version)
+                vividProperties.applicationName,
+                vividProperties.environment,
+                vividProperties.clientToken,
+                vividProperties.streams,
+                null, // TODO: Fetch from API using Manifest entries (Implementation-Version)
             )
         )
     }

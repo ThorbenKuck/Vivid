@@ -29,6 +29,8 @@
     "ENABLED": "Enabled",
     "ON": "ON",
     "OFF": "OFF",
+    "ONLINE": "Online",
+    "OFFLINE": "Offline",
     "COPY_FROM": "Copy From",
     "CHOOSE_ENVIRONMENT": "Choose environment...",
     "COPY_OVERRIDES": "Copy Overrides",
@@ -38,7 +40,8 @@
     "NO_ENVIRONMENTS": "No Environments Configured",
     "NO_ENVIRONMENTS_DESC": "To see environment-specific feature states and configurations, you need to create at least one environment.",
     "CREATE_ENVIRONMENT": "Create Environment",
-    "NO_WRITE_ACCESS": "No write access to {{name}}"
+    "NO_WRITE_ACCESS": "No write access to {{name}}",
+    "PAGE": "Page"
   },
   "NAV": {
     "FEATURES": "Features",
@@ -95,7 +98,10 @@
     "EMPTY": "No Environments yet",
     "NO_DESCRIPTION": "No description provided",
     "NO_RULES": "No rules configured for this environment.",
-    "ADD_RULE": "Add Rule"
+    "ADD_RULE": "Add Rule",
+    "RULES": {
+      "MATCH_ENVIRONMENT": "must match"
+    }
   },
   "CLIENTS": {
     "TITLE": "Clients Registry",

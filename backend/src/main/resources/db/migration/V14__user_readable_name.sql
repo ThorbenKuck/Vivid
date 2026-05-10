@@ -1,0 +1,1 @@
+alter table vivid_users add name text;

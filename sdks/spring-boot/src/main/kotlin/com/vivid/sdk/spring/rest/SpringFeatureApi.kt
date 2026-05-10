@@ -1,7 +1,7 @@
 package com.vivid.sdk.spring.rest
 
 import com.vivid.sdk.FeatureApi
-import com.vivid.sdk.api.Feature
+import com.vivid.clients.api.Feature
 import com.vivid.sdk.spring.VividProperties
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -47,6 +47,7 @@ class SpringFeatureApi(
         } catch (e: Exception) {
             logger.warn("Error fetching feature $key: ${e.message}")
         }
+
         return null
     }
 

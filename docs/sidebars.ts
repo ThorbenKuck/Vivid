@@ -13,27 +13,47 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
  Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
-  vividSidebar: [
-    'introduction',
-    'getting-started',
-    'core-concepts',
-    'sdks',
-    {
-      type: 'category',
-      label: 'User Guide',
-      items: [
-        'user-guide/features',
-        'user-guide/environments',
-        'user-guide/clients',
-        'user-guide/settings',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Security',
-      items: ['security/permissions'],
-    },
-  ],
+    vividSidebar: [
+        'introduction',
+        'getting-started',
+        'core-concepts',
+        {
+            type: 'category',
+            label: 'User Guide',
+            items: [
+                'user-guide/features',
+                'user-guide/environments',
+                'user-guide/clients',
+                'user-guide/settings',
+            ],
+        },
+        'deployment',
+        'sdks',
+        {
+            type: 'category',
+            label: 'Clients',
+            items: [
+                'clients/concept',
+                'clients/streams',
+                {
+                    type: 'category',
+                    label: 'SDKs',
+                    items: [
+                        'clients/sdks/overview',
+                        'clients/sdks/api',
+                        'clients/sdks/java',
+                        'clients/sdks/kotlin',
+                        'clients/sdks/spring-boot',
+                    ],
+                }
+            ],
+        },
+        {
+            type: 'category',
+            label: 'Security',
+            items: ['security/permissions'],
+        },
+    ],
 };
 
 export default sidebars;

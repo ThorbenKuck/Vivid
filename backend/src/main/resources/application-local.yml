@@ -1,0 +1,21 @@
+application:
+  database:
+    url: jdbc:postgresql://localhost:5333/vivid
+    username: postgres
+    password: postgres
+  oidc:
+    issuer-url: http://localhost:8989/realms/vivid
+    issuer-name: Local KeyCloak
+    client-id: vivid-client
+    frontend-base-url: http://localhost:4200
+  clients:
+    streams:
+      sse:
+        enabled: true
+  backplane:
+    postgres:
+      enabled: true
+
+logging:
+  level:
+    com.vivid: TRACE

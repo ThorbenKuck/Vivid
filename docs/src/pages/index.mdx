@@ -1,15 +1,17 @@
----
-title: Vivid - Control Your Features with Confidence
----
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
-# Vivid - Feature Management
+# <img src={useBaseUrl('/img/logo-thick.svg')} alt="Vivid Logo" style={{height: '2em', marginRight: '-15px', verticalAlign: 'middle'}} /> ivid
 
-## Controlling your features with ease
+## Feature management that starts with the feature, not the flag.
 
-Vivid is a powerful feature control system designed to bridge the gap between development and product management. Control, monitor, and roll out features across multiple environments with precision and speed.
+Vivid helps software teams control, release, and operate features with confidence.
+Instead of scattering isolated flags across your codebase, Vivid puts the **feature itself** at the center:
+turn it on, turn it off, enrich it with flags or metadata, and manage its behavior per environment.
+
+Built for developers, product owners, business analysts, and support teams, Vivid makes feature control understandable for everyone involved in building and running software.
 
 <div className="button-group">
-  <a className="button button--primary button--lg" href="/docs/introduction">Get Started</a>
+  <a className="button button--primary button--lg" href={useBaseUrl('/docs/introduction')}>Get Started</a>
   <a className="button button--secondary button--lg" href="https://github.com/ThorbenKuck/Vivid">View on GitHub</a>
 </div>
 
@@ -18,22 +20,103 @@ Vivid is a powerful feature control system designed to bridge the gap between de
 <div className="container">
   <div className="row">
     <div className="col col--4">
-      <h3>🚀 Feature Management</h3>
+      <h3>🎛️ Control features not just flags</h3>
       <p>
-        Easily toggle features on and off across different environments. Use sub-flags for granular control and manage the lifecycle of your features from dev to prod.
+        Enable or disable entire features per environment. Add optional flags and metadata when you need more precise runtime behavior.
       </p>
     </div>
+
     <div className="col col--4">
-      <h3>🛠️ Ease of Use</h3>
+      <h3>🤝 Built for the whole team</h3>
       <p>
-        Designed for both technical and non-technical users. Our intuitive dashboard makes it simple to understand the current state of any feature on any stage.
+        Give developers, product owners, analysts, and support teams a shared view of what is active, where it is active, and how it behaves.
       </p>
     </div>
+
     <div className="col col--4">
-      <h3>📊 Metadata & Config</h3>
+      <h3>🔐 Secure by design</h3>
       <p>
-        Go beyond simple toggles. Use dynamic metadata to store configuration values and control application behavior at runtime without a single line of code change.
+        Vivid uses OIDC for authentication and role-based access control to decide who can view, change, or manage each part of the system.
+      </p>
+    </div>
+  </div>
+
+  <div className="row">
+    <div className="col col--4">
+      <h3>🌍 Environment-aware</h3>
+      <p>
+        Manage feature state independently across development, testing, staging, production, or any environment your team relies on.
+      </p>
+    </div>
+
+    <div className="col col--4">
+      <h3>🧩 Developer-friendly</h3>
+      <p>
+        Integrate with the Kotlin SDK and Spring Boot starter. Client integrations are actively evolving as Vivid grows.
+      </p>
+    </div>
+
+    <div className="col col--4">
+      <h3>🚀 Open source and beta-ready</h3>
+      <p>
+        Vivid is open source, free to use, and currently in beta. Built to become a production-ready feature management platform.
       </p>
     </div>
   </div>
 </div>
+
+---
+
+## Core Features
+
+<div class="highlight-container">
+    <div class="highlight-row">
+        <div class="text">Your features in the spotlight – always stay on top of things</div>
+        <div class="image">![Landing Page](/img/feat/landing_page.png)</div>
+    </div>
+
+    <div class="details-row">
+        <span>Be honest: Do you know off the top of your head which features are active in which stages? With Vivid’s feature overview, guesswork is a thing of the past. We provide you with a dashboard where you can see at a glance what’s happening where.</span>
+        <span>No searching, no asking, just pure clarity for you and your team.</span>
+    </div>
+
+    <div class="highlight-row">
+        <div class="image">![Landing Page](/img/feat/feature_flags.png)</div>
+        <div class="text">Precision, not a scattergun approach: Control your app down to the smallest detail.</div>
+    </div>
+
+    <div class="details-row">
+        <span>Is a simple on/off switch not enough for you? It’s not enough for us either. With Vivid, you can map out complex workflows using granular sub-flags or attach metadata directly to your features</span>
+        <span>Whether you want to customize a layout element only in Switzerland or need a special banner text for app version 2.0, you have the power to do so without having to redeploy a single line of code.</span>
+    </div>
+
+    <div class="highlight-row">
+        <div class="text">Full transparency: Keep track of your applications</div>
+        <div class="image">![Landing Page](/img/feat/client_management.png)</div>
+    </div>
+
+    <div class="details-row">
+        <span>Have you ever wondered which of your services or app versions is currently using which features? With Vivid, you no longer have to guess. We give you in-depth insights into your clients’ configurations. See in real time which application is connecting to which environment and what the actual status of your flag settings is there.</span>
+        <span>It’s the ultimate safety net: You’ll immediately know if an instance is still running an outdated version or if a flag is interpreted unexpectedly. Maximum control over your distributed system landscape.</span>
+    </div>
+
+    <div class="highlight-row">
+        <div class="image">![Landing Page](/img/feat/environments.png)</div>
+        <div class="text">Vivid adapts to you, not the other way around.</div>
+    </div>
+
+    <div class="details-row">
+        <span>Every company operates differently, and every deployment setup is unique. We don’t force you into a rigid framework. Whether you only use Dev and Prod or have a complex chain of five different staging environments, Vivid lets you map your environment exactly as it is. Quick to set up, intuitive to manage, and ready for your next big release.</span>
+    </div>
+</div>
+---
+
+## Why Vivid?
+
+Feature flags are powerful, but they often become technical details hidden in code.
+Vivid turns them into manageable product capabilities.
+
+With Vivid, teams can describe a feature once, control it across environments, and extend it with metadata whenever more advanced behavior is needed.
+That makes feature management easier to understand, safer to operate, and more useful beyond the development team.
+
+Whether you are preparing a release, testing behavior in staging, supporting production users, or coordinating product decisions, Vivid gives your team a shared control surface for the features that matter.

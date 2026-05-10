@@ -2,7 +2,7 @@ package com.vivid.sdk.spring
 
 import com.vivid.sdk.*
 import com.vivid.sdk.caches.ApiEnabledFeatureCache
-import com.vivid.sdk.caches.SimpleFeatureCache
+import com.vivid.sdk.caches.InMemoryFeatureCache
 import com.vivid.sdk.spring.condition.ConditionalOnVivid
 import com.vivid.sdk.spring.qualifier.VividAutowireCandidateResolver
 import org.slf4j.LoggerFactory
@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.PropertySource
+import java.time.Clock
 
 private val logger = LoggerFactory.getLogger(VividAutoConfiguration::class.java)
 
@@ -44,20 +45,29 @@ class VividAutoConfiguration {
     fun features(
         featureCache: FeatureCache,
     ): ModifiableFeatures {
-        logger.debug("Consider adding a FeatureApi bean or FeatureCache bean to your application context to improve consistency.")
         return CacheBasedFeatures(featureCache)
     }
 
     @Bean
     @ConditionalOnMissingBean(FeatureCache::class)
-    fun featureCache(featureApi: ObjectProvider<FeatureApi>): FeatureCache {
+    fun featureCache(
+        featureApi: ObjectProvider<FeatureApi>,
+        applicationClock: ObjectProvider<Clock>,
+        vividProperties: VividProperties,
+    ): FeatureCache {
         val api = featureApi.ifUnique
-        if (api == null) {
+
+        val builder = if (api == null) {
             logger.warn("No FeatureApi or FeatureCache bean found in application context, using default cache implementation. This may impact feature availability.")
-            return SimpleFeatureCache()
+            InMemoryFeatureCache.builder()
+        } else {
+            ApiEnabledFeatureCache.builder(api)
         }
 
-        return ApiEnabledFeatureCache(api)
+        return builder.clock(applicationClock.getIfAvailable { Clock.systemDefaultZone() })
+            .maxCapacity(vividProperties.cache.maxCapacity)
+            .retentionTime(vividProperties.cache.retentionTime)
+            .build()
     }
 
     @Bean

@@ -51,7 +51,7 @@
 
 
             <ng-template #expandedRowTemplate let-f>
-                <div class="text-xs text-muted token"><span class="text-bold">Token: </span>{{ f.clientToken }}</div>
+                <div class="text-xs text-muted token"><span class="text-bold">Token: </span><span copyToClipboard>{{ f.clientToken }}</span></div>
             </ng-template>
         </app-table>
     } @else {

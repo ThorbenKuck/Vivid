@@ -38,7 +38,8 @@
     "NO_ENVIRONMENTS": "Keine Umgebungen konfiguriert",
     "NO_ENVIRONMENTS_DESC": "Um umgebungsspezifische Feature-Status und Konfigurationen zu sehen, müssen Sie mindestens eine Umgebung erstellen.",
     "CREATE_ENVIRONMENT": "Umgebung erstellen",
-    "NO_WRITE_ACCESS": "Kein Schreibzugriff auf {{name}}"
+    "NO_WRITE_ACCESS": "Kein Schreibzugriff auf {{name}}",
+    "PAGE": "Seite"
   },
   "NAV": {
     "FEATURES": "Features",
@@ -95,7 +96,10 @@
     "EMPTY": "Noch keine Umgebungen vorhanden",
     "NO_DESCRIPTION": "Keine Beschreibung angegeben",
     "NO_RULES": "Für diese Umgebung sind keine Regeln konfiguriert.",
-    "ADD_RULE": "Regel hinzufügen"
+    "ADD_RULE": "Regel hinzufügen",
+    "RULES": {
+      "MATCH_ENVIRONMENT": "muss übereinstimmen mit"
+    }
   },
   "CLIENTS": {
     "TITLE": "Client-Verzeichnis",

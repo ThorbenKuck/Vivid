@@ -15,7 +15,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent {
-  @Input() collapsed = false;
+  @Input() collapsed = true;
 
   themes = [ 'dark', 'light' ] as const;
   current = this.themeService.theme;

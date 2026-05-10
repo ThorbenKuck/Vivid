@@ -18,7 +18,7 @@
             } @else {
                 <div class="no-description text-muted italic">{{ 'ENVIRONMENTS.NO_DESCRIPTION' | translate }}</div>
             }
-            <div class="text-xs text-muted">{{ 'COMMON.KEY' | translate }}: {{ env.key }}</div>
+            <div class="text-xs text-muted">{{ 'COMMON.KEY' | translate }}: <span copyToClipboard class="key">{{ env.key }}</span></div>
         </div>
     </card>
 
@@ -31,16 +31,7 @@
         <div class="rules-list flex-col gap-md mt-md">
             @for (rule of env.rules; track $index) {
                 <div class="rule-item card bg-tertiary p-md">
-                    <div class="flex items-center justify-between mb-sm">
-                        <div class="flex items-center gap-sm">
-                            <badge variant="primary" [content]="rule.type"></badge>
-                            <span class="text-sm font-semibold" *ngIf="rule.type === 'MATCH_ENVIRONMENT'">{{ 'COMMON.MATCH_ENVIRONMENT' | translate }}</span>
-                        </div>
-                        <button class="icon-btn-slim danger" (click)="removeRule($index)">
-                            <span class="material-symbols-rounded">delete</span>
-                        </button>
-                    </div>
-
+                    <span class="rule-name">{{ "ENVIRONMENTS.RULES." + rule.type | translate }}</span>
                     @if (rule.type === 'MATCH_ENVIRONMENT') {
                         <div class="form-group">
                             <label class="text-xs text-muted">{{ 'COMMON.SOURCE_ENVIRONMENT' | translate }}</label>
@@ -53,6 +44,12 @@
                             </select>
                         </div>
                     }
+
+                    <div class="delete-icon flex items-center justify-between mb-sm">
+                        <button class="icon-btn-slim danger" (click)="removeRule($index)">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
                 </div>
             } @empty {
                 <div class="text-secondary text-center p-md italic">{{ 'ENVIRONMENTS.NO_RULES' | translate }}</div>

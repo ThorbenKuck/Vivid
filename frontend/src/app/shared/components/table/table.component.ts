@@ -10,14 +10,16 @@ import {
 } from '@angular/core';
 import {Page, Pageable} from "./datastructure";
 import {NgTemplateOutlet} from "@angular/common";
-import {TableColumnComponent} from "./table-column.component"; // Dein Interface Pfad
+import {TableColumnComponent} from "./table-column.component";
+import {TranslatePipe} from "@ngx-translate/core"; // Dein Interface Pfad
 
 @Component({
     selector: 'app-table',
     standalone: true,
     templateUrl: './table.component.html',
     imports: [
-        NgTemplateOutlet
+        NgTemplateOutlet,
+        TranslatePipe
     ],
     styleUrl: './table.component.css'
 })

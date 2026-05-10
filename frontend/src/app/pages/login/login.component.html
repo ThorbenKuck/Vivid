@@ -6,10 +6,10 @@
         <app-loading-indicator *ngIf="loading()"></app-loading-indicator>
 
         <div *ngIf="!loading() && !error()">
-            <div *ngIf="issuer()" class="auth-options">
+            <div *ngIf="authConfig()" class="auth-options">
                 <button (click)="onLogin()">
                     <span class="icon">🔒</span>
-                    {{ 'LOGIN.LOGIN_WITH' | translate:{issuer: issuer()} }}
+                    {{ 'LOGIN.LOGIN_WITH' | translate:{issuer: authConfig()?.issuerName || authConfig()?.issuer || '?'} }}
                 </button>
             </div>
             <ng-template #noProvider>

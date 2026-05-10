@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Observable} from 'rxjs';
@@ -16,6 +16,7 @@ import {LoadingIndicator} from "../../shared/components/loading-indicator/loadin
 import {RouterLink} from "@angular/router";
 import {ModalService} from "../../services/modal.service";
 import {HasPermissionDirective} from "../../shared/directives/has-permission.directive";
+import {CopyToClipboardDirective} from "../../shared/directives/copy-to-clipboard.directive";
 
 @Component({
     selector: 'app-clients',
@@ -33,6 +34,7 @@ import {HasPermissionDirective} from "../../shared/directives/has-permission.dir
         LoadingIndicator,
         RouterLink,
         HasPermissionDirective,
+        CopyToClipboardDirective,
     ],
     templateUrl: './clients.component.html',
     styleUrls: ['./clients.component.css']
@@ -82,6 +84,20 @@ export class ClientsComponent implements OnInit {
                     });
                 }
             });
+        });
+    }
+
+    copied = signal(false);
+
+    copyToClipboard(value: string) {
+        // Browser API zum Kopieren
+        navigator.clipboard.writeText(value).then(() => {
+            this.copied.set(true);
+
+            // Nach 2 Sekunden das Icon zurücksetzen
+            setTimeout(() => {
+                this.copied.set(false);
+            }, 2000);
         });
     }
 }

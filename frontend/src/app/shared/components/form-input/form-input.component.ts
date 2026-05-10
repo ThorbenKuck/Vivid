@@ -35,6 +35,7 @@ import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/for
             color: var(--text-muted);
             cursor: not-allowed;
         }
+
         .input-container {
             position: relative;
             display: flex;

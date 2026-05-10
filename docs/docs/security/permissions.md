@@ -88,3 +88,5 @@ Here is an example of a JWT payload (claims) for a user with "Feature Manager" p
 :::danger
 Renaming an environment in Vivid will change the required role for specific access (e.g., from `vivid:env:old-name:write` to `vivid:env:new-name:write`). Ensure your OIDC provider roles are updated accordingly to prevent lockouts.
 :::
+
+## Auditing

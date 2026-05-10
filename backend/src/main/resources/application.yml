@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: vivid-backend
+  datasource:
+    url: ${DATABASE_URL:${application.database.url}}
+    username: ${DATABASE_USERNAME:${application.database.username}}
+    password: ${DATABASE_PASSWORD:${application.database.password}}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${application.oidc.issuer-url:#{null}}
+  flyway:
+    baseline-version: 0
+    baseline-description: Setup initial database
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  server:
+    port: 8081
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+logging:
+  level:
+    root: WARN
+    com.vivid: INFO
+  pattern:
+    console: '%-5p [%d]: %m%n'
+#debug: true
+
+
+application:
+  clients:
+    streams:
+      enabled: true
+  backplane:
+    enabled: true
+
+  oidc:
+    issuer-url: ${OIDC_ISSUER_URL}
+    issuer-name: ${OIDC_ISSUER_NAME}
+    client-id: ${OIDC_CLIENT_ID}
+    frontend-base-url: ${OIDC_FRONTEND_BASE_URL}

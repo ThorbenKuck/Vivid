@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import {LoadingIndicator} from "../../shared/components/loading-indicator/loading-indicator";
 import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {AuthConfigDto} from "../../dtos/AuthConfigDto";
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,7 @@ import {TranslateModule, TranslateService} from "@ngx-translate/core";
   styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit {
-  issuer = signal<string | null>(null);
+  authConfig = signal<AuthConfigDto | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -40,7 +41,7 @@ export class LoginComponent implements OnInit {
   loadConfig() {
     this.authService.getAuthConfig().subscribe({
       next: (config) => {
-        this.issuer.set(config.issuer || null);
+        this.authConfig.set(config);
         this.loading.set(false);
       },
       error: (err) => {
@@ -52,7 +53,7 @@ export class LoginComponent implements OnInit {
   }
 
   onLogin() {
-    const issuer = this.issuer()
+    const issuer = this.authConfig()?.issuer
     if (issuer) {
       this.authService.initiateLogin(issuer);
     }

@@ -2,7 +2,7 @@ package com.vivid.sdk.spring.sse
 
 import com.vivid.sdk.FeatureStream
 import com.vivid.sdk.Subscription
-import com.vivid.sdk.api.Feature
+import com.vivid.clients.api.Feature
 import com.vivid.sdk.spring.VividProperties
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
@@ -47,18 +47,22 @@ class SseFeatureStream(
                 backoff(Long.MAX_VALUE, ofSeconds(2))
                     .filter { error ->
                         error !is WebClientResponseException ||
-                                error.statusCode != HttpStatus.FORBIDDEN
+                                (error.statusCode != HttpStatus.FORBIDDEN && error.statusCode != HttpStatus.UNAUTHORIZED && error.statusCode != HttpStatus.NOT_FOUND)
                     }
                     .doBeforeRetry { logger.warn("SSE connection lost. " + it.failure().localizedMessage + ". Retrying...") }
             )
 
         val disposable = eventStream.subscribe(
             { event ->
-                logger.debug("Received SSE event with data: {}", event.data())
-                event.data()?.let { callback.onNext(it) }
+                event.data()?.let {
+                    logger.debug("Received SSE event with data: {}", event.data())
+                    callback.onNext(it)
+                }
             }, { error ->
                 if (error is WebClientResponseException.Forbidden) {
                     logger.error("Cannot use Sse feature stream: {}", error.responseBodyAsString)
+                } else if(error is WebClientResponseException.NotFound) {
+                    logger.error("Cannot use Sse feature stream. Vivid is not configured to accept SSE requests")
                 } else {
                     logger.error("Error in SSE feature stream: {}", error.message, error)
                 }

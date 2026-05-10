@@ -19,7 +19,7 @@ export class WebFeatureManagementService {
   constructor(private http: HttpService) {}
 
   getAllFeatures(q = '', page = 0, size = 20): Observable<Page<FeatureDto>> {
-    const params: any = { q, page, size };
+    const params: any = { q, page, size, sort: 'runningNumber,asc' };
     return this.http.get<Page<FeatureDto>>(this.baseUrl, params);
   }
 

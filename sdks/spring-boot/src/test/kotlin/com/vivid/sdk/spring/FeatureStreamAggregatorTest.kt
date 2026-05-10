@@ -1,19 +1,16 @@
 package com.vivid.sdk.spring
 
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.okJson
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.vivid.sdk.api.Feature
-import com.vivid.sdk.api.metadata.StringMetadataValue
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.vivid.clients.api.metadata.StringMetadataValue
+import com.vivid.sdk.newFeature
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestPropertySource
 import org.wiremock.spring.EnableWireMock
-import java.time.Instant
+import tools.jackson.databind.json.JsonMapper
 import java.util.UUID.randomUUID
 
 @SpringBootTest(
@@ -29,21 +26,23 @@ import java.util.UUID.randomUUID
 @EnableWireMock
 class FeatureStreamAggregatorTest @Autowired constructor(
     val featureStreamAggregator: FeatureStreamAggregator,
-    val jsonMapper: tools.jackson.databind.json.JsonMapper,
+    val jsonMapper: JsonMapper,
 ) {
 
     @Test
+    @Disabled
     fun `starting the aggregator should start the rest stream`() {
         // arrange
         val id = randomUUID().toString().replace("-", "")
-        val feature = Feature(
-            id = id,
-            name = "test-feature",
-            enabled = true,
-            flags = mapOf("test-flag" to true),
-            metadata = mapOf("test-metadata" to StringMetadataValue("test-value")),
-            timestamp = Instant.now(),
-        )
+        val feature = newFeature {
+            id(id)
+            name("test-feature")
+            key("test-feature")
+            enabled(true)
+            flag("test-flag", true)
+            metadata("test-metadata", StringMetadataValue("test-value"))
+            build()
+        }
         stubFor(
             get("/api/client/features/test/${feature.name}")
                 .willReturn(

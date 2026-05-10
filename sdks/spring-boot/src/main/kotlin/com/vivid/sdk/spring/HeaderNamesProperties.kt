@@ -15,8 +15,8 @@ data class HeaderNamesProperties(
     }
 
     fun applyTo(webClientBuild: WebClient.RequestHeadersSpec<*>, vividProperties: VividProperties) {
-        webClientBuild.header(applicationName, vividProperties.applicationName)
         webClientBuild.header(environment, vividProperties.environment)
+        vividProperties.applicationName?.let { webClientBuild.header(applicationName, it) }
         vividProperties.clientToken?.let { webClientBuild.header(clientToken, it) }
     }
 }

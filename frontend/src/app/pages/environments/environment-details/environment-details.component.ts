@@ -8,11 +8,12 @@ import {CardComponent} from "../../../shared/components/card/card.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BadgeComponent} from "../../../shared/components/badge/badge.component";
 import {LoadingIndicator} from "../../../shared/components/loading-indicator/loading-indicator";
+import {CopyToClipboardDirective} from "../../../shared/directives/copy-to-clipboard.directive";
 
 @Component({
   selector: 'app-environment-details',
   standalone: true,
-    imports: [CommonModule, TranslateModule, CardComponent, FormsModule, ReactiveFormsModule, BadgeComponent, LoadingIndicator],
+    imports: [CommonModule, TranslateModule, CardComponent, FormsModule, ReactiveFormsModule, BadgeComponent, LoadingIndicator, CopyToClipboardDirective],
   templateUrl: './environment-details.component.html',
   styleUrls: ['./environment-details.component.css']
 })

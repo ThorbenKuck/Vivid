@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Vivid - Feature Management',
   tagline: 'Controlling your features with ease',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -36,6 +36,13 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
+
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: ['@docusaurus/theme-mermaid'],
+
 
   presets: [
     [
@@ -80,7 +87,7 @@ const config: Config = {
       title: 'Vivid',
       logo: {
         alt: 'Vivid Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo-tick.svg',
       },
       items: [
         {

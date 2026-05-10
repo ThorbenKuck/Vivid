@@ -1,6 +1,6 @@
 package com.vivid.sdk.spring.kafka
 
-import com.vivid.sdk.api.Feature
+import com.vivid.clients.api.Feature
 import org.springframework.kafka.config.MethodKafkaListenerEndpoint
 import java.util.UUID
 import java.util.regex.Pattern

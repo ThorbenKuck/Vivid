@@ -19,25 +19,27 @@ import {Page, pageOf} from "../../../shared/components/table/datastructure";
 import {LoadingIndicator} from "../../../shared/components/loading-indicator/loading-indicator";
 import {HasPermissionDirective} from "../../../shared/directives/has-permission.directive";
 import {PermissionService} from "../../../services/permission.service";
+import {DateTimeComponent} from "../../../shared/components/date-time/content-header.component";
 
 @Component({
   selector: 'app-client-details',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    TranslateModule,
-    CardComponent,
-    TableComponent,
-    TableColumnComponent,
-    EnvStatusComponent,
-    DurationPipe,
-    BadgeComponent,
-    FormsModule,
-    FormInputComponent,
-    LoadingIndicator,
-    HasPermissionDirective,
-  ],
+    imports: [
+        CommonModule,
+        RouterLink,
+        TranslateModule,
+        CardComponent,
+        TableComponent,
+        TableColumnComponent,
+        EnvStatusComponent,
+        DurationPipe,
+        BadgeComponent,
+        FormsModule,
+        FormInputComponent,
+        LoadingIndicator,
+        HasPermissionDirective,
+        DateTimeComponent,
+    ],
   templateUrl: './client-details.component.html',
   styleUrls: ['./client-details.component.css']
 })

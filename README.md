@@ -1,12 +1,23 @@
 # Vivid
 
-Vivid is a feature management platform with a cleanly separated backend (Spring Boot + Kotlin) and frontend (Angular). This repository is structured as a mono‑repo:
+Welcome to the Vivid repository!
+
+Vivid is a feature management platform with the aim to give your whole team control over features.
+The official documentation is available at [GitHub Pages](https://thorbenkuck.github.io/Vivid/).
+
+## Repository Structure
+
+This repository is structured as a mono‑repo.
+Its split into four main sections:
 
 - backend/
+  The backend application of Vivid, written in Kotlin with Spring Boot.
 - frontend/
+  The frontend application of Vivid, written in Angular.
 - sdks/
-
-This guide explains how to start the backend and the frontend locally.
+  A collection of SDKs for Vivid clients.
+- test/
+  A test Applikation for locally testing Vivid.
 
 ---
 
@@ -22,65 +33,73 @@ Optional:
 
 ---
 
-### 1) Start the Database (PostgreSQL)
+## Starting the Backend
 
-You can run PostgreSQL and KeyCloak (both required for Vivid) using the provided Docker Compose file.
+Before you get started, I highly recommend that you setup your IDE project.
+This will make it easier to run the backend application.
+Vivid uses maven for its backend.
+
+To set up the backend in your IDE, you need to import the project as a maven project.
+How to do that depends on your IDE.
+
+> [!NOTE]
+> For IntelliJ, right-click on the pom.xml and select the last context menu action `+ Add as Maven Project`.
+> Then wait for the project to be imported.
+
+Once done with that, you'll have imported the backend, test application and the SDKs into your IDE.
+This makes it easier to run the backend application.
+
+> [!WARN]
+> If you don't integrate the IDE, your backend will complain about missing dependencies on first start.
+> Specifically the client-api module, which contains the contract between the backend and the clients.
+> 
+> To fix this, you'd need to manually `mvn clean install` in the `sdks/client-api` module.
+> This will compile the contract and install it into your local maven repository.
+> 
+> Additionally, the test application will complain about missing dependencies as well.
+> 
+> So if you don't want to integrate all modules at once, you'll need to manually `mvn clean install` all the required `sdks/*` modules.
+
+After you set up your project and compiled the dependencies, you can start the backend application.
+Vivid's backend requires two things when running, a PostgreSQL database and a KeyCloak server.
+Both can be run either locally or in a container.
+For ease of use, you can start up a docker container using docker-compose.
+
+For that, you need to have Docker installed.
+With docker installed, you can run:
 
 ```
-# from repository root
-docker compose -f backend/docker-compose.yaml up -d
+cd backend
+docker compose up -d
 ```
 
-Postgres:
-- Host: `localhost`
-- Port: `5332` (container 5432 mapped to 5332)
-- Database: `vivid`
-- Username: `postgres`
-- Password: `postgres`
+This will start up a PostgreSQL database and a KeyCloak server.
+- The database is setup at `localhost:5333` with username `postgres`, password `postgres` and db name `vivid`.
+  - You can connect to the database using the tool of your choice (e.g. pgAdmin, IntelliJ, DBeaver, etc.).
+- The KeyCloak server is available at [localhost:8989](http://localhost:8989). The root user has username `admin` and password `admin`.
+  - The DB of the KeyCloak is isolated and not accessible from outside.
 
-KeyCloak:
-- Host: `localhost`
-- Port `8989`
-- User: `admin`
-- Password: `admin`
+With that setup, you can start the backend application.
+Either by navigating to the `backend/` directory and run `mvn spring-boot:run` or finding the class `com.vivid.backend.VividApplication` and starting it with your IDE of choice.
 
-The backend reads these via Spring properties (see `backend/backend/src/main/resources/application.yml`) and supports overrides with these environment variables:
-- `DATABASE_URL` (default `jdbc:postgresql://localhost:5332/vivid`)
-- `DATABASE_USERNAME` (default `postgres`)
-- `DATABASE_PASSWORD` (default `postgres`)
+Relevant URLs of the backend are:
+- Application starts on [http://localhost:8080](http://localhost:8080).
+- OpenAPI/Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
+- OpenAPI JSON: [http://localhost:8080/api-docs](http://localhost:8080/api-docs).
 
-To stop and remove the container:
+To stop and remove the containers later, run:
 ```
-docker compose -f backend/docker-compose.yaml down
+cd backend
+docker compose down
 ```
 
 ---
 
-### 2) Start the Backend (Spring Boot + Kotlin)
+## Starting the Frontend (Angular)
 
-```
-cd backend/backend
-mvn spring-boot:run
-```
-
-- Application starts on `http://localhost:8080`.
-- Flyway will run database migrations on startup.
-- OpenAPI/Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/api-docs`
-
-APIs:
-- Web API (management): `http://localhost:8080/api/web/**`
-- Client API (runtime): `http://localhost:8080/api/client/**`
-
-Run tests:
-```
-cd backend/backend
-mvn clean test
-```
-
----
-
-### 3) Start the Frontend (Angular)
+Vivids frontend is a single page application (SPA) written in Angular.
+It is built with Angular CLI and uses as little dependencies as possible.
+To start the frontend, run:
 
 ```
 cd frontend
@@ -88,43 +107,8 @@ npm install
 npm start
 ```
 
-- App runs at `http://localhost:4200`.
-- Default backend base URL is `http://localhost:8080` and can be changed via environment files:
-  - `frontend/src/environments/environment.ts`
-  - `frontend/src/environments/environment.prod.ts`
+The application will then be available under [http://localhost:4200](http://localhost:4200).
 
-Frontend highlights:
-- Mobile‑first layout with a collapsible sidebar. In mobile view the sidebar is fully hidden; on desktop it can collapse to icons‑only. The collapse/expand button is in the header (left side).
-- Dark theme is default. Theme can be changed from the sidebar dropdown (light/dark). Theme variables are applied via the `data-theme` attribute on `<html>`.
-- Environments: On initial load the app fetches all environments from the backend. If none exist, the header shows a “+ Add Environment” button (navigates to the Environments page). If one exists, it is auto‑selected; if multiple exist, the header shows a “Select environment …” dropdown. Selecting an environment affects the Features pages.
-
-Backend Environment support (summary)
-- The backend now models `Environment` and a `FeatureEnvironment` relation that stores `enabled`, `flags`, and `metadata` per environment.
-- Web API endpoints support search and pagination for features and environments, and allow upserting environment‑specific state: `PUT /api/web/features/{id}/environments/{environmentId}`.
-- Client API now requires `environmentId` when fetching enabled features: `GET /api/client/features?environmentId=...`.
-
----
-
-### Troubleshooting
-
-- PostgreSQL port already in use: adjust the host port in `backend/docker-compose.yaml` or stop the conflicting service.
-- Database connection issues: verify `DATABASE_URL`, credentials, and that the container is healthy (`docker ps`, `docker logs`).
-- Clean rebuild backend: `cd backend/backend && mvn clean install`.
-- If the frontend cannot reach the backend, confirm CORS settings and that `environment.apiBaseUrl` matches the backend URL.
-
----
-
-### Repository Structure (quick view)
-
-```
-backend/
-  ├─ backend/                # Spring Boot Kotlin app (Maven)
-  │  ├─ pom.xml
-  │  └─ src/
-  ├─ docker-compose.yaml     # Local PostgreSQL and KeyCloak
-frontend/
-  ├─ angular.json
-  ├─ package.json
-  └─ src/
-```
-
+> [!NOTE]
+> By default, the frontend will try to reach the backend at `http://localhost:8080`.
+> If you changed the port of the backend, you need to change it in `frontend/src/environments/environment.ts` as well.

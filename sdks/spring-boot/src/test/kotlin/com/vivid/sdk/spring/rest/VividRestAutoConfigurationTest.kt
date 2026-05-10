@@ -2,8 +2,8 @@ package com.vivid.sdk.spring.rest
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.vivid.sdk.Features
-import com.vivid.sdk.api.Feature
-import com.vivid.sdk.api.metadata.StringMetadataValue
+import com.vivid.clients.api.metadata.StringMetadataValue
+import com.vivid.sdk.newFeature
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,14 +31,14 @@ class VividRestAutoConfigurationTest @Autowired constructor(
     fun `rest feature api bean is created`() {
         // arrange
         val id = randomUUID().toString().replace("-", "")
-        val feature = Feature(
-            id = id,
-            name = "test-feature",
-            enabled = true,
-            flags = mapOf("test-flag" to true),
-            metadata = mapOf("test-metadata" to StringMetadataValue("test-value")),
-            timestamp = Instant.now(),
-        )
+        val feature = newFeature {
+            id(id)
+            name("test-feature")
+            enabled(true)
+            flag("test-flag", true)
+            metadata("test-metadata", StringMetadataValue("test-value"))
+            timestamp(Instant.now())
+        }
         stubFor(
             get("/api/client/features/test/${feature.name}")
                 .willReturn(
@@ -62,16 +62,17 @@ class VividRestAutoConfigurationTest @Autowired constructor(
     }
 
     @Test
-    fun `references are evaluated lazily if at all`() {        // arrange
+    fun `references are evaluated lazily if at all`() {
+        // arrange
         val id = randomUUID().toString().replace("-", "")
-        val feature = Feature(
-            id = id,
-            name = "test-feature",
-            enabled = true,
-            flags = mapOf("test-flag" to true),
-            metadata = mapOf("test-metadata" to StringMetadataValue("test-value")),
-            timestamp = Instant.now(),
-        )
+        val feature = newFeature {
+            id(id)
+            name("test-feature")
+            enabled(true)
+            flag("test-flag", true)
+            metadata("test-metadata", StringMetadataValue("test-value"))
+            timestamp(Instant.now())
+        }
         stubFor(
             get("/api/client/features/test/${feature.name}")
                 .willReturn(

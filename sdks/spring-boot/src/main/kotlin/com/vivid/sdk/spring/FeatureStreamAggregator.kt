@@ -3,7 +3,7 @@ package com.vivid.sdk.spring
 import com.vivid.sdk.FeatureStream
 import com.vivid.sdk.ModifiableFeatures
 import com.vivid.sdk.Subscription
-import com.vivid.sdk.api.Feature
+import com.vivid.clients.api.Feature
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean

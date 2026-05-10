@@ -1,6 +1,7 @@
 package com.vivid.sdk.spring
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import java.time.Duration
 
 /**
  * Configuration properties for the Vivid SDK.
@@ -23,7 +24,7 @@ data class VividProperties(
     /**
      * The name of the application.
      */
-    val applicationName: String,
+    val applicationName: String?,
     /**
      * The token assigned to this client.
      *
@@ -35,4 +36,10 @@ data class VividProperties(
      */
     val streams: Set<String>,
     val autostartStreams: Boolean,
-)
+    val cache: Cache = Cache(),
+) {
+    data class Cache(
+        val maxCapacity: Int = 1000,
+        val retentionTime: Duration = Duration.ofMinutes(60),
+    )
+}
