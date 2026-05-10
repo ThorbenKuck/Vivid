@@ -4,3 +4,4 @@ node_modules
 .idea
 *.iml
 target/
+.flattened-pom.xml
