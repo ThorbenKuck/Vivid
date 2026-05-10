@@ -1,5 +1,7 @@
 # Vivid
 
+![Vivid Banner](.img/banner.svg)
+
 Welcome to the Vivid repository!
 
 Vivid is a feature management platform with the aim to give your whole team control over features.
